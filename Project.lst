@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/18/26 15:10:04
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/18/26 15:29:39
 main.asm						     Page 1 - 1
 
 
@@ -24,20 +24,85 @@ main.asm						     Page 1 - 1
  = 0000000D			CR = 13; Carriage return
  = 0000000A			LF = 10; Line feed
 
- 00000000 54 65 73 74 20	myString BYTE "Test program", CR, LF, 0
-	   70 72 6F 67 72
-	   61 6D 0D 0A 00
+ 00000000 52 6F 63 6B 20	introString1 BYTE "Rock paper scissors rules:", CR, LF, 0
+	   70 61 70 65 72
+	   20 73 63 69 73
+	   73 6F 72 73 20
+	   72 75 6C 65 73
+	   3A 0D 0A 00
+ 0000001D 42 6F 74 68 20	introString2 BYTE "Both players input their move at the same time", CR, LF, 0
+	   70 6C 61 79 65
+	   72 73 20 69 6E
+	   70 75 74 20 74
+	   68 65 69 72 20
+	   6D 6F 76 65 20
+	   61 74 20 74 68
+	   65 20 73 61 6D
+	   65 20 74 69 6D
+	   65 0D 0A 00
+ 0000004E 50 6C 61 79 65	introString3 BYTE "Player 1 uses ASD and Player 2 uses JKL for rock, paper, then scissors", CR, LF, 0
+	   72 20 31 20 75
+	   73 65 73 20 41
+	   53 44 20 61 6E
+	   64 20 50 6C 61
+	   79 65 72 20 32
+	   20 75 73 65 73
+	   20 4A 4B 4C 20
+	   66 6F 72 20 72
+	   6F 63 6B 2C 20
+	   70 61 70 65 72
+	   2C 20 74 68 65
+	   6E 20 73 63 69
+	   73 73 6F 72 73
+	   0D 0A 00
+ 00000097 42 65 73 74 20	introString4 BYTE "Best of 3 wins", CR, LF, 0
+	   6F 66 20 33 20
+	   77 69 6E 73 0D
+	   0A 00
+
+ 000000A8 52 65 61 64 79	readyString BYTE "Ready? Go!", CR, LF, 0
+	   3F 20 47 6F 21
+	   0D 0A 00
+ 000000B5 50 6C 61 79 65	matchVictoryString BYTE "Player _ wins!", CR, LF, 0
+	   72 20 5F 20 77
+	   69 6E 73 21 0D
+	   0A 00
+ 000000C6 50 6C 61 79 65	gameVictoryString BYTE "Player _ has won the game!", CR, LF, 0
+	   72 20 5F 20 68
+	   61 73 20 77 6F
+	   6E 20 74 68 65
+	   20 67 61 6D 65
+	   21 0D 0A 00
+
+ 000000E3 57 6F 75 6C 64	playAgainString BYTE "Would you like to play again? (Y \ N)", CR, LF, 0
+	   20 79 6F 75 20
+	   6C 69 6B 65 20
+	   74 6F 20 70 6C
+	   61 79 20 61 67
+	   61 69 6E 3F 20
+	   28 59 20 5C 20
+	   4E 29 0D 0A 00
 
  00000000			.code
  00000000			main PROC
- 00000000  BA 00000000 R		mov edx, offset myString
+ 00000000			GameStart:
+ 00000000  BA 00000000 R		mov edx, offset introString1
  00000005  E8 00000000 E		call WriteString
+ 0000000A  BA 0000001D R		mov edx, offset introString2
+ 0000000F  E8 00000000 E		call WriteString
+ 00000014  BA 0000004E R		mov edx, offset introString3
+ 00000019  E8 00000000 E		call WriteString
+ 0000001E  BA 00000097 R		mov edx, offset introString4
+ 00000023  E8 00000000 E		call WriteString
+
+
+ 00000028			Quit:
 					INVOKE ExitProcess, 0
- 0000000A  6A 00	   *	    push   +000000000h
- 0000000C  E8 00000000 E   *	    call   ExitProcess
- 00000011			main ENDP
+ 00000028  6A 00	   *	    push   +000000000h
+ 0000002A  E8 00000000 E   *	    call   ExitProcess
+ 0000002F			main ENDP
 				END main
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/18/26 15:10:04
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/18/26 15:29:39
 main.asm						     Symbols 2 - 1
 
 
@@ -131,8 +196,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 0000000F Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000011 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000010B Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000002F Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -239,7 +304,9 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000011 Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000002F Public STDCALL
+  GameStart  . . . . . . . . . .	L Near	 00000000 _TEXT	
+  Quit . . . . . . . . . . . . .	L Near	 00000028 _TEXT	
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -465,8 +532,13 @@ blue . . . . . . . . . . . . . .	Number	 00000001h
 brown  . . . . . . . . . . . . .	Number	 00000006h   
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
+gameVictoryString  . . . . . . .	Byte	 000000C6 _DATA	
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
+introString1 . . . . . . . . . .	Byte	 00000000 _DATA	
+introString2 . . . . . . . . . .	Byte	 0000001D _DATA	
+introString3 . . . . . . . . . .	Byte	 0000004E _DATA	
+introString4 . . . . . . . . . .	Byte	 00000097 _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
 lightGray  . . . . . . . . . . .	Number	 00000007h   
@@ -474,7 +546,9 @@ lightGreen . . . . . . . . . . .	Number	 0000000Ah
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
-myString . . . . . . . . . . . .	Byte	 00000000 _DATA	
+matchVictoryString . . . . . . .	Byte	 000000B5 _DATA	
+playAgainString  . . . . . . . .	Byte	 000000E3 _DATA	
+readyString  . . . . . . . . . .	Byte	 000000A8 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
