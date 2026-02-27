@@ -1,3 +1,6 @@
+SCREEN_WIDTH EQU 80
+SCREEN_HEIGHT EQU 50
+
 Sprite STRUCT ; Sprite is used for anything that should be rendered 
 	posX DWORD ?
 	posY DWORD ?

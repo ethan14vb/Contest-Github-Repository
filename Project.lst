@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/27/26 16:59:36
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/27/26 17:26:19
 renderer.asm						     Page 1 - 1
 
 
@@ -8,6 +8,9 @@ renderer.asm						     Page 1 - 1
 				.stack 4096
 
 				include engine_types.inc
+ = 00000050		      C SCREEN_WIDTH EQU 80
+ = 00000032		      C SCREEN_HEIGHT EQU 50
+			      C 
  00000014		      C Sprite STRUCT ; Sprite is used for anything that should be rendered 
  00000000  00000000	      C 	posX DWORD ?
  00000004  00000000	      C 	posY DWORD ?
@@ -25,16 +28,32 @@ renderer.asm						     Page 1 - 1
 			      C 
 
  00000000			.data
- 00000000  000007D0 [		screenBuffer Pixel 80 * 25 dup(<0, 0, 0, 255>)
+ 00000000  00000FA0 [		screenBuffer Pixel SCREEN_WIDTH * SCREEN_HEIGHT dup(<0, 0, 0, 255>)
 	    00 00 00 FF
 	   ]
 
  00000000			.code
+				; // ----------------------------------
+				; // displayBuffer
+				; // Renders an RGBA buffer to the screen using ASCII characters.
+				; // Intended to be used for frame by frame animation. 
+				; // This will render on top of the last contents of screenBuffer.
+				; // 
+				; // Parameters: 
+				; //	EAX - pointer to the new frame buffer to render. 
+				; //
+				; // Registers Clobbered: EAX
+				; // ----------------------------------
+
+ 00000000			displayBuffer PROC
+
+ 00000000			displayBuffer ENDP
+
  00000000			main PROC
  00000000  33 C0		xor eax, eax
  00000002			main ENDP
 				END main
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/27/26 16:59:36
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/27/26 17:26:19
 renderer.asm						     Symbols 2 - 1
 
 
@@ -64,7 +83,7 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00001F40 DWord	  Public  'DATA'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00003E80 DWord	  Public  'DATA'	
 _TEXT  . . . . . . . . . . . . .	32 Bit	 00000002 DWord	  Public  'CODE'	
 
 
@@ -72,6 +91,7 @@ Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
+displayBuffer  . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000000 Public STDCALL
 main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000002 Public STDCALL
 
 
@@ -88,6 +108,8 @@ Symbols:
 @fardata?  . . . . . . . . . . .	Text   	 FLAT
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
+SCREEN_HEIGHT  . . . . . . . . .	Number	 00000032h   
+SCREEN_WIDTH . . . . . . . . . .	Number	 00000050h   
 screenBuffer . . . . . . . . . .	Pixel	 00000000 _DATA	
 
 	   0 Warnings

@@ -11,7 +11,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="main.asm" />
     <MASM Include="renderer.asm" />
   </ItemGroup>
   <ItemGroup>
