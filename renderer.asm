@@ -6,6 +6,8 @@ option casemap : none
 include engine_types.inc
 
 .data
+CR = 13 ; // Carriage return
+LF = 10 ; // Line feed
 screenBuffer Pixel SCREEN_WIDTH * SCREEN_HEIGHT dup(<0, 0, 0, 255>)
 outputTextBuffer db 100000 dup(0); // Used for the displayBuffer PROC
 
@@ -36,7 +38,16 @@ x_loop:
 	jge row_end
 
 row_end:
+	; // Add newline
+	mov byte PTR[edi], CR
+	inc edi
+	mov byte PTR[edi], LF
+	inc edi
+
+	add ebx, 2 ; // y += 2
+
 	jmp y_loop
+
 
 done: 
 	ret
