@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/27/26 17:26:19
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/27/26 18:16:42
 renderer.asm						     Page 1 - 1
 
 
@@ -31,6 +31,9 @@ renderer.asm						     Page 1 - 1
  00000000  00000FA0 [		screenBuffer Pixel SCREEN_WIDTH * SCREEN_HEIGHT dup(<0, 0, 0, 255>)
 	    00 00 00 FF
 	   ]
+ 00003E80  000186A0 [		outputTextBuffer db 100000 dup(0); // Used for the displayBuffer PROC
+	    00
+	   ]
 
  00000000			.code
 				; // ----------------------------------
@@ -40,20 +43,33 @@ renderer.asm						     Page 1 - 1
 				; // This will render on top of the last contents of screenBuffer.
 				; // 
 				; // Parameters: 
-				; //	EAX - pointer to the new frame buffer to render. 
+				; //	EAX - pointer to the new frame buffer to render. MUST BE SCREEN_WIDTH * SCREEN_HEIGHT!!!
 				; //
-				; // Registers Clobbered: EAX
 				; // ----------------------------------
+ 00000000			displayBuffer PROC USES esi edi ecx ebx
+ 00000000  56		   *	    push   esi
+ 00000001  57		   *	    push   edi
+ 00000002  51		   *	    push   ecx
+ 00000003  53		   *	    push   ebx
+ 00000004  8B F0			mov esi, eax; // move source frame to esi
+ 00000006  BF 00003E80 R		mov edi, OFFSET outputTextBuffer ;// move destination text buffer to edi
 
- 00000000			displayBuffer PROC
+					ret
+ 0000000B  5B		   *	    pop    ebx
+ 0000000C  59		   *	    pop    ecx
+ 0000000D  5F		   *	    pop    edi
+ 0000000E  5E		   *	    pop    esi
+ 0000000F  C3		   *	    ret    00000h
+ 00000010			displayBuffer ENDP
 
- 00000000			displayBuffer ENDP
-
- 00000000			main PROC
- 00000000  33 C0		xor eax, eax
- 00000002			main ENDP
+ 00000010			main PROC
+ 00000010  33 C0			xor eax, eax
+ 00000012  B8 00000000 R		mov eax, OFFSET screenBuffer
+ 00000017  E8 FFFFFFE4			call displayBuffer
+ 0000001C  33 C0			xor eax, eax
+ 0000001E			main ENDP
 				END main
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/27/26 17:26:19
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/27/26 18:16:42
 renderer.asm						     Symbols 2 - 1
 
 
@@ -83,16 +99,16 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00003E80 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000002 DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0001C520 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000001E DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
-displayBuffer  . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000000 Public STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000002 Public STDCALL
+displayBuffer  . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000010 Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000010 _TEXT	Length= 0000000E Public STDCALL
 
 
 Symbols:
@@ -110,6 +126,7 @@ Symbols:
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 SCREEN_HEIGHT  . . . . . . . . .	Number	 00000032h   
 SCREEN_WIDTH . . . . . . . . . .	Number	 00000050h   
+outputTextBuffer . . . . . . . .	Byte	 00003E80 _DATA	
 screenBuffer . . . . . . . . . .	Pixel	 00000000 _DATA	
 
 	   0 Warnings
