@@ -1,7 +1,12 @@
 INCLUDE Irvine32.inc
+
 .data
+include kgdata.inc
+
 CR = 13; Carriage return
 LF = 10; Line feed
+
+unconventionalCharacters BYTE 0C9h, 0CDh, CR, LF, 0
 
 introString1 BYTE "Rock paper scissors rules:", CR, LF, 0
 introString2 BYTE "Both players input their move at the same time", CR, LF, 0
@@ -16,7 +21,7 @@ playAgainString BYTE "Would you like to play again? (Y \ N)", CR, LF, 0
 
 .code
 main PROC
-GameStart:
+	GameStart:
 	mov edx, offset introString1
 	call WriteString
 	mov edx, offset introString2
@@ -26,10 +31,11 @@ GameStart:
 	mov edx, offset introString4
 	call WriteString
 
-	
+	mov edx, offset unconventionalCharacters
+	call WriteString
 
-
-Quit:
+	Quit :
 	INVOKE ExitProcess, 0
 main ENDP
+
 END main
