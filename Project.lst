@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/27/26 18:16:42
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/27/26 18:20:38
 renderer.asm						     Page 1 - 1
 
 
@@ -54,22 +54,37 @@ renderer.asm						     Page 1 - 1
  00000004  8B F0			mov esi, eax; // move source frame to esi
  00000006  BF 00003E80 R		mov edi, OFFSET outputTextBuffer ;// move destination text buffer to edi
 
-					ret
- 0000000B  5B		   *	    pop    ebx
- 0000000C  59		   *	    pop    ecx
- 0000000D  5F		   *	    pop    edi
- 0000000E  5E		   *	    pop    esi
- 0000000F  C3		   *	    ret    00000h
- 00000010			displayBuffer ENDP
+ 0000000B  33 DB			xor ebx, ebx ;// y_index = 0
 
- 00000010			main PROC
- 00000010  33 C0			xor eax, eax
- 00000012  B8 00000000 R		mov eax, OFFSET screenBuffer
- 00000017  E8 FFFFFFE4			call displayBuffer
- 0000001C  33 C0			xor eax, eax
- 0000001E			main ENDP
+ 0000000D			y_loop:
+ 0000000D  83 FB 32			cmp ebx, SCREEN_HEIGHT
+ 00000010  7D 09			jge done
+
+ 00000012  33 C9			xor ecx, ecx ;// x_index = 0
+ 00000014			x_loop:
+ 00000014  83 F9 50			cmp ecx, SCREEN_WIDTH
+ 00000017  7D 00			jge row_end
+
+ 00000019			row_end:
+ 00000019  EB F2			jmp y_loop
+
+ 0000001B			done: 
+					ret
+ 0000001B  5B		   *	    pop    ebx
+ 0000001C  59		   *	    pop    ecx
+ 0000001D  5F		   *	    pop    edi
+ 0000001E  5E		   *	    pop    esi
+ 0000001F  C3		   *	    ret    00000h
+ 00000020			displayBuffer ENDP
+
+ 00000020			main PROC
+ 00000020  33 C0			xor eax, eax
+ 00000022  B8 00000000 R		mov eax, OFFSET screenBuffer
+ 00000027  E8 FFFFFFD4			call displayBuffer
+ 0000002C  33 C0			xor eax, eax
+ 0000002E			main ENDP
 				END main
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/27/26 18:16:42
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/27/26 18:20:38
 renderer.asm						     Symbols 2 - 1
 
 
@@ -100,15 +115,19 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 0001C520 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000001E DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000002E DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
-displayBuffer  . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000010 Public STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000010 _TEXT	Length= 0000000E Public STDCALL
+displayBuffer  . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000020 Public STDCALL
+  y_loop . . . . . . . . . . . .	L Near	 0000000D _TEXT	
+  x_loop . . . . . . . . . . . .	L Near	 00000014 _TEXT	
+  row_end  . . . . . . . . . . .	L Near	 00000019 _TEXT	
+  done . . . . . . . . . . . . .	L Near	 0000001B _TEXT	
+main . . . . . . . . . . . . . .	P Near	 00000020 _TEXT	Length= 0000000E Public STDCALL
 
 
 Symbols:
