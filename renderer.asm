@@ -54,14 +54,19 @@ x_loop:
 	; // Get bottom pixel
 	; // (((y_index + 1) * SCREENWIDTH) + x_index) * 2
 	mov eax, ebx
-	inc eax
+	inc eax 
 	imul eax, SCREEN_WIDTH
 	add eax, ecx
 	shl eax, 2
 	mov eax, [esi + eax] ; // eax is now the bottom pixel
 
 	; // Write character
+	; // Write ESC[38;2;RRR;GGG;BBBm
+	; // Write ESC[48;2;RRR;GGG;BBBm
+	; // Write half block
 
+	inc ecx
+	jmp x_loop
 
 row_end:
 	; // Add newline
