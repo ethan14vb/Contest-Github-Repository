@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/27/26 18:26:58
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/28/26 10:02:28
 renderer.asm						     Page 1 - 1
 
 
@@ -26,8 +26,14 @@ renderer.asm						     Page 1 - 1
  00000003  00		      C     a BYTE ?
 			      C Pixel ENDS
 			      C 
+				SetConsoleOutputCP PROTO STDCALL : DWORD
+				SetConsoleMode     PROTO STDCALL : DWORD, : DWORD
+				GetStdHandle       PROTO STDCALL : DWORD
 
  00000000			.data
+ =-0000000B			STD_OUTPUT_HANDLE EQU -11
+ = 00000004			ENABLE_VIRTUAL_TERMINAL_PROCESSING EQU 4
+
  = 0000000D			CR = 13 ; // Carriage return
  = 0000000A			LF = 10 ; // Line feed
  00000000  00000FA0 [		screenBuffer Pixel SCREEN_WIDTH * SCREEN_HEIGHT dup(<0, 0, 0, 255>)
@@ -54,48 +60,83 @@ renderer.asm						     Page 1 - 1
  00000002  51		   *	    push   ecx
  00000003  53		   *	    push   ebx
  00000004  8B F0			mov esi, eax; // move source frame to esi
- 00000006  BF 00003E80 R		mov edi, OFFSET outputTextBuffer ;// move destination text buffer to edi
+ 00000006  BF 00003E80 R		mov edi, OFFSET outputTextBuffer ; // move destination text buffer to edi
 
- 0000000B  33 DB			xor ebx, ebx ;// y_index = 0
+ 0000000B  33 DB			xor ebx, ebx ; // y_index = 0
 
  0000000D			y_loop:
  0000000D  83 FB 32			cmp ebx, SCREEN_HEIGHT
- 00000010  7D 14			jge done
+ 00000010  7D 2F			jge done
 
- 00000012  33 C9			xor ecx, ecx ;// x_index = 0
+ 00000012  33 C9			xor ecx, ecx ; // x_index = 0
  00000014			x_loop:
  00000014  83 F9 50			cmp ecx, SCREEN_WIDTH
- 00000017  7D 00			jge row_end
+ 00000017  7D 1B			jge row_end
 
- 00000019			row_end:
+					; // Get top pixel
+					; // ((y_index * SCREENWIDTH) + x_index) * 2
+ 00000019  8B C3			mov eax, ebx
+ 0000001B  6B C0 50			imul eax, SCREEN_WIDTH
+ 0000001E  03 C1			add eax, ecx 
+ 00000020  C1 E0 02			shl eax, 2
+ 00000023  8B 14 30			mov edx, [esi + eax] ; // edx is now the top pixel
+
+					; // Get bottom pixel
+					; // (((y_index + 1) * SCREENWIDTH) + x_index) * 2
+ 00000026  8B C3			mov eax, ebx
+ 00000028  40				inc eax
+ 00000029  6B C0 50			imul eax, SCREEN_WIDTH
+ 0000002C  03 C1			add eax, ecx
+ 0000002E  C1 E0 02			shl eax, 2
+ 00000031  8B 04 30			mov eax, [esi + eax] ; // eax is now the bottom pixel
+
+					; // Write character
+
+
+ 00000034			row_end:
 					; // Add newline
- 00000019  C6 07 0D			mov byte PTR[edi], CR
- 0000001C  47				inc edi
- 0000001D  C6 07 0A			mov byte PTR[edi], LF
- 00000020  47				inc edi
+ 00000034  C6 07 0D			mov byte PTR[edi], CR
+ 00000037  47				inc edi
+ 00000038  C6 07 0A			mov byte PTR[edi], LF
+ 0000003B  47				inc edi
 
- 00000021  83 C3 02			add ebx, 2 ; // y += 2
+ 0000003C  83 C3 02			add ebx, 2 ; // y += 2
 
- 00000024  EB E7			jmp y_loop
+ 0000003F  EB CC			jmp y_loop
 
 
- 00000026			done: 
+ 00000041			done: 
 					ret
- 00000026  5B		   *	    pop    ebx
- 00000027  59		   *	    pop    ecx
- 00000028  5F		   *	    pop    edi
- 00000029  5E		   *	    pop    esi
- 0000002A  C3		   *	    ret    00000h
- 0000002B			displayBuffer ENDP
+ 00000041  5B		   *	    pop    ebx
+ 00000042  59		   *	    pop    ecx
+ 00000043  5F		   *	    pop    edi
+ 00000044  5E		   *	    pop    esi
+ 00000045  C3		   *	    ret    00000h
+ 00000046			displayBuffer ENDP
 
- 0000002B			main PROC
- 0000002B  33 C0			xor eax, eax
- 0000002D  B8 00000000 R		mov eax, OFFSET screenBuffer
- 00000032  E8 FFFFFFC9			call displayBuffer
- 00000037  33 C0			xor eax, eax
- 00000039			main ENDP
+				; // This main method is for testing the renderer
+ 00000046			main PROC
+					; // Force output to be UTF-8
+					invoke SetConsoleOutputCP, 65001 
+ 00000046  68 0000FDE9	   *	    push   +00000FDE9h
+ 0000004B  E8 00000000 E   *	    call   SetConsoleOutputCP
+				
+					; // Enable virutal terminal processing (Required for RGB functionality)
+					invoke GetStdHandle, STD_OUTPUT_HANDLE
+ 00000050  6A F5	   *	    push    -00000000Bh
+ 00000052  E8 00000000 E   *	    call   GetStdHandle
+					invoke SetConsoleMode, eax, ENABLE_VIRTUAL_TERMINAL_PROCESSING
+ 00000057  6A 04	   *	    push   +000000004h
+ 00000059  50		   *	    push   eax
+ 0000005A  E8 00000000 E   *	    call   SetConsoleMode
+
+ 0000005F  33 C0			xor eax, eax
+ 00000061  B8 00000000 R		mov eax, OFFSET screenBuffer
+ 00000066  E8 FFFFFF95			call displayBuffer
+ 0000006B  33 C0			xor eax, eax
+ 0000006D			main ENDP
 				END main
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/27/26 18:26:58
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/28/26 10:02:28
 renderer.asm						     Symbols 2 - 1
 
 
@@ -126,19 +167,22 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 0001C520 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000039 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000006D DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
-displayBuffer  . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000002B Public STDCALL
+GetStdHandle . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+SetConsoleMode . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+SetConsoleOutputCP . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+displayBuffer  . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000046 Public STDCALL
   y_loop . . . . . . . . . . . .	L Near	 0000000D _TEXT	
   x_loop . . . . . . . . . . . .	L Near	 00000014 _TEXT	
-  row_end  . . . . . . . . . . .	L Near	 00000019 _TEXT	
-  done . . . . . . . . . . . . .	L Near	 00000026 _TEXT	
-main . . . . . . . . . . . . . .	P Near	 0000002B _TEXT	Length= 0000000E Public STDCALL
+  row_end  . . . . . . . . . . .	L Near	 00000034 _TEXT	
+  done . . . . . . . . . . . . .	L Near	 00000041 _TEXT	
+main . . . . . . . . . . . . . .	P Near	 00000046 _TEXT	Length= 00000027 Public STDCALL
 
 
 Symbols:
@@ -155,9 +199,11 @@ Symbols:
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 CR . . . . . . . . . . . . . . .	Number	 0000000Dh   
+ENABLE_VIRTUAL_TERMINAL_PROCESSING .	Number	 00000004h   
 LF . . . . . . . . . . . . . . .	Number	 0000000Ah   
 SCREEN_HEIGHT  . . . . . . . . .	Number	 00000032h   
 SCREEN_WIDTH . . . . . . . . . .	Number	 00000050h   
+STD_OUTPUT_HANDLE  . . . . . . .	Number	 -0000000Bh   
 outputTextBuffer . . . . . . . .	Byte	 00003E80 _DATA	
 screenBuffer . . . . . . . . . .	Pixel	 00000000 _DATA	
 
