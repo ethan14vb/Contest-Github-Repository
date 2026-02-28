@@ -15,6 +15,7 @@ screenBuffer Pixel SCREEN_WIDTH * SCREEN_HEIGHT dup(<255, 255, 255, 255>)
 main PROC
 	; // Simple barebones test
 	call initializeRenderer
+
 	mov eax, OFFSET screenBuffer
 	call displayBuffer
 

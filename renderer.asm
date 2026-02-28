@@ -7,6 +7,7 @@ include engine_types.inc
 include renderer.inc
 
 SetConsoleOutputCP PROTO STDCALL : DWORD
+GetConsoleMode     PROTO STDCALL : DWORD, : DWORD
 SetConsoleMode     PROTO STDCALL : DWORD, : DWORD
 GetStdHandle       PROTO STDCALL : DWORD
 WriteConsoleA      PROTO STDCALL : DWORD, : DWORD, : DWORD, : DWORD, : DWORD
@@ -16,6 +17,7 @@ WriteConsoleA      PROTO STDCALL : DWORD, : DWORD, : DWORD, : DWORD, : DWORD
 STD_OUTPUT_HANDLE EQU -11
 ENABLE_VIRTUAL_TERMINAL_PROCESSING EQU 4
 
+ConsoleMode dd ?
 hConsoleOutput dd ?
 bytesWritten dd 0
 
@@ -108,7 +110,7 @@ x_loop:
 	imul eax, SCREEN_WIDTH
 	add eax, ecx 
 	shl eax, 2
-	mov edx, [esi + eax] ; // edx is now the top pixel
+	lea  edx, [esi + eax] ; // edx is now the top pixel
 
 	; // Get bottom pixel
 	; // (((y_index + 1) * SCREENWIDTH) + x_index) * 2
@@ -117,7 +119,7 @@ x_loop:
 	imul eax, SCREEN_WIDTH
 	add eax, ecx
 	shl eax, 2
-	mov eax, [esi + eax] ; // eax is now the bottom pixel
+	lea  eax, [esi + eax] ; // eax is now the bottom pixel
 
 	; // Write foreground ANSI prefix (ESC[38;2;RRR;GGG;BBB;m)
 	mov byte ptr[edi], ESCP
@@ -134,18 +136,24 @@ x_loop:
 	inc edi
 	mov byte ptr[edi], ';'
 	inc edi
-	mov al, [eax]
+
+	push edx ; // push edx so we can use it
+	mov edx, eax
+
+	mov al, [edx]
 	call writeByteInDecimal ; // Bottom RRR
 	mov byte ptr[edi], ';'
 	inc edi
-	mov al, [eax + 1]
+	mov al, [edx + 1]
 	call writeByteInDecimal ; // Bottom GGG
 	mov byte ptr[edi], ';'
 	inc edi
-	mov al, [eax + 2]
+	mov al, [edx + 2]
 	call writeByteInDecimal ; // Bottom BBB
 	mov byte ptr[edi], 'm'
 	inc edi
+
+	pop edx ; // restore edx
 
 	; // Write background ANSI prefix (ESC[48;2;RRR;GGG;BBB;m)
 	mov byte ptr[edi], ESCP
@@ -199,9 +207,19 @@ row_end:
 
 
 done: 
+	; // Clear formatting
+	mov byte ptr[edi], ESCP
+	inc edi
+	mov byte ptr[edi], '['
+	inc edi
+	mov byte ptr[edi], '0'
+	inc edi
+	mov byte ptr[edi], 'm'
+	inc edi
+
 	; // Call WriteConsoleA to display the frame here
-	mov ebx, OFFSET outputTextBuffer
-	sub ebx, edi
+	mov ebx, edi
+	sub ebx, OFFSET outputTextBuffer
 
 	invoke WriteConsoleA,
 		hConsoleOutput,
@@ -209,6 +227,7 @@ done:
 		ebx, ; // msgLen
 		OFFSET bytesWritten,
 		0
+
 	ret
 
 displayBuffer ENDP
@@ -227,7 +246,11 @@ initializeRenderer PROC USES eax
 	; // Enable virutal terminal processing (Required for RGB functionality)
 	invoke GetStdHandle, STD_OUTPUT_HANDLE
 	mov hConsoleOutput, eax
-	invoke SetConsoleMode, hConsoleOutput, ENABLE_VIRTUAL_TERMINAL_PROCESSING
+
+	; // Get the current terminal mode and OR it with ENABLE_VIRTUAL_TERMINAL_PROCESSING
+	invoke GetConsoleMode, hConsoleOutput, OFFSET ConsoleMode
+	or ConsoleMode, ENABLE_VIRTUAL_TERMINAL_PROCESSING
+	invoke SetConsoleMode, hConsoleOutput, ConsoleMode
 
 	ret
 initializeRenderer ENDP
