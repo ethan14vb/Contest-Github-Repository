@@ -5,4 +5,9 @@ option casemap : none
 
 include renderer.inc
 
-END
+.code
+main PROC
+	; // Simple barebones test
+	call initializeRenderer
+main ENDP
+END main

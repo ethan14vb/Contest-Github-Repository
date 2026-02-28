@@ -212,23 +212,23 @@ done:
 
 displayBuffer ENDP
 
-; // This main method is for testing the renderer
-main PROC
+; // ----------------------------------
+; // initializeRenderer
+; // Initializes the console for rendering
+; // Intended to be used for frame by frame animation. 
+; // 
+; // ----------------------------------
+PUBLIC initializeRenderer
+initializeRenderer PROC USES eax
 	; // Force output to be UTF-8
-	invoke SetConsoleOutputCP, 65001 
+	invoke SetConsoleOutputCP, 65001
 
 	; // Enable virutal terminal processing (Required for RGB functionality)
 	invoke GetStdHandle, STD_OUTPUT_HANDLE
 	mov hConsoleOutput, eax
 	invoke SetConsoleMode, hConsoleOutput, ENABLE_VIRTUAL_TERMINAL_PROCESSING
 
-	mov eax, 126
-	mov edi, OFFSET outputTextBuffer
-	call writeByteInDecimal
+	ret
+initializeRenderer ENDP
 
-	;// Include Irvine32.inc to use this debug text
-	;// mov edx, offset outputTextBuffer
-	;// call WriteString
-
-main ENDP
-END main
+END
