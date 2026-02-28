@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/28/26 11:19:41
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/28/26 12:15:44
 renderer.asm						     Page 1 - 1
 
 
@@ -26,21 +26,30 @@ renderer.asm						     Page 1 - 1
  00000003  00		      C     a BYTE ?
 			      C Pixel ENDS
 			      C 
+
 				SetConsoleOutputCP PROTO STDCALL : DWORD
 				SetConsoleMode     PROTO STDCALL : DWORD, : DWORD
 				GetStdHandle       PROTO STDCALL : DWORD
+				WriteConsoleA      PROTO STDCALL : DWORD, : DWORD, : DWORD, : DWORD, : DWORD
 
  00000000			.data
+				; // Windows function data
  =-0000000B			STD_OUTPUT_HANDLE EQU -11
  = 00000004			ENABLE_VIRTUAL_TERMINAL_PROCESSING EQU 4
 
+ 00000000 00000000		hConsoleOutput dd ?
+ 00000004 00000000		bytesWritten dd 0
+
+				; // Constants
  = 0000000D			CR = 13 ; // Carriage return
  = 0000000A			LF = 10 ; // Line feed
- = 0000001B			ESCP = 1Bh; // ESC character
- 00000000  00000FA0 [		screenBuffer Pixel SCREEN_WIDTH * SCREEN_HEIGHT dup(<0, 0, 0, 255>)
+ = 0000001B			ESCP = 1Bh ; // ESC character
+
+				; // Renderer buffers
+ 00000008  00000FA0 [		screenBuffer Pixel SCREEN_WIDTH * SCREEN_HEIGHT dup(<0, 0, 0, 255>)
 	    00 00 00 FF
 	   ]
- 00003E80  000186A0 [		outputTextBuffer db 100000 dup(0); // Used for the displayBuffer PROC
+ 00003E88  000186A0 [		outputTextBuffer db 100000 dup(0); // Used for the displayBuffer PROC
 	    00
 	   ]
 
@@ -111,18 +120,18 @@ renderer.asm						     Page 1 - 1
  0000002B  51		   *	    push   ecx
  0000002C  53		   *	    push   ebx
  0000002D  8B F0			mov esi, eax; // move source frame to esi
- 0000002F  BF 00003E80 R		mov edi, OFFSET outputTextBuffer ; // move destination text buffer to edi
+ 0000002F  BF 00003E88 R		mov edi, OFFSET outputTextBuffer ; // move destination text buffer to edi
 
  00000034  33 DB			xor ebx, ebx ; // y_index = 0
 
  00000036			y_loop:
  00000036  83 FB 32			cmp ebx, SCREEN_HEIGHT
- 00000039  0F 8D 000000BA		jge done
+ 00000039  0F 8D 000000C6		jge done
 
  0000003F  33 C9			xor ecx, ecx ; // x_index = 0
  00000041			x_loop:
  00000041  83 F9 50			cmp ecx, SCREEN_WIDTH
- 00000044  0F 8D 0000009F		jge row_end
+ 00000044  0F 8D 000000AB		jge row_end
 
 					; // Get top pixel
 					; // ((y_index * SCREENWIDTH) + x_index) * 2
@@ -198,59 +207,82 @@ renderer.asm						     Page 1 - 1
  000000E2  47				inc edi
 
 					; // Write half block
+ 000000E3  C6 07 E2			mov byte ptr[edi], 0E2h
+ 000000E6  47				inc edi
+ 000000E7  C6 07 96			mov byte ptr[edi], 096h
+ 000000EA  47				inc edi
+ 000000EB  C6 07 84			mov byte ptr[edi], 084h
+ 000000EE  47				inc edi
 
- 000000E3  41				inc ecx
- 000000E4  E9 FFFFFF58			jmp x_loop
+ 000000EF  41				inc ecx
+ 000000F0  E9 FFFFFF4C			jmp x_loop
 
- 000000E9			row_end:
+ 000000F5			row_end:
 					; // Add newline
- 000000E9  C6 07 0D			mov byte PTR[edi], CR
- 000000EC  47				inc edi
- 000000ED  C6 07 0A			mov byte PTR[edi], LF
- 000000F0  47				inc edi
+ 000000F5  C6 07 0D			mov byte PTR[edi], CR
+ 000000F8  47				inc edi
+ 000000F9  C6 07 0A			mov byte PTR[edi], LF
+ 000000FC  47				inc edi
 
- 000000F1  83 C3 02			add ebx, 2 ; // y += 2
+ 000000FD  83 C3 02			add ebx, 2 ; // y += 2
 
- 000000F4  E9 FFFFFF3D			jmp y_loop
+ 00000100  E9 FFFFFF31			jmp y_loop
 
 
- 000000F9			done: 
+ 00000105			done: 
 					; // Call WriteConsoleA to display the frame here
+ 00000105  BB 00003E88 R		mov ebx, OFFSET outputTextBuffer
+ 0000010A  2B DF			sub ebx, edi
+
+					invoke WriteConsoleA,
+						hConsoleOutput,
+						OFFSET outputTextBuffer,
+						ebx, ; // msgLen
+						OFFSET bytesWritten,
+						0
+ 0000010C  6A 00	   *	    push   +000000000h
+ 0000010E  68 00000004 R   *	    push   dword  ptr OFFSET FLAT: bytesWritten
+ 00000113  53		   *	    push   ebx
+ 00000114  68 00003E88 R   *	    push   dword  ptr OFFSET FLAT: outputTextBuffer
+ 00000119  FF 35 00000000 R *	    push   hConsoleOutput
+ 0000011F  E8 00000000 E   *	    call   WriteConsoleA
 					ret
- 000000F9  5B		   *	    pop    ebx
- 000000FA  59		   *	    pop    ecx
- 000000FB  5F		   *	    pop    edi
- 000000FC  5E		   *	    pop    esi
- 000000FD  C3		   *	    ret    00000h
- 000000FE			displayBuffer ENDP
+ 00000124  5B		   *	    pop    ebx
+ 00000125  59		   *	    pop    ecx
+ 00000126  5F		   *	    pop    edi
+ 00000127  5E		   *	    pop    esi
+ 00000128  C3		   *	    ret    00000h
+
+ 00000129			displayBuffer ENDP
 
 				; // This main method is for testing the renderer
- 000000FE			main PROC
+ 00000129			main PROC
 					; // Force output to be UTF-8
 					invoke SetConsoleOutputCP, 65001 
- 000000FE  68 0000FDE9	   *	    push   +00000FDE9h
- 00000103  E8 00000000 E   *	    call   SetConsoleOutputCP
+ 00000129  68 0000FDE9	   *	    push   +00000FDE9h
+ 0000012E  E8 00000000 E   *	    call   SetConsoleOutputCP
 				
 					; // Enable virutal terminal processing (Required for RGB functionality)
 					invoke GetStdHandle, STD_OUTPUT_HANDLE
- 00000108  6A F5	   *	    push    -00000000Bh
- 0000010A  E8 00000000 E   *	    call   GetStdHandle
-					invoke SetConsoleMode, eax, ENABLE_VIRTUAL_TERMINAL_PROCESSING
- 0000010F  6A 04	   *	    push   +000000004h
- 00000111  50		   *	    push   eax
- 00000112  E8 00000000 E   *	    call   SetConsoleMode
+ 00000133  6A F5	   *	    push    -00000000Bh
+ 00000135  E8 00000000 E   *	    call   GetStdHandle
+ 0000013A  A3 00000000 R		mov hConsoleOutput, eax
+					invoke SetConsoleMode, hConsoleOutput, ENABLE_VIRTUAL_TERMINAL_PROCESSING
+ 0000013F  6A 04	   *	    push   +000000004h
+ 00000141  FF 35 00000000 R *	    push   hConsoleOutput
+ 00000147  E8 00000000 E   *	    call   SetConsoleMode
 
- 00000117  B8 0000007E			mov eax, 126
- 0000011C  BF 00003E80 R		mov edi, OFFSET outputTextBuffer
- 00000121  E8 FFFFFEDA			call writeByteInDecimal
+ 0000014C  B8 0000007E			mov eax, 126
+ 00000151  BF 00003E88 R		mov edi, OFFSET outputTextBuffer
+ 00000156  E8 FFFFFEA5			call writeByteInDecimal
 
 					;// Include Irvine32.inc to use this debug text
 					;// mov edx, offset outputTextBuffer
 					;// call WriteString
 
- 00000126			main ENDP
+ 0000015B			main ENDP
 				END main
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/28/26 11:19:41
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/28/26 12:15:44
 renderer.asm						     Symbols 2 - 1
 
 
@@ -280,8 +312,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 0001C520 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000126 DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0001C528 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000015B DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -291,12 +323,13 @@ Procedures, parameters, and locals:
 GetStdHandle . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 SetConsoleMode . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 SetConsoleOutputCP . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-displayBuffer  . . . . . . . . .	P Near	 00000029 _TEXT	Length= 000000D5 Public STDCALL
+WriteConsoleA  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+displayBuffer  . . . . . . . . .	P Near	 00000029 _TEXT	Length= 00000100 Public STDCALL
   y_loop . . . . . . . . . . . .	L Near	 00000036 _TEXT	
   x_loop . . . . . . . . . . . .	L Near	 00000041 _TEXT	
-  row_end  . . . . . . . . . . .	L Near	 000000E9 _TEXT	
-  done . . . . . . . . . . . . .	L Near	 000000F9 _TEXT	
-main . . . . . . . . . . . . . .	P Near	 000000FE _TEXT	Length= 00000028 Public STDCALL
+  row_end  . . . . . . . . . . .	L Near	 000000F5 _TEXT	
+  done . . . . . . . . . . . . .	L Near	 00000105 _TEXT	
+main . . . . . . . . . . . . . .	P Near	 00000129 _TEXT	Length= 00000032 Public STDCALL
 writeByteInDecimal . . . . . . .	P Near	 00000000 _TEXT	Length= 00000029 Public STDCALL
   print_tens . . . . . . . . . .	L Near	 00000010 _TEXT	
   print_ones . . . . . . . . . .	L Near	 00000021 _TEXT	
@@ -322,8 +355,10 @@ LF . . . . . . . . . . . . . . .	Number	 0000000Ah
 SCREEN_HEIGHT  . . . . . . . . .	Number	 00000032h   
 SCREEN_WIDTH . . . . . . . . . .	Number	 00000050h   
 STD_OUTPUT_HANDLE  . . . . . . .	Number	 -0000000Bh   
-outputTextBuffer . . . . . . . .	Byte	 00003E80 _DATA	
-screenBuffer . . . . . . . . . .	Pixel	 00000000 _DATA	
+bytesWritten . . . . . . . . . .	DWord	 00000004 _DATA	
+hConsoleOutput . . . . . . . . .	DWord	 00000000 _DATA	
+outputTextBuffer . . . . . . . .	Byte	 00003E88 _DATA	
+screenBuffer . . . . . . . . . .	Pixel	 00000008 _DATA	
 
 	   0 Warnings
 	   0 Errors

@@ -4,17 +4,26 @@ option casemap : none
 .stack 4096
 
 include engine_types.inc
+
 SetConsoleOutputCP PROTO STDCALL : DWORD
 SetConsoleMode     PROTO STDCALL : DWORD, : DWORD
 GetStdHandle       PROTO STDCALL : DWORD
+WriteConsoleA      PROTO STDCALL : DWORD, : DWORD, : DWORD, : DWORD, : DWORD
 
 .data
+; // Windows function data
 STD_OUTPUT_HANDLE EQU -11
 ENABLE_VIRTUAL_TERMINAL_PROCESSING EQU 4
 
+hConsoleOutput dd ?
+bytesWritten dd 0
+
+; // Constants
 CR = 13 ; // Carriage return
 LF = 10 ; // Line feed
-ESCP = 1Bh; // ESC character
+ESCP = 1Bh ; // ESC character
+
+; // Renderer buffers
 screenBuffer Pixel SCREEN_WIDTH * SCREEN_HEIGHT dup(<0, 0, 0, 255>)
 outputTextBuffer db 100000 dup(0); // Used for the displayBuffer PROC
 
@@ -189,7 +198,17 @@ row_end:
 
 done: 
 	; // Call WriteConsoleA to display the frame here
+	mov ebx, OFFSET outputTextBuffer
+	sub ebx, edi
+
+	invoke WriteConsoleA,
+		hConsoleOutput,
+		OFFSET outputTextBuffer,
+		ebx, ; // msgLen
+		OFFSET bytesWritten,
+		0
 	ret
+
 displayBuffer ENDP
 
 ; // This main method is for testing the renderer
@@ -199,7 +218,8 @@ main PROC
 
 	; // Enable virutal terminal processing (Required for RGB functionality)
 	invoke GetStdHandle, STD_OUTPUT_HANDLE
-	invoke SetConsoleMode, eax, ENABLE_VIRTUAL_TERMINAL_PROCESSING
+	mov hConsoleOutput, eax
+	invoke SetConsoleMode, hConsoleOutput, ENABLE_VIRTUAL_TERMINAL_PROCESSING
 
 	mov eax, 126
 	mov edi, OFFSET outputTextBuffer
