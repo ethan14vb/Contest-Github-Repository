@@ -81,6 +81,7 @@ row_end:
 
 
 done: 
+	; // Call WriteConsoleA to display the frame here
 	ret
 displayBuffer ENDP
 
