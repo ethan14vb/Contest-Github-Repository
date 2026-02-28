@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/28/26 12:15:44
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/28/26 12:33:52
 renderer.asm						     Page 1 - 1
 
 
@@ -114,6 +114,7 @@ renderer.asm						     Page 1 - 1
 				; //	EAX - pointer to the new frame buffer to render. MUST BE SCREEN_WIDTH * SCREEN_HEIGHT!!!
 				; //
 				; // ----------------------------------
+				PUBLIC displayBuffer
  00000029			displayBuffer PROC USES esi edi ecx ebx
  00000029  56		   *	    push   esi
  0000002A  57		   *	    push   edi
@@ -282,7 +283,7 @@ renderer.asm						     Page 1 - 1
 
  0000015B			main ENDP
 				END main
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/28/26 12:15:44
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/28/26 12:33:52
 renderer.asm						     Symbols 2 - 1
 
 

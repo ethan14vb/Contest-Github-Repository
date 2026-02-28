@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AsmLibrary", "AsmLibrary", 
 		engine_types.inc = engine_types.inc
 		main.asm = main.asm
 		renderer.asm = renderer.asm
+		renderer.inc = renderer.inc
+		renderer_test.asm = renderer_test.asm
 	EndProjectSection
 EndProject
 Global

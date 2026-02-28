@@ -85,6 +85,7 @@ writeByteInDecimal ENDP
 ; //	EAX - pointer to the new frame buffer to render. MUST BE SCREEN_WIDTH * SCREEN_HEIGHT!!!
 ; //
 ; // ----------------------------------
+PUBLIC displayBuffer
 displayBuffer PROC USES esi edi ecx ebx
 	mov esi, eax; // move source frame to esi
 	mov edi, OFFSET outputTextBuffer ; // move destination text buffer to edi
