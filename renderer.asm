@@ -19,10 +19,26 @@ outputTextBuffer db 100000 dup(0); // Used for the displayBuffer PROC
 
 .code
 ; // ----------------------------------
+; // writeByteInDecimal
+; // Writes a single byte's decimal representation using ASCII characters into a buffer. 
+; // 
+; // Parameters: 
+; //	AL - byte to print
+; //    EDI - pointer to the buffer to write text to
+; // ----------------------------------
+writeByteInDecimal PROC
+	; // divide by 100
+	; // print result (100s place)
+	; // divide remainder by 10
+	; // print result (10s place)
+	; // print remainder (1s place)
+	ret
+writeByteInDecimal ENDP
+
+; // ----------------------------------
 ; // displayBuffer
 ; // Renders an RGBA buffer to the screen using ASCII characters.
 ; // Intended to be used for frame by frame animation. 
-; // This will render on top of the last contents of screenBuffer.
 ; // 
 ; // Parameters: 
 ; //	EAX - pointer to the new frame buffer to render. MUST BE SCREEN_WIDTH * SCREEN_HEIGHT!!!
