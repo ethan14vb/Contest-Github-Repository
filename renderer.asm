@@ -26,9 +26,30 @@ outputTextBuffer db 100000 dup(0); // Used for the displayBuffer PROC
 ; //	AL - byte to print
 ; //    EDI - pointer to the buffer to write text to
 ; // ----------------------------------
-writeByteInDecimal PROC
+writeByteInDecimal PROC USES ebx
 	; // divide by 100
+	xor ah, ah
+	mov bl, 100
+	div bl
+
+	cmp al, 0
+	jmp print_tens
+
 	; // print result (100s place)
+	add al, '0' ; // Add 0x30 to display correct ASCII number representation
+	mov [edi], al
+	inc edi
+
+print_tens:
+	mov bl, 10
+	div bl
+
+	cmp al, 0
+	jmp print_ones
+
+print_ones:
+
+	
 	; // divide remainder by 10
 	; // print result (10s place)
 	; // print remainder (1s place)
