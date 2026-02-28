@@ -25,6 +25,9 @@ outputTextBuffer db 100000 dup(0); // Used for the displayBuffer PROC
 ; // Parameters: 
 ; //	AL - byte to print
 ; //    EDI - pointer to the buffer to write text to
+; //
+; // Registers changed:
+; //	EDI - will be adjusted after prints. Does not add null terminator.
 ; // ----------------------------------
 writeByteInDecimal PROC USES ebx
 	; // divide by 100
@@ -41,18 +44,24 @@ writeByteInDecimal PROC USES ebx
 	inc edi
 
 print_tens:
+	mov al, ah
+	xor ah, ah
+
 	mov bl, 10
 	div bl
 
 	cmp al, 0
 	jmp print_ones
 
-print_ones:
-
-	
-	; // divide remainder by 10
 	; // print result (10s place)
+	add al, '0'
+	mov [edi], al
+	inc edi
+
+print_ones:
 	; // print remainder (1s place)
+	add ah, '0'
+	mov[edi], ah	
 	ret
 writeByteInDecimal ENDP
 
