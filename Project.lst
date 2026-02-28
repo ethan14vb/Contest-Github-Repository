@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/28/26 10:47:21
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/28/26 11:05:11
 renderer.asm						     Page 1 - 1
 
 
@@ -63,7 +63,7 @@ renderer.asm						     Page 1 - 1
  00000005  F6 F3			div bl
 
  00000007  3C 00			cmp al, 0
- 00000009  EB 05			jmp print_tens
+ 00000009  74 05			je print_tens
 
 					; // print result (100s place)
  0000000B  04 30			add al, '0' ; // Add 0x30 to display correct ASCII number representation
@@ -78,7 +78,7 @@ renderer.asm						     Page 1 - 1
  00000016  F6 F3			div bl
 
  00000018  3C 00			cmp al, 0
- 0000001A  EB 05			jmp print_ones
+ 0000001A  74 05			je print_ones
 
 					; // print result (10s place)
  0000001C  04 30			add al, '0'
@@ -89,10 +89,11 @@ renderer.asm						     Page 1 - 1
 					; // print remainder (1s place)
  00000021  80 C4 30			add ah, '0'
  00000024  88 27			mov[edi], ah	
+ 00000026  47				inc edi
 					ret
- 00000026  5B		   *	    pop    ebx
- 00000027  C3		   *	    ret    00000h
- 00000028			writeByteInDecimal ENDP
+ 00000027  5B		   *	    pop    ebx
+ 00000028  C3		   *	    ret    00000h
+ 00000029			writeByteInDecimal ENDP
 
 				; // ----------------------------------
 				; // displayBuffer
@@ -103,95 +104,99 @@ renderer.asm						     Page 1 - 1
 				; //	EAX - pointer to the new frame buffer to render. MUST BE SCREEN_WIDTH * SCREEN_HEIGHT!!!
 				; //
 				; // ----------------------------------
- 00000028			displayBuffer PROC USES esi edi ecx ebx
- 00000028  56		   *	    push   esi
- 00000029  57		   *	    push   edi
- 0000002A  51		   *	    push   ecx
- 0000002B  53		   *	    push   ebx
- 0000002C  8B F0			mov esi, eax; // move source frame to esi
- 0000002E  BF 00003E80 R		mov edi, OFFSET outputTextBuffer ; // move destination text buffer to edi
+ 00000029			displayBuffer PROC USES esi edi ecx ebx
+ 00000029  56		   *	    push   esi
+ 0000002A  57		   *	    push   edi
+ 0000002B  51		   *	    push   ecx
+ 0000002C  53		   *	    push   ebx
+ 0000002D  8B F0			mov esi, eax; // move source frame to esi
+ 0000002F  BF 00003E80 R		mov edi, OFFSET outputTextBuffer ; // move destination text buffer to edi
 
- 00000033  33 DB			xor ebx, ebx ; // y_index = 0
+ 00000034  33 DB			xor ebx, ebx ; // y_index = 0
 
- 00000035			y_loop:
- 00000035  83 FB 32			cmp ebx, SCREEN_HEIGHT
- 00000038  7D 32			jge done
+ 00000036			y_loop:
+ 00000036  83 FB 32			cmp ebx, SCREEN_HEIGHT
+ 00000039  7D 32			jge done
 
- 0000003A  33 C9			xor ecx, ecx ; // x_index = 0
- 0000003C			x_loop:
- 0000003C  83 F9 50			cmp ecx, SCREEN_WIDTH
- 0000003F  7D 1E			jge row_end
+ 0000003B  33 C9			xor ecx, ecx ; // x_index = 0
+ 0000003D			x_loop:
+ 0000003D  83 F9 50			cmp ecx, SCREEN_WIDTH
+ 00000040  7D 1E			jge row_end
 
 					; // Get top pixel
 					; // ((y_index * SCREENWIDTH) + x_index) * 2
- 00000041  8B C3			mov eax, ebx
- 00000043  6B C0 50			imul eax, SCREEN_WIDTH
- 00000046  03 C1			add eax, ecx 
- 00000048  C1 E0 02			shl eax, 2
- 0000004B  8B 14 30			mov edx, [esi + eax] ; // edx is now the top pixel
+ 00000042  8B C3			mov eax, ebx
+ 00000044  6B C0 50			imul eax, SCREEN_WIDTH
+ 00000047  03 C1			add eax, ecx 
+ 00000049  C1 E0 02			shl eax, 2
+ 0000004C  8B 14 30			mov edx, [esi + eax] ; // edx is now the top pixel
 
 					; // Get bottom pixel
 					; // (((y_index + 1) * SCREENWIDTH) + x_index) * 2
- 0000004E  8B C3			mov eax, ebx
- 00000050  40				inc eax 
- 00000051  6B C0 50			imul eax, SCREEN_WIDTH
- 00000054  03 C1			add eax, ecx
- 00000056  C1 E0 02			shl eax, 2
- 00000059  8B 04 30			mov eax, [esi + eax] ; // eax is now the bottom pixel
+ 0000004F  8B C3			mov eax, ebx
+ 00000051  40				inc eax 
+ 00000052  6B C0 50			imul eax, SCREEN_WIDTH
+ 00000055  03 C1			add eax, ecx
+ 00000057  C1 E0 02			shl eax, 2
+ 0000005A  8B 04 30			mov eax, [esi + eax] ; // eax is now the bottom pixel
 
 					; // Write character
 					; // Write ESC[38;2;RRR;GGG;BBBm
 					; // Write ESC[48;2;RRR;GGG;BBBm
 					; // Write half block
 
- 0000005C  41				inc ecx
- 0000005D  EB DD			jmp x_loop
+ 0000005D  41				inc ecx
+ 0000005E  EB DD			jmp x_loop
 
- 0000005F			row_end:
+ 00000060			row_end:
 					; // Add newline
- 0000005F  C6 07 0D			mov byte PTR[edi], CR
- 00000062  47				inc edi
- 00000063  C6 07 0A			mov byte PTR[edi], LF
- 00000066  47				inc edi
+ 00000060  C6 07 0D			mov byte PTR[edi], CR
+ 00000063  47				inc edi
+ 00000064  C6 07 0A			mov byte PTR[edi], LF
+ 00000067  47				inc edi
 
- 00000067  83 C3 02			add ebx, 2 ; // y += 2
+ 00000068  83 C3 02			add ebx, 2 ; // y += 2
 
- 0000006A  EB C9			jmp y_loop
+ 0000006B  EB C9			jmp y_loop
 
 
- 0000006C			done: 
+ 0000006D			done: 
 					; // Call WriteConsoleA to display the frame here
 					ret
- 0000006C  5B		   *	    pop    ebx
- 0000006D  59		   *	    pop    ecx
- 0000006E  5F		   *	    pop    edi
- 0000006F  5E		   *	    pop    esi
- 00000070  C3		   *	    ret    00000h
- 00000071			displayBuffer ENDP
+ 0000006D  5B		   *	    pop    ebx
+ 0000006E  59		   *	    pop    ecx
+ 0000006F  5F		   *	    pop    edi
+ 00000070  5E		   *	    pop    esi
+ 00000071  C3		   *	    ret    00000h
+ 00000072			displayBuffer ENDP
 
 				; // This main method is for testing the renderer
- 00000071			main PROC
+ 00000072			main PROC
 					; // Force output to be UTF-8
 					invoke SetConsoleOutputCP, 65001 
- 00000071  68 0000FDE9	   *	    push   +00000FDE9h
- 00000076  E8 00000000 E   *	    call   SetConsoleOutputCP
+ 00000072  68 0000FDE9	   *	    push   +00000FDE9h
+ 00000077  E8 00000000 E   *	    call   SetConsoleOutputCP
 				
 					; // Enable virutal terminal processing (Required for RGB functionality)
 					invoke GetStdHandle, STD_OUTPUT_HANDLE
- 0000007B  6A F5	   *	    push    -00000000Bh
- 0000007D  E8 00000000 E   *	    call   GetStdHandle
+ 0000007C  6A F5	   *	    push    -00000000Bh
+ 0000007E  E8 00000000 E   *	    call   GetStdHandle
 					invoke SetConsoleMode, eax, ENABLE_VIRTUAL_TERMINAL_PROCESSING
- 00000082  6A 04	   *	    push   +000000004h
- 00000084  50		   *	    push   eax
- 00000085  E8 00000000 E   *	    call   SetConsoleMode
+ 00000083  6A 04	   *	    push   +000000004h
+ 00000085  50		   *	    push   eax
+ 00000086  E8 00000000 E   *	    call   SetConsoleMode
 
- 0000008A  33 C0			xor eax, eax
- 0000008C  B8 00000000 R		mov eax, OFFSET screenBuffer
- 00000091  E8 FFFFFF92			call displayBuffer
- 00000096  33 C0			xor eax, eax
- 00000098			main ENDP
+ 0000008B  B8 0000007E			mov eax, 126
+ 00000090  BF 00003E80 R		mov edi, OFFSET outputTextBuffer
+ 00000095  E8 FFFFFF66			call writeByteInDecimal
+
+					;// Include Irvine32.inc to use this debug text
+					;// mov edx, offset outputTextBuffer
+					;// call WriteString
+
+ 0000009A			main ENDP
 				END main
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/28/26 10:47:21
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/28/26 11:05:11
 renderer.asm						     Symbols 2 - 1
 
 
@@ -222,7 +227,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 0001C520 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000098 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000009A DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -232,13 +237,13 @@ Procedures, parameters, and locals:
 GetStdHandle . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 SetConsoleMode . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 SetConsoleOutputCP . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-displayBuffer  . . . . . . . . .	P Near	 00000028 _TEXT	Length= 00000049 Public STDCALL
-  y_loop . . . . . . . . . . . .	L Near	 00000035 _TEXT	
-  x_loop . . . . . . . . . . . .	L Near	 0000003C _TEXT	
-  row_end  . . . . . . . . . . .	L Near	 0000005F _TEXT	
-  done . . . . . . . . . . . . .	L Near	 0000006C _TEXT	
-main . . . . . . . . . . . . . .	P Near	 00000071 _TEXT	Length= 00000027 Public STDCALL
-writeByteInDecimal . . . . . . .	P Near	 00000000 _TEXT	Length= 00000028 Public STDCALL
+displayBuffer  . . . . . . . . .	P Near	 00000029 _TEXT	Length= 00000049 Public STDCALL
+  y_loop . . . . . . . . . . . .	L Near	 00000036 _TEXT	
+  x_loop . . . . . . . . . . . .	L Near	 0000003D _TEXT	
+  row_end  . . . . . . . . . . .	L Near	 00000060 _TEXT	
+  done . . . . . . . . . . . . .	L Near	 0000006D _TEXT	
+main . . . . . . . . . . . . . .	P Near	 00000072 _TEXT	Length= 00000028 Public STDCALL
+writeByteInDecimal . . . . . . .	P Near	 00000000 _TEXT	Length= 00000029 Public STDCALL
   print_tens . . . . . . . . . .	L Near	 00000010 _TEXT	
   print_ones . . . . . . . . . .	L Near	 00000021 _TEXT	
 

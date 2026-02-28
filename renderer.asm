@@ -36,7 +36,7 @@ writeByteInDecimal PROC USES ebx
 	div bl
 
 	cmp al, 0
-	jmp print_tens
+	je print_tens
 
 	; // print result (100s place)
 	add al, '0' ; // Add 0x30 to display correct ASCII number representation
@@ -51,7 +51,7 @@ print_tens:
 	div bl
 
 	cmp al, 0
-	jmp print_ones
+	je print_ones
 
 	; // print result (10s place)
 	add al, '0'
@@ -62,6 +62,7 @@ print_ones:
 	; // print remainder (1s place)
 	add ah, '0'
 	mov[edi], ah	
+	inc edi
 	ret
 writeByteInDecimal ENDP
 
@@ -140,9 +141,13 @@ main PROC
 	invoke GetStdHandle, STD_OUTPUT_HANDLE
 	invoke SetConsoleMode, eax, ENABLE_VIRTUAL_TERMINAL_PROCESSING
 
-	xor eax, eax
-	mov eax, OFFSET screenBuffer
-	call displayBuffer
-	xor eax, eax
+	mov eax, 126
+	mov edi, OFFSET outputTextBuffer
+	call writeByteInDecimal
+
+	;// Include Irvine32.inc to use this debug text
+	;// mov edx, offset outputTextBuffer
+	;// call WriteString
+
 main ENDP
 END main
