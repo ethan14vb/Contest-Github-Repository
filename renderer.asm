@@ -165,6 +165,12 @@ x_loop:
 	inc edi
 
 	; // Write half block
+	mov byte ptr[edi], 0E2h
+	inc edi
+	mov byte ptr[edi], 096h
+	inc edi
+	mov byte ptr[edi], 084h
+	inc edi
 
 	inc ecx
 	jmp x_loop
