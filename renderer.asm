@@ -14,6 +14,7 @@ ENABLE_VIRTUAL_TERMINAL_PROCESSING EQU 4
 
 CR = 13 ; // Carriage return
 LF = 10 ; // Line feed
+ESCP = 1Bh; // ESC character
 screenBuffer Pixel SCREEN_WIDTH * SCREEN_HEIGHT dup(<0, 0, 0, 255>)
 outputTextBuffer db 100000 dup(0); // Used for the displayBuffer PROC
 
@@ -107,8 +108,36 @@ x_loop:
 	shl eax, 2
 	mov eax, [esi + eax] ; // eax is now the bottom pixel
 
-	; // Write character
-	; // Write ESC[38;2;RRR;GGG;BBBm
+	; // Write foreground ANSI prefix (ESC[38;2;RRR;GGG;BBB;m)
+	mov byte ptr[edi], ESCP
+	inc edi
+	mov byte ptr[edi], '['
+	inc edi
+	mov byte ptr[edi], ';'
+	inc edi
+	mov byte ptr[edi], '3'
+	inc edi
+	mov byte ptr[edi], '8'
+	inc edi
+	mov byte ptr[edi], ';'
+	inc edi
+	mov byte ptr[edi], '2'
+	inc edi
+	mov byte ptr[edi], ';'
+	inc edi
+	mov al, [eax]
+	call writeByteInDecimal ; // Bottom RRR
+	mov byte ptr[edi], ';'
+	inc edi
+	mov al, [eax + 1]
+	call writeByteInDecimal ; // Bottom GGG
+	mov byte ptr[edi], ';'
+	inc edi
+	mov al, [eax + 2]
+	call writeByteInDecimal ; // Bottom BBB
+	mov byte ptr[edi], 'm'
+	inc edi
+
 	; // Write ESC[48;2;RRR;GGG;BBBm
 	; // Write half block
 
