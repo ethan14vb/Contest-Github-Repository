@@ -113,8 +113,6 @@ x_loop:
 	inc edi
 	mov byte ptr[edi], '['
 	inc edi
-	mov byte ptr[edi], ';'
-	inc edi
 	mov byte ptr[edi], '3'
 	inc edi
 	mov byte ptr[edi], '8'
@@ -138,7 +136,34 @@ x_loop:
 	mov byte ptr[edi], 'm'
 	inc edi
 
-	; // Write ESC[48;2;RRR;GGG;BBBm
+	; // Write background ANSI prefix (ESC[48;2;RRR;GGG;BBB;m)
+	mov byte ptr[edi], ESCP
+	inc edi
+	mov byte ptr[edi], '['
+	inc edi
+	mov byte ptr[edi], '4'
+	inc edi
+	mov byte ptr[edi], '8'
+	inc edi
+	mov byte ptr[edi], ';'
+	inc edi
+	mov byte ptr[edi], '2'
+	inc edi
+	mov byte ptr[edi], ';'
+	inc edi
+	mov al, [edx]
+	call writeByteInDecimal; // Top RRR
+	mov byte ptr[edi], ';'
+	inc edi
+	mov al, [edx + 1]
+	call writeByteInDecimal; // Top GGG
+	mov byte ptr[edi], ';'
+	inc edi
+	mov al, [edx + 2]
+	call writeByteInDecimal; // Top BBB
+	mov byte ptr[edi], 'm'
+	inc edi
+
 	; // Write half block
 
 	inc ecx
