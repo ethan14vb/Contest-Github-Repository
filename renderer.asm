@@ -4,6 +4,7 @@ option casemap : none
 .stack 4096
 
 include engine_types.inc
+include renderer.inc
 
 SetConsoleOutputCP PROTO STDCALL : DWORD
 SetConsoleMode     PROTO STDCALL : DWORD, : DWORD

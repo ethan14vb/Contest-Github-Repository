@@ -1,3 +1,3 @@
 ; // Contains external declarations for all of the public functions in renderer.asm
-displayBuffer PROTO : DWORD
+displayBuffer PROTO
 initializeRenderer PROTO
