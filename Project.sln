@@ -8,7 +8,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1A9A10CA-CB73-42A9-8530-5B9AC4C98180}"
 	ProjectSection(SolutionItems) = preProject
 		engine_types.inc = engine_types.inc
-		main.asm = main.asm
 		renderer.asm = renderer.asm
 		renderer.inc = renderer.inc
 	EndProjectSection

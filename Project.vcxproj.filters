@@ -23,7 +23,7 @@
     <MASM Include="renderer.asm">
       <Filter>Source</Filter>
     </MASM>
-    <MASM Include="renderer_test.asm">
+    <MASM Include="main.asm">
       <Filter>Source</Filter>
     </MASM>
   </ItemGroup>
