@@ -9,7 +9,7 @@ include engine_types.inc
 ExitProcess PROTO STDCALL : DWORD
 
 .data
-screenBuffer Pixel SCREEN_WIDTH * SCREEN_HEIGHT dup(<255, 255, 255, 255>)
+screenBuffer Pixel SCREEN_WIDTH * SCREEN_HEIGHT dup(<90, 0, 128, 255>)
 
 .code
 main PROC

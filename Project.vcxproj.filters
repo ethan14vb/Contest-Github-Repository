@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="renderer.inc">
+      <Filter>Include</Filter>
+    </None>
+    <None Include="engine_types.inc">
+      <Filter>Include</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{73c18493-04f4-4a80-8897-6813e9238d5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include">
+      <UniqueIdentifier>{3224bbb7-1079-431e-9490-141390455819}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{fa569797-693a-4505-99ef-a3e213442298}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="renderer.asm">
+      <Filter>Source</Filter>
+    </MASM>
+    <MASM Include="renderer_test.asm">
+      <Filter>Source</Filter>
+    </MASM>
+  </ItemGroup>
+</Project>
