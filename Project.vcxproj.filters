@@ -26,5 +26,8 @@
     <MASM Include="main.asm">
       <Filter>Source</Filter>
     </MASM>
+    <MASM Include="scene.asm">
+      <Filter>Source</Filter>
+    </MASM>
   </ItemGroup>
 </Project>

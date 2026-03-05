@@ -13,6 +13,7 @@
   <ItemGroup>
     <MASM Include="main.asm" />
     <MASM Include="renderer.asm" />
+    <MASM Include="scene.asm" />
   </ItemGroup>
   <ItemGroup>
     <None Include="engine_types.inc" />
