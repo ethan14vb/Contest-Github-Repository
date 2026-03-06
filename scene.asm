@@ -3,17 +3,21 @@
 option casemap : none
 .stack 4096
 
+Scene STRUCT
+	pGameObjects DWORD ? ; // Linked list containing game objects
+Scene ENDS
+
 .code
-start PROC
+scene_start PROC
 	ret
-start ENDP
+scene_start ENDP
 
-update PROC
+scene_update PROC
 	ret
-update ENDP
+scene_update ENDP
 
-exit PROC
+scene_exit PROC
 	ret
-exit ENDP
+scene_exit ENDP
 
 END

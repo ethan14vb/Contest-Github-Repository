@@ -23,10 +23,13 @@
     <MASM Include="renderer.asm">
       <Filter>Source</Filter>
     </MASM>
-    <MASM Include="main.asm">
+    <MASM Include="scene.asm">
       <Filter>Source</Filter>
     </MASM>
-    <MASM Include="scene.asm">
+    <MASM Include="game_object.asm">
+      <Filter>Source</Filter>
+    </MASM>
+    <MASM Include="main.asm">
       <Filter>Source</Filter>
     </MASM>
   </ItemGroup>

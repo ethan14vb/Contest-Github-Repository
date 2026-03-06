@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <MASM Include="game_object.asm" />
     <MASM Include="main.asm" />
     <MASM Include="renderer.asm" />
     <MASM Include="scene.asm" />

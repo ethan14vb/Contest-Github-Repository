@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/05/26 18:35:02
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/06/26 12:37:29
 scene.asm						     Page 1 - 1
 
 
@@ -7,24 +7,37 @@ scene.asm						     Page 1 - 1
 				option casemap : none
 				.stack 4096
 
+ 00000004			Scene STRUCT
+ 00000000  00000000			pGameObjects DWORD ? ; // Linked list containing game objects
+				Scene ENDS
+
  00000000			.code
- 00000000			start PROC
+ 00000000			scene_start PROC
  00000000  C3				ret
- 00000001			start ENDP
+ 00000001			scene_start ENDP
 
- 00000001			update PROC
+ 00000001			scene_update PROC
  00000001  C3				ret
- 00000002			update ENDP
+ 00000002			scene_update ENDP
 
- 00000002			exit PROC
+ 00000002			scene_exit PROC
  00000002  C3				ret
- 00000003			exit ENDP
+ 00000003			scene_exit ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/05/26 18:35:02
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/06/26 12:37:29
 scene.asm						     Symbols 2 - 1
 
 
+
+
+Structures and Unions:
+
+                N a m e                  Size
+                                         Offset      Type
+
+Scene  . . . . . . . . . . . . .	 00000004
+  pGameObjects . . . . . . . . .	 00000000	 DWord
 
 
 Segments and Groups:
@@ -41,9 +54,9 @@ Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
-exit . . . . . . . . . . . . . .	P Near	 00000002 _TEXT	Length= 00000001 Public STDCALL
-start  . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000001 Public STDCALL
-update . . . . . . . . . . . . .	P Near	 00000001 _TEXT	Length= 00000001 Public STDCALL
+scene_exit . . . . . . . . . . .	P Near	 00000002 _TEXT	Length= 00000001 Public STDCALL
+scene_start  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000001 Public STDCALL
+scene_update . . . . . . . . . .	P Near	 00000001 _TEXT	Length= 00000001 Public STDCALL
 
 
 Symbols:
