@@ -7,6 +7,9 @@
     <None Include="engine_types.inc">
       <Filter>Include</Filter>
     </None>
+    <None Include="camera.inc">
+      <Filter>Include</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">
@@ -32,7 +35,7 @@
     <MASM Include="main.asm">
       <Filter>Source</Filter>
     </MASM>
-    <MASM Include="camera.asm">
+    <MASM Include="sprite_component.inc">
       <Filter>Source</Filter>
     </MASM>
   </ItemGroup>

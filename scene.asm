@@ -4,7 +4,7 @@ option casemap : none
 .stack 4096
 
 Scene STRUCT
-	pGameObjects DWORD ? ; // Linked list containing game objects
+	pGameObjects DWORD ? ; // List containing game objects
 Scene ENDS
 
 .code
