@@ -1,21 +1,32 @@
-INCLUDE default_header.inc
+; // ==================================
+; // renderer_test.asm
+; // ----------------------------------
+; // Tests the pixel buffer to ASCII rendering capability by calling the displayBuffer
+; // function on a buffer with a solid color. 
+; //
+; // Usage: 
+; //	Exclude main.asm from the project and instead include this file, then build,
+; // run, and feel free to debug and test.
+; // ==================================
 
-include renderer.inc
-include engine_types.inc
+INCLUDE default_header.inc
+INCLUDE renderer.inc
+INCLUDE engine_types.inc
 
 ExitProcess PROTO STDCALL : DWORD
 
 .data
-screenBuffer Pixel SCREEN_WIDTH * SCREEN_HEIGHT dup(<0, 0, 255, 255>)
+screenBuffer Pixel SCREEN_WIDTH * SCREEN_HEIGHT DUP(<0, 0, 255, 255>)
 
 .code
 main PROC PUBLIC
-	; // Simple barebones test
-	call initializeRenderer
+	; // Simple barebones test that displays screenBuffer using displayBuffer
+	CALL initializeRenderer
 
 	mov eax, OFFSET screenBuffer
-	call displayBuffer
+	CALL displayBuffer
 
-	invoke ExitProcess, 0
+	INVOKE ExitProcess, 0
 main ENDP
+
 END main

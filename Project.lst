@@ -1,29 +1,73 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/10/26 19:40:48
-sprite_component.inc					     Page 1 - 1
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/10/26 19:45:28
+main.asm						     Page 1 - 1
 
 
- 000C				SpriteComponent STRUCT
- 0000  00000000				h DWORD ?
- 0004  00000000				w DWORD ?
- 0008  00000000				pBuffer DWORD ?
-				SpriteComponent ENDS
+				; // ==================================
+				; // main.asm
+				; // ----------------------------------
+				; // The entry point of the program. Right now it is nonfunctional, but main.asm
+				; // will be responsible for updating the currently running scene and the inialization
+				; // of the engine.
+				; // ==================================
 
-				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/10/26 19:40:48
-sprite_component.inc					     Symbols 2 - 1
+				INCLUDE default_header.inc
+			      C .386
+			      C .model flat, stdcall
+			      C option casemap : none
+			      C .stack 4096
+			      C OPTION PROC : PRIVATE
+			      C 
+
+				ExitProcess PROTO STDCALL : DWORD
+
+ 00000000			.code
+ 00000000			main PROC PUBLIC
+					; // Eventually, this is where the main loop and heart of the engine will be.
+					; // This loop will update at a fixed 30 frames per second and call scene_update
+					; // on the current scene.
+					INVOKE ExitProcess, 0
+ 00000000  6A 00	   *	    push   +000000000h
+ 00000002  E8 00000000 E   *	    call   ExitProcess
+ 00000007			main ENDP
+
+				END main
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/10/26 19:45:28
+main.asm						     Symbols 2 - 1
 
 
 
 
-Structures and Unions:
+Segments and Groups:
 
-                N a m e                  Size
-                                         Offset      Type
+                N a m e                 Size     Length   Align   Combine Class
 
-SpriteComponent  . . . . . . . .	 000C
-  h  . . . . . . . . . . . . . .	 0000	     DWord
-  w  . . . . . . . . . . . . . .	 0004	     DWord
-  pBuffer  . . . . . . . . . . .	 0008	     DWord
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000007 DWord	  Public  'CODE'	
+
+
+Procedures, parameters, and locals:
+
+                N a m e                 Type     Value    Attr
+
+ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000007 Public STDCALL
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000003h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
 
 	   0 Warnings
 	   0 Errors
