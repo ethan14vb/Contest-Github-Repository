@@ -33,14 +33,14 @@
     <MASM Include="scene.asm">
       <Filter>Source</Filter>
     </MASM>
-    <MASM Include="game_object.asm">
-      <Filter>Source</Filter>
-    </MASM>
     <MASM Include="sprite_component.inc">
       <Filter>Include</Filter>
     </MASM>
     <MASM Include="main.asm">
       <Filter>Source</Filter>
+    </MASM>
+    <MASM Include="game_object.inc">
+      <Filter>Include</Filter>
     </MASM>
   </ItemGroup>
 </Project>
