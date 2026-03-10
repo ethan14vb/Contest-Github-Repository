@@ -1,13 +1,15 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/10/26 18:55:00
-main.asm						     Page 1 - 1
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/10/26 19:09:48
+scene.asm						     Page 1 - 1
 
 
 				; // ==================================
-				; // main.asm
+				; // scene.asm
 				; // ----------------------------------
-				; // The entry point of the program. Right now it is nonfunctional, but main.asm
-				; // will be responsible for updating the currently running scene and the inialization
-				; // of the engine.
+				; // Scenes are classes that hold a single section of a game. A scene contains a
+				; // pointer to a list of GameObjects that is updated by the scene_update function.
+				; // The scene also updates simulations and any game logic that isn't handled directly
+				; // by GameObjects or their components. At the end of every update, the scene will
+				; // call the renderer module to render its contents.
 				; // ==================================
 
 				INCLUDE default_header.inc
@@ -17,24 +19,39 @@ main.asm						     Page 1 - 1
 			      C .stack 4096
 			      C OPTION PROC : PRIVATE
 			      C 
+				INCLUDE scene.inc
+ 00000004		      C Scene STRUCT
+ 00000000  00000000	      C 	pGameObjects DWORD ? ; // List containing game objects
+			      C Scene ENDS
+			      C 
 
-				ExitProcess PROTO STDCALL : DWORD
+ 00000000			.CODE
+ 00000000			scene_start PROC
+ 00000000  C3				ret
+ 00000001			scene_start ENDP
 
- 00000000			.code
- 00000000			main PROC PUBLIC
-					; // Eventually, this is where the main loop and heart of the engine will be.
-					; // This loop will update at a fixed 30 frames per second and call scene_update
-					; // on the current scene.
-					invoke ExitProcess, 0
- 00000000  6A 00	   *	    push   +000000000h
- 00000002  E8 00000000 E   *	    call   ExitProcess
- 00000007			main ENDP
+ 00000001			scene_update PROC
+ 00000001  C3				ret
+ 00000002			scene_update ENDP
 
-				END main
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/10/26 18:55:00
-main.asm						     Symbols 2 - 1
+ 00000002			scene_exit PROC
+ 00000002  C3				ret
+ 00000003			scene_exit ENDP
+
+				END
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/10/26 19:09:48
+scene.asm						     Symbols 2 - 1
 
 
+
+
+Structures and Unions:
+
+                N a m e                  Size
+                                         Offset      Type
+
+Scene  . . . . . . . . . . . . .	 00000004
+  pGameObjects . . . . . . . . .	 00000000	 DWord
 
 
 Segments and Groups:
@@ -44,15 +61,16 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000007 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000003 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
-ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000007 Public STDCALL
+scene_exit . . . . . . . . . . .	P Near	 00000002 _TEXT	Length= 00000001 Private STDCALL
+scene_start  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000001 Private STDCALL
+scene_update . . . . . . . . . .	P Near	 00000001 _TEXT	Length= 00000001 Private STDCALL
 
 
 Symbols:
