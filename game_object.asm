@@ -1,7 +1,4 @@
-.386
-.model flat, stdcall
-option casemap : none
-.stack 4096
+INCLUDE default_header.inc
 
 GameObject STRUCT
 	pComponents DWORD ?

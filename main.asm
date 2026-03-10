@@ -1,12 +1,9 @@
-.386
-.model flat, stdcall
-option casemap : none
-.stack 4096
+INCLUDE default_header.inc
 
 ExitProcess PROTO STDCALL : DWORD
 
 .code
-main PROC
+main PROC PUBLIC
 invoke ExitProcess, 0
 main ENDP
 

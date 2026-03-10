@@ -1,11 +1,5 @@
-.386
-.model flat, stdcall
-option casemap : none
-.stack 4096
-
-Scene STRUCT
-	pGameObjects DWORD ? ; // List containing game objects
-Scene ENDS
+INCLUDE default_header.inc
+INCLUDE scene.inc
 
 .code
 scene_start PROC

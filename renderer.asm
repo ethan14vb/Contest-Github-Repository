@@ -1,7 +1,4 @@
-.386
-.model flat, stdcall
-option casemap : none
-.stack 4096
+INCLUDE default_header.inc
 
 include engine_types.inc
 include renderer.inc

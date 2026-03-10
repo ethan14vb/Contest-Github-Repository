@@ -19,8 +19,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="camera.inc" />
+    <None Include="default_header.inc" />
     <None Include="engine_types.inc" />
     <None Include="renderer.inc" />
+    <None Include="scene.inc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4164AA65-1EF9-4E69-899B-D1BED776070B}</ProjectGuid>

@@ -10,6 +10,10 @@
     <None Include="camera.inc">
       <Filter>Include</Filter>
     </None>
+    <None Include="scene.inc">
+      <Filter>Include</Filter>
+    </None>
+    <None Include="default_header.inc" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">
@@ -32,10 +36,10 @@
     <MASM Include="game_object.asm">
       <Filter>Source</Filter>
     </MASM>
-    <MASM Include="main.asm">
-      <Filter>Source</Filter>
-    </MASM>
     <MASM Include="sprite_component.inc">
+      <Filter>Include</Filter>
+    </MASM>
+    <MASM Include="main.asm">
       <Filter>Source</Filter>
     </MASM>
   </ItemGroup>

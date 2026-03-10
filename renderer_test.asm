@@ -1,7 +1,4 @@
-.386
-.model flat, stdcall
-option casemap : none
-.stack 4096
+INCLUDE default_header.inc
 
 include renderer.inc
 include engine_types.inc
@@ -9,10 +6,10 @@ include engine_types.inc
 ExitProcess PROTO STDCALL : DWORD
 
 .data
-screenBuffer Pixel SCREEN_WIDTH * SCREEN_HEIGHT dup(<7, 29, 115, 255>)
+screenBuffer Pixel SCREEN_WIDTH * SCREEN_HEIGHT dup(<0, 0, 255, 255>)
 
 .code
-main PROC
+main PROC PUBLIC
 	; // Simple barebones test
 	call initializeRenderer
 
