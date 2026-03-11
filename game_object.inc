@@ -14,9 +14,9 @@
 ; // ==================================
 
 GameObject_vtable STRUCT
-	pStart DWORD ?
-	pUpdate DWORD ?
-	pExit DWORD ?
+	pStart DWORD ? ; For initialization of the GameObject
+	pUpdate DWORD ? ; For game logic that will run every frame update
+	pExit DWORD ? ; Called when the GameObject is removed
 GameObject_vtable ENDS
 
 GameObject STRUCT
