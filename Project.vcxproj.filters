@@ -17,6 +17,9 @@
     <None Include="render_command.inc">
       <Filter>Include\Rendering</Filter>
     </None>
+    <None Include="transform_component.inc">
+      <Filter>Include\Engine</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">

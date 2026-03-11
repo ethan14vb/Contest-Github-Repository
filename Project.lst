@@ -1,41 +1,34 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/11/26 15:45:15
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/11/26 15:52:47
 sprite_component.inc					     Page 1 - 1
 
 
- 0034				SpriteComponent STRUCT
-					; // Sprite position within scene
- 0000  00000000				x DWORD ?
- 0004  00000000				y DWORD ?
+ 002C				SpriteComponent STRUCT
+ 0000  00000000				originX DWORD ?
+ 0004  00000000				originY DWORD ?
 
- 0008  00000000				originX DWORD ?
- 000C  00000000				originY DWORD ?
+ 0008  00000000				pTexture DWORD ?
+
+					; // Info about where the sprite is in the source buffer. (If using spritesheet cell)
+ 000C  00000000				cellX DWORD ?
+ 0010  00000000				cellY DWORD ?
+ 0014  00000000				cellW DWORD ?
+ 0018  00000000				cellH DWORD ?
+
+					; // *************************
+					; // Booleans (Maybe later these can be compressed into flags to save space)
+					; // *************************
+ 001C  00000000				flipX DWORD ?
+ 0020  00000000				flipY DWORD ? 
 
 					; // Whether to ignore the camera offset when rendering.
 					; // Used for drawing UI items
- 0010  00000000				ignoreCamera DWORD ? ; // Boolean
+ 0024  00000000				ignoreCamera DWORD ?
 
- 0014  00000000				pImage DWORD ? ; // The buffer with the sprite data
-
-					; // Info about where the sprite is in the source buffer. (If using spritesheet cell)
- 0018  00000000				cellX DWORD ?
- 001C  00000000				cellY DWORD ?
- 0020  00000000				cellW DWORD ?
- 0024  00000000				cellH DWORD ?
-
-					; // Boolean values about whether the sprite should be drawn flipped
- 0028  00000000				flipX DWORD ?
- 002C  00000000				flipY DWORD ? 
-
- 0030  00000000				visible DWORD ?
-
-					; // Possible Futher updates (Not in scope for this project):
-					; //	Rotation Support
-					; //	Transparency Support
-					; //	Stretch Support
+ 0028  00000000				visible DWORD ?
 				SpriteComponent ENDS
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/11/26 15:45:15
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/11/26 15:52:47
 sprite_component.inc					     Symbols 2 - 1
 
 
@@ -46,20 +39,18 @@ Structures and Unions:
                 N a m e                  Size
                                          Offset      Type
 
-SpriteComponent  . . . . . . . .	 0034
-  x  . . . . . . . . . . . . . .	 0000	     DWord
-  y  . . . . . . . . . . . . . .	 0004	     DWord
-  originX  . . . . . . . . . . .	 0008	     DWord
-  originY  . . . . . . . . . . .	 000C	     DWord
-  ignoreCamera . . . . . . . . .	 0010	     DWord
-  pImage . . . . . . . . . . . .	 0014	     DWord
-  cellX  . . . . . . . . . . . .	 0018	     DWord
-  cellY  . . . . . . . . . . . .	 001C	     DWord
-  cellW  . . . . . . . . . . . .	 0020	     DWord
-  cellH  . . . . . . . . . . . .	 0024	     DWord
-  flipX  . . . . . . . . . . . .	 0028	     DWord
-  flipY  . . . . . . . . . . . .	 002C	     DWord
-  visible  . . . . . . . . . . .	 0030	     DWord
+SpriteComponent  . . . . . . . .	 002C
+  originX  . . . . . . . . . . .	 0000	     DWord
+  originY  . . . . . . . . . . .	 0004	     DWord
+  pTexture . . . . . . . . . . .	 0008	     DWord
+  cellX  . . . . . . . . . . . .	 000C	     DWord
+  cellY  . . . . . . . . . . . .	 0010	     DWord
+  cellW  . . . . . . . . . . . .	 0014	     DWord
+  cellH  . . . . . . . . . . . .	 0018	     DWord
+  flipX  . . . . . . . . . . . .	 001C	     DWord
+  flipY  . . . . . . . . . . . .	 0020	     DWord
+  ignoreCamera . . . . . . . . .	 0024	     DWord
+  visible  . . . . . . . . . . .	 0028	     DWord
 
 	   0 Warnings
 	   0 Errors

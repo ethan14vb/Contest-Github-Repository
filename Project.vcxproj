@@ -24,6 +24,7 @@
     <None Include="renderer.inc" />
     <None Include="render_command.inc" />
     <None Include="scene.inc" />
+    <None Include="transform_component.inc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4164AA65-1EF9-4E69-899B-D1BED776070B}</ProjectGuid>

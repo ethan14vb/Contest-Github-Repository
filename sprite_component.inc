@@ -1,16 +1,8 @@
 SpriteComponent STRUCT
-	; // Sprite position within scene
-	x DWORD ?
-	y DWORD ?
-
 	originX DWORD ?
 	originY DWORD ?
 
-	; // Whether to ignore the camera offset when rendering.
-	; // Used for drawing UI items
-	ignoreCamera DWORD ? ; // Boolean
-
-	pImage DWORD ? ; // The buffer with the sprite data
+	pTexture DWORD ?
 
 	; // Info about where the sprite is in the source buffer. (If using spritesheet cell)
 	cellX DWORD ?
@@ -18,16 +10,17 @@ SpriteComponent STRUCT
 	cellW DWORD ?
 	cellH DWORD ?
 
-	; // Boolean values about whether the sprite should be drawn flipped
+	; // *************************
+	; // Booleans (Maybe later these can be compressed into flags to save space)
+	; // *************************
 	flipX DWORD ?
 	flipY DWORD ? 
 
-	visible DWORD ?
+	; // Whether to ignore the camera offset when rendering.
+	; // Used for drawing UI items
+	ignoreCamera DWORD ?
 
-	; // Possible Futher updates (Not in scope for this project):
-	; //	Rotation Support
-	; //	Transparency Support
-	; //	Stretch Support
+	visible DWORD ?
 SpriteComponent ENDS
 
 END
