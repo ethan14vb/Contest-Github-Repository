@@ -15,11 +15,6 @@ SpriteComponent STRUCT
 	; // *************************
 	flipX DWORD ?
 	flipY DWORD ? 
-
-	; // Whether to ignore the camera offset when rendering.
-	; // Used for drawing UI items
-	ignoreCamera DWORD ?
-
 	visible DWORD ?
 SpriteComponent ENDS
 

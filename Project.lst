@@ -1,8 +1,8 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/11/26 15:52:47
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/11/26 16:01:04
 sprite_component.inc					     Page 1 - 1
 
 
- 002C				SpriteComponent STRUCT
+ 0028				SpriteComponent STRUCT
  0000  00000000				originX DWORD ?
  0004  00000000				originY DWORD ?
 
@@ -19,16 +19,11 @@ sprite_component.inc					     Page 1 - 1
 					; // *************************
  001C  00000000				flipX DWORD ?
  0020  00000000				flipY DWORD ? 
-
-					; // Whether to ignore the camera offset when rendering.
-					; // Used for drawing UI items
- 0024  00000000				ignoreCamera DWORD ?
-
- 0028  00000000				visible DWORD ?
+ 0024  00000000				visible DWORD ?
 				SpriteComponent ENDS
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/11/26 15:52:47
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/11/26 16:01:04
 sprite_component.inc					     Symbols 2 - 1
 
 
@@ -39,7 +34,7 @@ Structures and Unions:
                 N a m e                  Size
                                          Offset      Type
 
-SpriteComponent  . . . . . . . .	 002C
+SpriteComponent  . . . . . . . .	 0028
   originX  . . . . . . . . . . .	 0000	     DWord
   originY  . . . . . . . . . . .	 0004	     DWord
   pTexture . . . . . . . . . . .	 0008	     DWord
@@ -49,8 +44,7 @@ SpriteComponent  . . . . . . . .	 002C
   cellH  . . . . . . . . . . . .	 0018	     DWord
   flipX  . . . . . . . . . . . .	 001C	     DWord
   flipY  . . . . . . . . . . . .	 0020	     DWord
-  ignoreCamera . . . . . . . . .	 0024	     DWord
-  visible  . . . . . . . . . . .	 0028	     DWord
+  visible  . . . . . . . . . . .	 0024	     DWord
 
 	   0 Warnings
 	   0 Errors
