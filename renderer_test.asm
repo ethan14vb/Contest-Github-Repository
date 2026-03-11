@@ -16,15 +16,13 @@ INCLUDE engine_types.inc
 ExitProcess PROTO STDCALL : DWORD
 
 .data
-screenBuffer Pixel SCREEN_WIDTH * SCREEN_HEIGHT DUP(<0, 0, 255, 255>)
+screenBuffer Pixel SCREEN_WIDTH * SCREEN_HEIGHT DUP(<0, 128, 128, 255>)
 
 .code
 main PROC PUBLIC
 	; // Simple barebones test that displays screenBuffer using displayBuffer
-	CALL initializeRenderer
-
-	mov eax, OFFSET screenBuffer
-	CALL displayBuffer
+	INVOKE initializeRenderer
+	INVOKE displayBuffer, OFFSET screenBuffer
 
 	INVOKE ExitProcess, 0
 main ENDP

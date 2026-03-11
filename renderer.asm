@@ -1,22 +1,30 @@
 INCLUDE default_header.inc
+INCLUDE engine_types.inc
+INCLUDE renderer.inc
 
-include engine_types.inc
-include renderer.inc
+; // ********************************************
+; // Windows function prototypes
+; // ********************************************
+SetConsoleOutputCP PROTO STDCALL : DWORD ; // Used to change the output format to UTF-8
 
-SetConsoleOutputCP PROTO STDCALL : DWORD
+; // Used to enable virtual terminal processing for full RGB support
 GetConsoleMode     PROTO STDCALL : DWORD, : DWORD
 SetConsoleMode     PROTO STDCALL : DWORD, : DWORD
+
+; // Windows functions for displaying the text buffer of RGB data.
+; //	WriteConsoleA was chosen instead of the Irvine library functions because of its
+; //	support for things like virtual terminal processing and greater flexibility.
 GetStdHandle       PROTO STDCALL : DWORD
 WriteConsoleA      PROTO STDCALL : DWORD, : DWORD, : DWORD, : DWORD, : DWORD
 
 .data
 ; // Windows function data
-STD_OUTPUT_HANDLE EQU -11
-ENABLE_VIRTUAL_TERMINAL_PROCESSING EQU 4
+STD_OUTPUT_HANDLE = -11
+ENABLE_VIRTUAL_TERMINAL_PROCESSING = 4
 
-ConsoleMode dd ?
-hConsoleOutput dd ?
-bytesWritten dd 0
+ConsoleMode DD ?
+hConsoleOutput DD ?
+bytesWritten DD 0
 
 ; // Constants
 CR = 13 ; // Carriage return
@@ -24,8 +32,8 @@ LF = 10 ; // Line feed
 ESCP = 1Bh ; // ESC character
 
 ; // Renderer buffers
-screenBuffer Pixel SCREEN_WIDTH * SCREEN_HEIGHT dup(<0, 0, 0, 255>)
-outputTextBuffer db 100000 dup(0); // Used for the displayBuffer PROC
+screenBuffer Pixel SCREEN_WIDTH * SCREEN_HEIGHT DUP(<0, 0, 0, 255>)
+outputTextBuffer DB 100000 DUP(0); // Used for the displayBuffer PROC
 
 .code
 ; // ----------------------------------
@@ -82,12 +90,10 @@ writeByteInDecimal ENDP
 ; // Intended to be used for frame by frame animation. 
 ; // 
 ; // Parameters: 
-; //	EAX - pointer to the new frame buffer to render. MUST BE SCREEN_WIDTH * SCREEN_HEIGHT!!!
+; //	pBuffer DWORD - pointer to the new frame buffer to render. MUST BE SCREEN_WIDTH * SCREEN_HEIGHT!!!
 ; //
 ; // ----------------------------------
-PUBLIC displayBuffer
-displayBuffer PROC USES esi edi ecx ebx
-	mov esi, eax; // move source frame to esi
+displayBuffer PROC PUBLIC USES esi edi ecx ebx, pBuffer:DWORD
 	mov edi, OFFSET outputTextBuffer ; // move destination text buffer to edi
 
 	xor ebx, ebx ; // y_index = 0
@@ -107,7 +113,10 @@ x_loop:
 	imul eax, SCREEN_WIDTH
 	add eax, ecx 
 	shl eax, 2
-	lea  edx, [esi + eax] ; // edx is now the top pixel
+	mov edx, pBuffer
+	add edx, eax ; // edx is now the top pixel
+
+	push edx
 
 	; // Get bottom pixel
 	; // (((y_index + 1) * SCREENWIDTH) + x_index) * 2
@@ -116,22 +125,27 @@ x_loop:
 	imul eax, SCREEN_WIDTH
 	add eax, ecx
 	shl eax, 2
-	lea  eax, [esi + eax] ; // eax is now the bottom pixel
+	mov edx, pBuffer
+	add edx, eax 
+
+	mov eax, edx ; // eax is now the bottom pixel
+
+	pop edx ; // restore the top pixel
 
 	; // Write foreground ANSI prefix (ESC[38;2;RRR;GGG;BBB;m)
-	mov byte ptr[edi], ESCP
+	mov BYTE PTR[edi], ESCP
 	inc edi
-	mov byte ptr[edi], '['
+	mov BYTE PTR[edi], '['
 	inc edi
-	mov byte ptr[edi], '3'
+	mov BYTE PTR[edi], '3'
 	inc edi
-	mov byte ptr[edi], '8'
+	mov BYTE PTR[edi], '8'
 	inc edi
-	mov byte ptr[edi], ';'
+	mov BYTE PTR[edi], ';'
 	inc edi
-	mov byte ptr[edi], '2'
+	mov BYTE PTR[edi], '2'
 	inc edi
-	mov byte ptr[edi], ';'
+	mov BYTE PTR[edi], ';'
 	inc edi
 
 	push edx ; // push edx so we can use it
@@ -139,53 +153,53 @@ x_loop:
 
 	mov al, [edx]
 	call writeByteInDecimal ; // Bottom RRR
-	mov byte ptr[edi], ';'
+	mov BYTE PTR[edi], ';'
 	inc edi
 	mov al, [edx + 1]
 	call writeByteInDecimal ; // Bottom GGG
-	mov byte ptr[edi], ';'
+	mov BYTE PTR[edi], ';'
 	inc edi
 	mov al, [edx + 2]
 	call writeByteInDecimal ; // Bottom BBB
-	mov byte ptr[edi], 'm'
+	mov BYTE PTR[edi], 'm'
 	inc edi
 
 	pop edx ; // restore edx
 
 	; // Write background ANSI prefix (ESC[48;2;RRR;GGG;BBB;m)
-	mov byte ptr[edi], ESCP
+	mov BYTE PTR[edi], ESCP
 	inc edi
-	mov byte ptr[edi], '['
+	mov BYTE PTR[edi], '['
 	inc edi
-	mov byte ptr[edi], '4'
+	mov BYTE PTR[edi], '4'
 	inc edi
-	mov byte ptr[edi], '8'
+	mov BYTE PTR[edi], '8'
 	inc edi
-	mov byte ptr[edi], ';'
+	mov BYTE PTR[edi], ';'
 	inc edi
-	mov byte ptr[edi], '2'
+	mov BYTE PTR[edi], '2'
 	inc edi
-	mov byte ptr[edi], ';'
+	mov BYTE PTR[edi], ';'
 	inc edi
 	mov al, [edx]
 	call writeByteInDecimal; // Top RRR
-	mov byte ptr[edi], ';'
+	mov BYTE PTR[edi], ';'
 	inc edi
 	mov al, [edx + 1]
 	call writeByteInDecimal; // Top GGG
-	mov byte ptr[edi], ';'
+	mov BYTE PTR[edi], ';'
 	inc edi
 	mov al, [edx + 2]
 	call writeByteInDecimal; // Top BBB
-	mov byte ptr[edi], 'm'
+	mov BYTE PTR[edi], 'm'
 	inc edi
 
 	; // Write half block
-	mov byte ptr[edi], 0E2h
+	mov BYTE PTR[edi], 0E2h
 	inc edi
-	mov byte ptr[edi], 096h
+	mov BYTE PTR[edi], 096h
 	inc edi
-	mov byte ptr[edi], 084h
+	mov BYTE PTR[edi], 084h
 	inc edi
 
 	inc ecx
@@ -193,9 +207,9 @@ x_loop:
 
 row_end:
 	; // Add newline
-	mov byte PTR[edi], CR
+	mov BYTE PTR[edi], CR
 	inc edi
-	mov byte PTR[edi], LF
+	mov BYTE PTR[edi], LF
 	inc edi
 
 	add ebx, 2 ; // y += 2
@@ -204,21 +218,21 @@ row_end:
 
 
 done: 
-	; // Clear formatting
-	mov byte ptr[edi], ESCP
+	; // Clear RGB formatting
+	mov BYTE PTR[edi], ESCP
 	inc edi
-	mov byte ptr[edi], '['
+	mov BYTE PTR[edi], '['
 	inc edi
-	mov byte ptr[edi], '0'
+	mov BYTE PTR[edi], '0'
 	inc edi
-	mov byte ptr[edi], 'm'
+	mov BYTE PTR[edi], 'm'
 	inc edi
 
 	; // Call WriteConsoleA to display the frame here
 	mov ebx, edi
 	sub ebx, OFFSET outputTextBuffer
 
-	invoke WriteConsoleA,
+	INVOKE WriteConsoleA,
 		hConsoleOutput,
 		OFFSET outputTextBuffer,
 		ebx, ; // msgLen
@@ -231,23 +245,22 @@ displayBuffer ENDP
 
 ; // ----------------------------------
 ; // initializeRenderer
-; // Initializes the console for rendering
-; // Intended to be used for frame by frame animation. 
+; // Initializes the console for rendering by switching to UTF-8 format and 
+; // enabling virtual terminal processing for full RGB support.
 ; // 
 ; // ----------------------------------
-PUBLIC initializeRenderer
-initializeRenderer PROC USES eax
+initializeRenderer PROC PUBLIC USES eax
 	; // Force output to be UTF-8
-	invoke SetConsoleOutputCP, 65001
+	INVOKE SetConsoleOutputCP, 65001
 
 	; // Enable virutal terminal processing (Required for RGB functionality)
-	invoke GetStdHandle, STD_OUTPUT_HANDLE
+	INVOKE GetStdHandle, STD_OUTPUT_HANDLE
 	mov hConsoleOutput, eax
 
 	; // Get the current terminal mode and OR it with ENABLE_VIRTUAL_TERMINAL_PROCESSING
-	invoke GetConsoleMode, hConsoleOutput, OFFSET ConsoleMode
+	INVOKE GetConsoleMode, hConsoleOutput, OFFSET ConsoleMode
 	or ConsoleMode, ENABLE_VIRTUAL_TERMINAL_PROCESSING
-	invoke SetConsoleMode, hConsoleOutput, ConsoleMode
+	INVOKE SetConsoleMode, hConsoleOutput, ConsoleMode
 
 	ret
 initializeRenderer ENDP
