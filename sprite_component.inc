@@ -1,3 +1,10 @@
+; // ==================================
+; // SpriteComponent
+; // ----------------------------------
+; // Defines how a GameObject should appear using a texture.
+; // Should be used with a transform for proper functionality.
+; // ==================================
+
 SpriteComponent STRUCT
 	originX DWORD ?
 	originY DWORD ?
