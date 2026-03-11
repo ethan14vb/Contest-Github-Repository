@@ -1,3 +1,10 @@
+; // ==================================
+; // TransformComponent
+; // ----------------------------------
+; // Defines where in space a GameObject should be
+; // represented.
+; // ==================================
+
 TransformComponent STRUCT
 	x DWORD ?
 	y DWORD ?
