@@ -11,10 +11,13 @@
 RC_ENUM TYPEDEF DWORD
 
 RC_RECT = 0 ; // RenderCommand Rectangle
-RC_SPRITE = 1 ; // RenderCommand Sprite
+RC_SPRITE = 1 ; // RenderCommand Sprite NYI
 
 RenderCommand STRUCT
 	rcType RC_ENUM ? ; // Render command type
+
+	x DWORD ?
+	y DWORD ?
 
 	; // More contents here
 RenderCommand ENDS
