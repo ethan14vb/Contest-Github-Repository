@@ -22,6 +22,7 @@
     <None Include="default_header.inc" />
     <None Include="engine_types.inc" />
     <None Include="renderer.inc" />
+    <None Include="render_command.inc" />
     <None Include="scene.inc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

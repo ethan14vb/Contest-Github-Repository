@@ -14,6 +14,9 @@
     <None Include="renderer.inc">
       <Filter>Include\Rendering</Filter>
     </None>
+    <None Include="render_command.inc">
+      <Filter>Include\Rendering</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">
