@@ -1,6 +1,6 @@
 Camera STRUCT
 	x DWORD ?
 	y DWORD ?
-	h DWORD ? ; // Height
-	w DWORD ? ; // Width
+	h DWORD ? ; // Viewport Height
+	w DWORD ? ; // Viewport Width
 Camera ENDS
