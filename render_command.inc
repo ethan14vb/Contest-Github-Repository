@@ -16,8 +16,10 @@ RC_SPRITE = 1 ; // RenderCommand Sprite NYI
 RenderCommand STRUCT
 	rcType RC_ENUM ? ; // Render command type
 
+	; // Properties from transform_component
 	x DWORD ?
 	y DWORD ?
+	ignoreCamera DWORD ?
 
 	; // More contents here
 RenderCommand ENDS
