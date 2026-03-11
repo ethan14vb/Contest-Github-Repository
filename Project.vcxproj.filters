@@ -20,6 +20,9 @@
     <None Include="transform_component.inc">
       <Filter>Include\Engine</Filter>
     </None>
+    <None Include="rect_component.inc">
+      <Filter>Include\Engine</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">

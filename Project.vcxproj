@@ -21,6 +21,7 @@
     <None Include="camera.inc" />
     <None Include="default_header.inc" />
     <None Include="engine_types.inc" />
+    <None Include="rect_component.inc" />
     <None Include="renderer.inc" />
     <None Include="render_command.inc" />
     <None Include="scene.inc" />
