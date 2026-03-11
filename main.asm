@@ -8,7 +8,7 @@
 
 INCLUDE default_header.inc
 
-ExitProcess PROTO STDCALL : DWORD
+ExitProcess PROTO : DWORD
 
 .code
 main PROC PUBLIC
