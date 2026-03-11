@@ -1,31 +1,16 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/11/26 13:44:57
-game_object.inc						     Page 1 - 1
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/11/26 14:29:43
+sprite_component.inc					     Page 1 - 1
 
 
-				; // ==================================
-				; // GameObject
-				; // ----------------------------------
-				; // A STRUCT meant to define the size of a GameObject.
-				; // This STRUCT is intended to be 'subclassed' by 
-				; // overriding the virtual function table.
-				; // ==================================
-
- 000C				GameObject_vtable STRUCT
- 0000  00000000				pStart DWORD ?
- 0004  00000000				pUpdate DWORD ?
- 0008  00000000				pExit DWORD ?
-				GameObject_vtable ENDS
-
- 000C				GameObject STRUCT
- 0000  00000000				numComponents DWORD ?
- 0004  00000000				pComponents DWORD ? ; Pointer to a table of components
- 0008  00000000				pVt DWORD ? ; Pointer to a virtual function table
-				GameObject ENDS
-
+ 000C				SpriteComponent STRUCT
+ 0000  00000000				h DWORD ?
+ 0004  00000000				w DWORD ?
+ 0008  00000000				pBuffer DWORD ?
+				SpriteComponent ENDS
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/11/26 13:44:57
-game_object.inc						     Symbols 2 - 1
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/11/26 14:29:43
+sprite_component.inc					     Symbols 2 - 1
 
 
 
@@ -35,14 +20,10 @@ Structures and Unions:
                 N a m e                  Size
                                          Offset      Type
 
-GameObject_vtable  . . . . . . .	 000C
-  pStart . . . . . . . . . . . .	 0000	     DWord
-  pUpdate  . . . . . . . . . . .	 0004	     DWord
-  pExit  . . . . . . . . . . . .	 0008	     DWord
-GameObject . . . . . . . . . . .	 000C
-  numComponents  . . . . . . . .	 0000	     DWord
-  pComponents  . . . . . . . . .	 0004	     DWord
-  pVt  . . . . . . . . . . . . .	 0008	     DWord
+SpriteComponent  . . . . . . . .	 000C
+  h  . . . . . . . . . . . . . .	 0000	     DWord
+  w  . . . . . . . . . . . . . .	 0004	     DWord
+  pBuffer  . . . . . . . . . . .	 0008	     DWord
 
 	   0 Warnings
 	   0 Errors
