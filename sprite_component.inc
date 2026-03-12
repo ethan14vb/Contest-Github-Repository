@@ -5,6 +5,9 @@
 ; // Should be used with a transform for proper functionality.
 ; // ==================================
 
+IFNDEF SPRITE_COMPONENT_INC
+SPRITE_COMPONENT_INC EQU 1
+
 SpriteComponent STRUCT
 	originX DWORD ?
 	originY DWORD ?
@@ -24,3 +27,5 @@ SpriteComponent STRUCT
 	flipY DWORD ? 
 	visible DWORD ?
 SpriteComponent ENDS
+
+ENDIF

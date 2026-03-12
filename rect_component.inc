@@ -6,6 +6,9 @@
 ; // The origin is defined by a transform.
 ; // ==================================
 
+IFNDEF RECT_COMMAND_INC
+RECT_COMMAND_INC EQU 1
+
 RectComponent STRUCT
 	h DWORD ? ; // Height
 	w DWORD ? ; // Width
@@ -19,3 +22,5 @@ RectComponent STRUCT
 
 	visible DWORD ?
 RectComponent ENDS
+
+ENDIF

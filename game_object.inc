@@ -13,6 +13,9 @@
 ; // separate from main game logic.
 ; // ==================================
 
+IFNDEF GAME_OBJECT_INC
+GAME_OBJECT_INC EQU 1
+
 GameObject_vtable STRUCT
 	pStart DWORD ? ; For initialization of the GameObject
 	pUpdate DWORD ? ; For game logic that will run every frame update
@@ -25,3 +28,4 @@ GameObject STRUCT
 	pVt DWORD ? ; Pointer to a virtual function table
 GameObject ENDS
 
+ENDIF

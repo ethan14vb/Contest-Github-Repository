@@ -5,6 +5,9 @@
 ; // represented.
 ; // ==================================
 
+IFNDEF TRANSFORM_COMPONENT_INC
+TRANSFORM_COMPONENT_INC EQU 1
+
 TransformComponent STRUCT
 	x DWORD ?
 	y DWORD ?
@@ -18,3 +21,5 @@ TransformComponent STRUCT
 	; // scaleX DWORD ?
 	; // scaleY DWORD ?
 TransformComponent ENDS
+
+ENDIF

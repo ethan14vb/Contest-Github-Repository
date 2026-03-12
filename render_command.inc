@@ -7,6 +7,9 @@
 ; // the commands passed to it.
 ; // ==================================
 
+IFNDEF RENDERER_COMMAND_INC
+RENDERER_COMMAND_INC EQU 1
+
 INCLUDE transform_component.inc
 INCLUDE rect_component.inc
 INCLUDE sprite_component.inc
@@ -29,3 +32,5 @@ RenderCommand STRUCT
 		sprite SpriteComponent <>
 	ENDS
 RenderCommand ENDS
+
+ENDIF
