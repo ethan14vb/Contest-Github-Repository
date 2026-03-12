@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/11/26 23:39:27
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/12/26 13:16:49
 scene.asm						     Page 1 - 1
 
 
@@ -20,6 +20,16 @@ scene.asm						     Page 1 - 1
 			      C OPTION PROC : PRIVATE
 			      C 
 				INCLUDE scene.inc
+			      C ; // ==================================
+			      C ; // Scene
+			      C ; // ----------------------------------
+			      C ; // Scenes are classes that hold a single section of a game. A scene contains a
+			      C ; // pointer to a list of GameObjects that is updated by the scene_update function.
+			      C ; // The scene also updates simulations and any game logic that isn't handled directly
+			      C ; // by GameObjects or their components. At the end of every update, the scene will
+			      C ; // call the renderer module to render its contents.
+			      C ; // ==================================
+			      C 
 			      C IFNDEF SCENE_INC
  = 00000001		      C SCENE_INC EQU 1
 			      C 
@@ -68,7 +78,7 @@ scene.asm						     Page 1 - 1
  00000003			scene_exit ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/11/26 23:39:27
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/12/26 13:16:49
 scene.asm						     Symbols 2 - 1
 
 
