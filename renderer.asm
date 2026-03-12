@@ -1,3 +1,11 @@
+; // ==================================
+; // renderer.asm
+; // ----------------------------------
+; // Responsible for determining how graphics should be displayed
+; // and then displaying them to the terminal or other interface
+; // that supports pixelated images.
+; // ==================================
+
 INCLUDE default_header.inc
 INCLUDE engine_types.inc
 INCLUDE renderer.inc
