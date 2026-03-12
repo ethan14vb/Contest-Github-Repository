@@ -25,5 +25,3 @@ GameObject STRUCT
 	pVt DWORD ? ; Pointer to a virtual function table
 GameObject ENDS
 
-
-END

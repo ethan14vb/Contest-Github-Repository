@@ -24,5 +24,3 @@ SpriteComponent STRUCT
 	flipY DWORD ? 
 	visible DWORD ?
 SpriteComponent ENDS
-
-END

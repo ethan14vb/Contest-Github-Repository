@@ -23,6 +23,12 @@
     <None Include="rect_component.inc">
       <Filter>Include\Engine</Filter>
     </None>
+    <None Include="sprite_component.inc">
+      <Filter>Include\Engine</Filter>
+    </None>
+    <None Include="game_object.inc">
+      <Filter>Include\Engine</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">
@@ -50,12 +56,6 @@
     </MASM>
     <MASM Include="main.asm">
       <Filter>Source</Filter>
-    </MASM>
-    <MASM Include="game_object.inc">
-      <Filter>Include\Engine</Filter>
-    </MASM>
-    <MASM Include="sprite_component.inc">
-      <Filter>Include\Engine</Filter>
     </MASM>
   </ItemGroup>
 </Project>

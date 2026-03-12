@@ -11,11 +11,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="game_object.inc" />
+    <None Include="game_object.inc">
+      <FileType>Document</FileType>
+    </None>
     <MASM Include="main.asm" />
     <MASM Include="renderer.asm" />
     <MASM Include="scene.asm" />
-    <MASM Include="sprite_component.inc" />
+    <None Include="sprite_component.inc">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="camera.inc" />

@@ -19,5 +19,3 @@ RectComponent STRUCT
 
 	visible DWORD ?
 RectComponent ENDS
-
-END

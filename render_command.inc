@@ -7,6 +7,10 @@
 ; // the commands passed to it.
 ; // ==================================
 
+INCLUDE transform_component.inc
+INCLUDE rect_component.inc
+INCLUDE sprite_component.inc
+
 ; // Enumerations
 RC_ENUM TYPEDEF DWORD
 
@@ -16,12 +20,12 @@ RC_SPRITE = 1 ; // RenderCommand Sprite NYI
 RenderCommand STRUCT
 	rcType RC_ENUM ? ; // Render command type
 
-	; // Properties from transform_component
-	x DWORD ?
-	y DWORD ?
-	ignoreCamera DWORD ?
+	transform TransformComponent <>
 
-	; // More contents here
+	; // This UNION was added before we had learned about them in class.
+	; // It was added to this STRUCT to allow for C style memory usage.
+	UNION
+		rect RectComponent <>
+		sprite SpriteComponent <>
+	ENDS
 RenderCommand ENDS
-
-END
