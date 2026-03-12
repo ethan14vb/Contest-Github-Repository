@@ -46,16 +46,22 @@
     <Filter Include="Include\Rendering">
       <UniqueIdentifier>{e8f30457-8992-412f-9833-31c4ad6d88cd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine">
+      <UniqueIdentifier>{19203411-f9b2-415f-8031-ee3e1a6d1d20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Rendering">
+      <UniqueIdentifier>{1a5080f9-bf19-4c04-a1ad-c215501bcfbb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="renderer.asm">
-      <Filter>Source</Filter>
-    </MASM>
     <MASM Include="scene.asm">
-      <Filter>Source</Filter>
+      <Filter>Source\Engine</Filter>
+    </MASM>
+    <MASM Include="renderer.asm">
+      <Filter>Source\Rendering</Filter>
     </MASM>
     <MASM Include="main.asm">
-      <Filter>Source</Filter>
+      <Filter>Source\Engine</Filter>
     </MASM>
   </ItemGroup>
 </Project>
