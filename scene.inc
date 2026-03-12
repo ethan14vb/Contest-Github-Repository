@@ -1,5 +1,5 @@
 ; // ==================================
-; // scene.inc
+; // Scene
 ; // ----------------------------------
 ; // Scenes are classes that hold a single section of a game. A scene contains a
 ; // pointer to a list of GameObjects that is updated by the scene_update function.

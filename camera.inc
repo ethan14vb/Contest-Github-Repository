@@ -1,7 +1,16 @@
+; // ==================================
+; // Camera
+; // ----------------------------------
+; // A camera defines where spatially a scene should
+; // render its GameObjects.
+; // ==================================
+
 IFNDEF CAMERA_INC
 CAMERA_INC EQU 1
 
 Camera STRUCT
+	; // Perhaps, some time in the future, this data could be 
+	; // replaced by a TransformComponent.
 	x DWORD ?
 	y DWORD ?
 	h DWORD ? ; // Viewport Height
