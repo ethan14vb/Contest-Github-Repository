@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/12/26 15:59:21
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/13/26 17:41:11
 scene.asm						     Page 1 - 1
 
 
@@ -33,8 +33,10 @@ scene.asm						     Page 1 - 1
 			      C IFNDEF SCENE_INC
  = 00000001		      C SCENE_INC EQU 1
 			      C 
- 00000004		      C Scene STRUCT
- 00000000  00000000	      C 	pGameObjects DWORD ? ; // List containing game objects
+ 0000000C		      C Scene STRUCT
+ 00000000  00000000	      C 	numGameObjects DWORD ?
+ 00000004  00000000	      C 	maxGameObjects DWORD ? ; // Maximum size of the game objects list
+ 00000008  00000000	      C 	pGameObjects DWORD ? ; // List containing game objects
 			      C Scene ENDS
 			      C 
 			      C ENDIF
@@ -78,7 +80,7 @@ scene.asm						     Page 1 - 1
  00000003			scene_exit ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/12/26 15:59:21
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/13/26 17:41:11
 scene.asm						     Symbols 2 - 1
 
 
@@ -89,8 +91,10 @@ Structures and Unions:
                 N a m e                  Size
                                          Offset      Type
 
-Scene  . . . . . . . . . . . . .	 00000004
-  pGameObjects . . . . . . . . .	 00000000	 DWord
+Scene  . . . . . . . . . . . . .	 0000000C
+  numGameObjects . . . . . . . .	 00000000	 DWord
+  maxGameObjects . . . . . . . .	 00000004	 DWord
+  pGameObjects . . . . . . . . .	 00000008	 DWord
 
 
 Segments and Groups:
