@@ -19,6 +19,7 @@ pMemory DWORD ?
 
 .code
 main PROC PUBLIC
+	; // Get heap handle
 	INVOKE GetProcessHeap
 	
 	.IF eax == NULL
@@ -26,6 +27,17 @@ main PROC PUBLIC
 	.ELSE 
 		mov hHeap, eax
 	.ENDIF
+
+	; // Allocate memory
+	INVOKE HeapAlloc, hHeap, HEAP_ZERO_MEMORY, 1000
+	.IF eax == NULL
+		jmp quit
+	.ELSE
+		mov pMemory, eax
+	.ENDIF
+
+	; // Free memory
+
 
 	quit:
 	INVOKE ExitProcess, 0
