@@ -37,7 +37,7 @@ main PROC PUBLIC
 	.ENDIF
 
 	; // Free memory
-
+	INVOKE HeapFree, hHeap, 0, pMemory
 
 	quit:
 	INVOKE ExitProcess, 0

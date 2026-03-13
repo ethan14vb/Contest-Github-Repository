@@ -1,15 +1,15 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/13/26 18:14:44
-heap_functions_test.asm					     Page 1 - 1
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/13/26 18:16:34
+scene.asm						     Page 1 - 1
 
 
 				; // ==================================
-				; // heap_functions_test.asm
+				; // scene.asm
 				; // ----------------------------------
-				; // For testing heap functionality
-				; //
-				; // Usage: 
-				; //	Exclude main.asm from the project and instead include this file, then build,
-				; // run, and feel free to debug and test.
+				; // Scenes are classes that hold a single section of a game. A scene contains a
+				; // pointer to a list of GameObjects that is updated by the scene_update function.
+				; // The scene also updates simulations and any game logic that isn't handled directly
+				; // by GameObjects or their components. At the end of every update, the scene will
+				; // call the renderer module to render its contents.
 				; // ==================================
 
 				INCLUDE default_header.inc
@@ -19,101 +19,82 @@ heap_functions_test.asm					     Page 1 - 1
 			      C .stack 4096
 			      C OPTION PROC : PRIVATE
 			      C 
-				INCLUDE heap_functions.inc
+				INCLUDE scene.inc
 			      C ; // ==================================
-			      C ; // heap_functions.inc
+			      C ; // Scene
 			      C ; // ----------------------------------
-			      C ; // Functions used for dynamic memory management. This file was
-			      C ; // added before we learned about heap memory management in class
-			      C ; // so we could have easy memory management. My resource for this 
-			      C ; // was the windows API reference and the class ch11 slides.
+			      C ; // Scenes are classes that hold a single section of a game. A scene contains a
+			      C ; // pointer to a list of GameObjects that is updated by the scene_update function.
+			      C ; // The scene also updates simulations and any game logic that isn't handled directly
+			      C ; // by GameObjects or their components. At the end of every update, the scene will
+			      C ; // call the renderer module to render its contents.
 			      C ; // ==================================
 			      C 
-			      C IFNDEF HEAP_FUNCTIONS_INC
- = 00000001		      C HEAP_FUNCTIONS_INC EQU 1
+			      C IFNDEF SCENE_INC
+ = 00000001		      C SCENE_INC EQU 1
 			      C 
-			      C INCLUDELIB kernel32.lib
-			      C 
-			      C ; // Constants
- = 00000008		      C HEAP_ZERO_MEMORY          equ 00000008h
- = 00000004		      C HEAP_GENERATE_EXCEPTIONS  equ 00000004h
- = 00000001		      C HEAP_NO_SERIALIZE         equ 00000001h
-			      C 
- = 00000000		      C NULL   EQU 0
-			      C 
-			      C ; // Types
-			      C HANDLE TYPEDEF DWORD
-			      C 
-			      C ; // Protos
-			      C GetProcessHeap	PROTO
-			      C HeapAlloc		PROTO,	hHeap:DWORD, dwFlags:DWORD, dwBytes:DWORD
-			      C HeapFree		PROTO,	hHeap:DWORD, dwFlags:DWORD, lpMem:DWORD
-			      C HeapReAlloc		PROTO,	hHeap:DWORD, dwFlags:DWORD, lpMem:DWORD,	dwBytes:DWORD
+ 0000000C		      C Scene STRUCT
+ 00000000  00000000	      C 	numGameObjects DWORD ?
+ 00000004  00000000	      C 	maxGameObjects DWORD ? ; // Maximum size of the game objects list
+ 00000008  00000000	      C 	pGameObjects DWORD ? ; // List containing game objects
+			      C Scene ENDS
 			      C 
 			      C ENDIF
 			      C 
 
-				ExitProcess PROTO : DWORD
-
- 00000000			.data
- 00000000 00000000		hHeap HANDLE ?
- 00000004 00000000		pMemory DWORD ?
-
  00000000			.code
- 00000000			main PROC PUBLIC
-					; // Get heap handle
-					INVOKE GetProcessHeap
- 00000000  E8 00000000 E   *	    call   GetProcessHeap
-					
-					.IF eax == NULL
- 00000005  0B C0	   *	    or	eax, eax
- 00000007  75 04	   *	    jne    @C0001
- 00000009  EB 26				jmp quit
-					.ELSE 
- 0000000B  EB 05	   *	    jmp    @C0003
- 0000000D		   *@C0001:
- 0000000D  A3 00000000 R			mov hHeap, eax
-					.ENDIF
- 00000012		   *@C0003:
+				; // ----------------------------------
+				; // scene_start
+				; // Initializes the scene and allocates resources that will be used such as spritesheets,
+				; // SFX, or other external files needed in the scene. 
+				; // ----------------------------------
+ 00000000			scene_start PROC
+ 00000000  C3				ret
+ 00000001			scene_start ENDP
 
-					; // Allocate memory
-					INVOKE HeapAlloc, hHeap, HEAP_ZERO_MEMORY, 1000
- 00000012  68 000003E8	   *	    push   +0000003E8h
- 00000017  6A 08	   *	    push   +000000008h
- 00000019  FF 35 00000000 R *	    push   hHeap
- 0000001F  E8 00000000 E   *	    call   HeapAlloc
-					.IF eax == NULL
- 00000024  0B C0	   *	    or	eax, eax
- 00000026  75 04	   *	    jne    @C0004
- 00000028  EB 07				jmp quit
-					.ELSE
- 0000002A  EB 05	   *	    jmp    @C0006
- 0000002C		   *@C0004:
- 0000002C  A3 00000004 R			mov pMemory, eax
-					.ENDIF
- 00000031		   *@C0006:
+				; // ----------------------------------
+				; // scene_update
+				; // Responsible for updating the game objects and simulations every frame.
+				; // ----------------------------------
+ 00000001			scene_update PROC
+					; // Take Input
 
-					; // Free memory
+					; // Update Game Objects
+					; // for (GameObject o : *pGameObjects):
+					; //	o.update()
 
+					; // Update components
 
- 00000031				quit:
-					INVOKE ExitProcess, 0
- 00000031  6A 00	   *	    push   +000000000h
- 00000033  E8 00000000 E   *	    call   ExitProcess
- 00000038			main ENDP
+					; // Build render list
 
-				END main
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/13/26 18:14:44
-heap_functions_test.asm					     Symbols 2 - 1
+					; // Pass render list to renderer
+ 00000001  C3				ret
+ 00000002			scene_update ENDP
+
+				; // ----------------------------------
+				; // scene_exit
+				; // A destructor that clears the scene and the resources allocated during scene_start.
+				; // ----------------------------------
+ 00000002			scene_exit PROC
+ 00000002  C3				ret
+ 00000003			scene_exit ENDP
+
+				END
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/13/26 18:16:34
+scene.asm						     Symbols 2 - 1
 
 
 
 
-Types:
+Structures and Unions:
 
-                N a m e                  Size     Attr
+                N a m e                  Size
+                                         Offset      Type
 
-HANDLE . . . . . . . . . . . . .	 00000004     DWord
+Scene  . . . . . . . . . . . . .	 0000000C
+  numGameObjects . . . . . . . .	 00000000	 DWord
+  maxGameObjects . . . . . . . .	 00000004	 DWord
+  pGameObjects . . . . . . . . .	 00000008	 DWord
 
 
 Segments and Groups:
@@ -122,21 +103,17 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000008 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000038 DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000003 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
-ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-GetProcessHeap . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-HeapAlloc  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000038 Public STDCALL
-  quit . . . . . . . . . . . . .	L Near	 00000031 _TEXT	
+scene_exit . . . . . . . . . . .	P Near	 00000002 _TEXT	Length= 00000001 Private STDCALL
+scene_start  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000001 Private STDCALL
+scene_update . . . . . . . . . .	P Near	 00000001 _TEXT	Length= 00000001 Private STDCALL
 
 
 Symbols:
@@ -152,13 +129,7 @@ Symbols:
 @fardata?  . . . . . . . . . . .	Text   	 FLAT
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
-HEAP_FUNCTIONS_INC . . . . . . .	Number	 00000001h   
-HEAP_GENERATE_EXCEPTIONS . . . .	Number	 00000004h   
-HEAP_NO_SERIALIZE  . . . . . . .	Number	 00000001h   
-HEAP_ZERO_MEMORY . . . . . . . .	Number	 00000008h   
-NULL . . . . . . . . . . . . . .	Number	 00000000h   
-hHeap  . . . . . . . . . . . . .	DWord	 00000000 _DATA	
-pMemory  . . . . . . . . . . . .	DWord	 00000004 _DATA	
+SCENE_INC  . . . . . . . . . . .	Number	 00000001h   
 
 	   0 Warnings
 	   0 Errors

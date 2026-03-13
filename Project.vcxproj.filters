@@ -63,7 +63,7 @@
     <MASM Include="renderer.asm">
       <Filter>Source\Rendering</Filter>
     </MASM>
-    <MASM Include="heap_functions_test.asm">
+    <MASM Include="main.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
   </ItemGroup>
