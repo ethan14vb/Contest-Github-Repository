@@ -12,9 +12,17 @@ HEAP_FUNCTIONS_INC EQU 1
 
 INCLUDELIB kernel32.lib
 
-HANDLE TYPEDEF DWORD
+; // Constants
+HEAP_ZERO_MEMORY          equ 00000008h
+HEAP_GENERATE_EXCEPTIONS  equ 00000004h
+HEAP_NO_SERIALIZE         equ 00000001h
+
 NULL   EQU 0
 
+; // Types
+HANDLE TYPEDEF DWORD
+
+; // Protos
 GetProcessHeap	PROTO
 HeapAlloc		PROTO,	hHeap:DWORD, dwFlags:DWORD, dwBytes:DWORD
 HeapFree		PROTO,	hHeap:DWORD, dwFlags:DWORD, lpMem:DWORD
