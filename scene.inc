@@ -12,6 +12,8 @@ IFNDEF SCENE_INC
 SCENE_INC EQU 1
 
 Scene STRUCT
+	numGameObjects DWORD ?
+	maxGameObjects DWORD ? ; // Maximum size of the game objects list
 	pGameObjects DWORD ? ; // List containing game objects
 Scene ENDS
 
