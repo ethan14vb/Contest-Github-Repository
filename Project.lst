@@ -1,0 +1,135 @@
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/13/26 18:10:01
+scene.asm						     Page 1 - 1
+
+
+				; // ==================================
+				; // scene.asm
+				; // ----------------------------------
+				; // Scenes are classes that hold a single section of a game. A scene contains a
+				; // pointer to a list of GameObjects that is updated by the scene_update function.
+				; // The scene also updates simulations and any game logic that isn't handled directly
+				; // by GameObjects or their components. At the end of every update, the scene will
+				; // call the renderer module to render its contents.
+				; // ==================================
+
+				INCLUDE default_header.inc
+			      C .386
+			      C .model flat, stdcall
+			      C option casemap : none
+			      C .stack 4096
+			      C OPTION PROC : PRIVATE
+			      C 
+				INCLUDE scene.inc
+			      C ; // ==================================
+			      C ; // Scene
+			      C ; // ----------------------------------
+			      C ; // Scenes are classes that hold a single section of a game. A scene contains a
+			      C ; // pointer to a list of GameObjects that is updated by the scene_update function.
+			      C ; // The scene also updates simulations and any game logic that isn't handled directly
+			      C ; // by GameObjects or their components. At the end of every update, the scene will
+			      C ; // call the renderer module to render its contents.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF SCENE_INC
+ = 00000001		      C SCENE_INC EQU 1
+			      C 
+ 0000000C		      C Scene STRUCT
+ 00000000  00000000	      C 	numGameObjects DWORD ?
+ 00000004  00000000	      C 	maxGameObjects DWORD ? ; // Maximum size of the game objects list
+ 00000008  00000000	      C 	pGameObjects DWORD ? ; // List containing game objects
+			      C Scene ENDS
+			      C 
+			      C ENDIF
+			      C 
+
+ 00000000			.code
+				; // ----------------------------------
+				; // scene_start
+				; // Initializes the scene and allocates resources that will be used such as spritesheets,
+				; // SFX, or other external files needed in the scene. 
+				; // ----------------------------------
+ 00000000			scene_start PROC
+ 00000000  C3				ret
+ 00000001			scene_start ENDP
+
+				; // ----------------------------------
+				; // scene_update
+				; // Responsible for updating the game objects and simulations every frame.
+				; // ----------------------------------
+ 00000001			scene_update PROC
+					; // Take Input
+
+					; // Update Game Objects
+					; // for (GameObject o : *pGameObjects):
+					; //	o.update()
+
+					; // Update components
+
+					; // Build render list
+
+					; // Pass render list to renderer
+ 00000001  C3				ret
+ 00000002			scene_update ENDP
+
+				; // ----------------------------------
+				; // scene_exit
+				; // A destructor that clears the scene and the resources allocated during scene_start.
+				; // ----------------------------------
+ 00000002			scene_exit PROC
+ 00000002  C3				ret
+ 00000003			scene_exit ENDP
+
+				END
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/13/26 18:10:01
+scene.asm						     Symbols 2 - 1
+
+
+
+
+Structures and Unions:
+
+                N a m e                  Size
+                                         Offset      Type
+
+Scene  . . . . . . . . . . . . .	 0000000C
+  numGameObjects . . . . . . . .	 00000000	 DWord
+  maxGameObjects . . . . . . . .	 00000004	 DWord
+  pGameObjects . . . . . . . . .	 00000008	 DWord
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000003 DWord	  Public  'CODE'	
+
+
+Procedures, parameters, and locals:
+
+                N a m e                 Type     Value    Attr
+
+scene_exit . . . . . . . . . . .	P Near	 00000002 _TEXT	Length= 00000001 Private STDCALL
+scene_start  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000001 Private STDCALL
+scene_update . . . . . . . . . .	P Near	 00000001 _TEXT	Length= 00000001 Private STDCALL
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000003h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+SCENE_INC  . . . . . . . . . . .	Number	 00000001h   
+
+	   0 Warnings
+	   0 Errors

@@ -13,9 +13,22 @@ INCLUDE heap_functions.inc
 
 ExitProcess PROTO : DWORD
 
+.data
+hHeap HANDLE ?
+pMemory DWORD ?
+
 .code
 main PROC PUBLIC
-INVOKE ExitProcess, 0
+	INVOKE GetProcessHeap
+	
+	.IF eax == NULL
+		jmp quit
+	.ELSE 
+		mov hHeap, eax
+	.ENDIF
+
+	quit:
+	INVOKE ExitProcess, 0
 main ENDP
 
 END main

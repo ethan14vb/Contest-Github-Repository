@@ -10,11 +10,14 @@
 IFNDEF HEAP_FUNCTIONS_INC
 HEAP_FUNCTIONS_INC EQU 1
 
-INCLUDE kernel32.inc
+INCLUDELIB kernel32.lib
 
-GetProcessHeap PROTO
-HeapAlloc PROTO, hHeap:DWORD, dwFlags:DWORD, dwBytes:DWORD
-HeapFree PROTO, hHeap:DWORD, dwFlags:DWORD, lpMem:DWORD
-HeapReAlloc PROTO, hHeap:DWORD, dwFlags:DWORD, lpMem:DWORD, dwBytes:DWORD
+HANDLE TYPEDEF DWORD
+NULL   EQU 0
+
+GetProcessHeap	PROTO
+HeapAlloc		PROTO,	hHeap:DWORD, dwFlags:DWORD, dwBytes:DWORD
+HeapFree		PROTO,	hHeap:DWORD, dwFlags:DWORD, lpMem:DWORD
+HeapReAlloc		PROTO,	hHeap:DWORD, dwFlags:DWORD, lpMem:DWORD,	dwBytes:DWORD
 
 ENDIF
