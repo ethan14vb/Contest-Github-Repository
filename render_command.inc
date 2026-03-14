@@ -23,14 +23,12 @@ RC_SPRITE = 1 ; // RenderCommand Sprite NYI
 RenderCommand STRUCT
 	rcType RC_ENUM ? ; // Render command type
 
-	transform TransformComponent <>
+	; // Pointer to the transform that describes where the object should be rendered
+	pTransform DWORD ?
 
-	; // This UNION was added before we had learned about them in class.
-	; // It was added to this STRUCT to allow for C style memory usage.
-	UNION
-		rect RectComponent <>
-		sprite SpriteComponent <>
-	ENDS
+	; // Pointer to the renderable object. Could be a RectComponent, or a SpriteComponent 
+	; // depending on the value of rcType
+	pRenderable DWORD ?
 RenderCommand ENDS
 
 ENDIF
