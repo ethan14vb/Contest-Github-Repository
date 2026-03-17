@@ -8,9 +8,20 @@
 INCLUDE default_header.inc
 INCLUDE transform_component.inc
 
+
 .code
-new_transform PROC
+new_transform_component PROC PUBLIC, x: DWORD, y: DWORD, ignoreCamera: DWORD
+	mov eax, x
+	mov eax, y
+	mov eax, ignoreCamera
 
-new_transform ENDP
+	ret 
+new_transform_component ENDP
 
-END
+free_transform_component PROC PUBLIC, pTransform: DWORD
+	mov eax, pTransform
+
+	ret 
+free_transform_component ENDP
+
+END 
