@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <MASM Include="transform_component.asm" />
     <None Include="game_object.inc">
       <FileType>Document</FileType>
     </None>
