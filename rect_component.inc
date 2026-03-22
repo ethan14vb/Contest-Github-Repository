@@ -23,4 +23,7 @@ RectComponent STRUCT
 	visible DWORD ?
 RectComponent ENDS
 
+new_rect_component PROTO h: DWORD, w: DWORD, r: BYTE, g: BYTE, b:  BYTE, a: BYTE
+free_rect_component PROTO pTransform: DWORD
+
 ENDIF

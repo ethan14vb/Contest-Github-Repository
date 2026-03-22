@@ -72,5 +72,8 @@
     <MASM Include="main.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
+    <MASM Include="rect_component.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
   </ItemGroup>
 </Project>
