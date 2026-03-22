@@ -1,13 +1,12 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/22/26 17:33:22
-main.asm						     Page 1 - 1
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/22/26 18:07:07
+transform_component.asm					     Page 1 - 1
 
 
 				; // ==================================
-				; // main.asm
+				; // TransformComponent
 				; // ----------------------------------
-				; // The entry point of the program. Right now it is nonfunctional, but main.asm
-				; // will be responsible for updating the currently running scene and the inialization
-				; // of the engine.
+				; // Defines where in space a GameObject should be
+				; // represented.
 				; // ==================================
 
 				INCLUDE default_header.inc
@@ -16,6 +15,36 @@ main.asm						     Page 1 - 1
 			      C option casemap : none
 			      C .stack 4096
 			      C OPTION PROC : PRIVATE
+			      C 
+				INCLUDE transform_component.inc
+			      C ; // ==================================
+			      C ; // TransformComponent
+			      C ; // ----------------------------------
+			      C ; // Defines where in space a GameObject should be
+			      C ; // represented.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF TRANSFORM_COMPONENT_INC
+ = 00000001		      C TRANSFORM_COMPONENT_INC EQU 1
+			      C 
+ 0000000C		      C TransformComponent STRUCT
+ 00000000  00000000	      C 	x DWORD ?
+ 00000004  00000000	      C 	y DWORD ?
+			      C 
+			      C 	; // Whether to ignore the camera offset when rendering.
+			      C 	; // Used for drawing UI items
+ 00000008  00000000	      C 	ignoreCamera DWORD ?
+			      C 
+			      C 	; // Out of scope for this project
+			      C 	; // rotation DWORD ?
+			      C 	; // scaleX DWORD ?
+			      C 	; // scaleY DWORD ?
+			      C TransformComponent ENDS
+			      C 
+			      C new_transform_component PROTO x: DWORD, y: DWORD, ignoreCamera: DWORD
+			      C free_transform_component PROTO pTransform: DWORD
+			      C 
+			      C ENDIF
 			      C 
 				INCLUDE heap_functions.inc
 			      C ; // ==================================
@@ -54,25 +83,57 @@ main.asm						     Page 1 - 1
 			      C ENDIF
 			      C 
 
-				ExitProcess PROTO : DWORD
-
  00000000			.code
- 00000000			main PROC PUBLIC
-					; // Eventually, this is where the main loop and heart of the engine will be.
-					; // This loop will update at a fixed 30 frames per second and call scene_update
-					; // on the current scene.
-					INVOKE initialize_heap
- 00000000  E8 00000000 E   *	    call   initialize_heap
-					INVOKE ExitProcess, 0
- 00000005  6A 00	   *	    push   +000000000h
- 00000007  E8 00000000 E   *	    call   ExitProcess
- 0000000C			main ENDP
+ 00000000			new_transform_component PROC PUBLIC, x: DWORD, y: DWORD, ignoreCamera: DWORD
+ 00000000  55		   *	    push   ebp
+ 00000001  8B EC	   *	    mov    ebp, esp
+					INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF TransformComponent
+ 00000003  6A 0C	   *	    push   +00000000Ch
+ 00000005  6A 04	   *	    push   +000000004h
+ 00000007  FF 35 00000000 E *	    push   hHeap
+ 0000000D  E8 00000000 E   *	    call   HeapAlloc
 
-				END main
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/22/26 17:33:22
-main.asm						     Symbols 2 - 1
+ 00000012  8B 75 08			mov esi, x
+ 00000015  89 30			mov (TransformComponent PTR [eax]).x, esi
+ 00000017  8B 75 0C			mov esi, y
+ 0000001A  89 70 04			mov (TransformComponent PTR [eax]).y, esi
+ 0000001D  8B 75 10			mov esi, ignoreCamera
+ 00000020  89 70 08			mov (TransformComponent PTR [eax]).ignoreCamera, esi
+
+					ret ; // Return with the address of the memory block in HeapAlloc
+ 00000023  C9		   *	    leave  
+ 00000024  C2 000C	   *	    ret    0000Ch
+ 00000027			new_transform_component ENDP
+
+ 00000027			free_transform_component PROC PUBLIC, pTransform: DWORD
+ 00000027  55		   *	    push   ebp
+ 00000028  8B EC	   *	    mov    ebp, esp
+					INVOKE HeapFree, hHeap, 0, pTransform
+ 0000002A  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 0000002D  6A 00	   *	    push   +000000000h
+ 0000002F  FF 35 00000000 E *	    push   hHeap
+ 00000035  E8 00000000 E   *	    call   HeapFree
+					ret
+ 0000003A  C9		   *	    leave  
+ 0000003B  C2 0004	   *	    ret    00004h
+ 0000003E			free_transform_component ENDP
+
+				END 
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/22/26 18:07:07
+transform_component.asm					     Symbols 2 - 1
 
 
+
+
+Structures and Unions:
+
+                N a m e                  Size
+                                         Offset      Type
+
+TransformComponent . . . . . . .	 0000000C
+  x  . . . . . . . . . . . . . .	 00000000	 DWord
+  y  . . . . . . . . . . . . . .	 00000004	 DWord
+  ignoreCamera . . . . . . . . .	 00000008	 DWord
 
 
 Types:
@@ -89,20 +150,24 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000000C DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000003E DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
-ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 GetProcessHeap . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapAlloc  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+free_transform_component . . . .	P Near	 00000027 _TEXT	Length= 00000017 Public STDCALL
+  pTransform . . . . . . . . . .	DWord	 bp + 00000008
 initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000000C Public STDCALL
+new_transform_component  . . . .	P Near	 00000000 _TEXT	Length= 00000027 Public STDCALL
+  x  . . . . . . . . . . . . . .	DWord	 bp + 00000008
+  y  . . . . . . . . . . . . . .	DWord	 bp + 0000000C
+  ignoreCamera . . . . . . . . .	DWord	 bp + 00000010
 
 
 Symbols:
@@ -123,6 +188,7 @@ HEAP_GENERATE_EXCEPTIONS . . . .	Number	 00000004h
 HEAP_NO_SERIALIZE  . . . . . . .	Number	 00000001h   
 HEAP_ZERO_MEMORY . . . . . . . .	Number	 00000008h   
 NULL . . . . . . . . . . . . . .	Number	 00000000h   
+TRANSFORM_COMPONENT_INC  . . . .	Number	 00000001h   
 hHeap  . . . . . . . . . . . . .	DWord	 00000000 FLAT	External STDCALL
 
 	   0 Warnings

@@ -11,17 +11,21 @@ INCLUDE heap_functions.inc
 
 .code
 new_transform_component PROC PUBLIC, x: DWORD, y: DWORD, ignoreCamera: DWORD
-	mov eax, x
-	mov eax, y
-	mov eax, ignoreCamera
+	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF TransformComponent
 
-	ret 
+	mov esi, x
+	mov (TransformComponent PTR [eax]).x, esi
+	mov esi, y
+	mov (TransformComponent PTR [eax]).y, esi
+	mov esi, ignoreCamera
+	mov (TransformComponent PTR [eax]).ignoreCamera, esi
+
+	ret ; // Return with the address of the memory block in HeapAlloc
 new_transform_component ENDP
 
 free_transform_component PROC PUBLIC, pTransform: DWORD
-	mov eax, pTransform
-
-	ret 
+	INVOKE HeapFree, hHeap, 0, pTransform
+	ret
 free_transform_component ENDP
 
 END 
