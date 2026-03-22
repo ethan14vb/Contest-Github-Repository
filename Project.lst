@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/22/26 18:46:32
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/22/26 18:48:07
 rect_component.asm					     Page 1 - 1
 
 
@@ -99,17 +99,17 @@ rect_component.asm					     Page 1 - 1
  00000012  8B 75 08			mov esi, h
  00000015  89 30			mov (RectComponent PTR [eax]).h, esi
  00000017  8B 75 0C			mov esi, w
- 0000001A  89 70 04			mov(RectComponent PTR[eax]).w, esi
+ 0000001A  89 70 04			mov (RectComponent PTR [eax]).w, esi
 
 					; // RGBA
  0000001D  8A 45 10			mov al, r
- 00000020  88 40 08			mov(RectComponent PTR[eax]).r, al
+ 00000020  88 40 08			mov (RectComponent PTR [eax]).r, al
  00000023  8A 45 14			mov al, g
- 00000026  88 40 09			mov(RectComponent PTR[eax]).g, al
+ 00000026  88 40 09			mov (RectComponent PTR [eax]).g, al
  00000029  8A 45 18			mov al, b
- 0000002C  88 40 0A			mov(RectComponent PTR[eax]).b, al
+ 0000002C  88 40 0A			mov (RectComponent PTR [eax]).b, al
  0000002F  8A 45 1C			mov al, a
- 00000032  88 40 0B			mov(RectComponent PTR[eax]).a, al
+ 00000032  88 40 0B			mov (RectComponent PTR [eax]).a, al
 
 					ret ; // Return with the address of the memory block in HeapAlloc
  00000035  C9		   *	    leave  
@@ -130,7 +130,7 @@ rect_component.asm					     Page 1 - 1
  00000050			free_rect_component ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/22/26 18:46:32
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/22/26 18:48:07
 rect_component.asm					     Symbols 2 - 1
 
 

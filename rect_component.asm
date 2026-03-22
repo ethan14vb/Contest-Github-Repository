@@ -18,17 +18,17 @@ new_rect_component PROC PUBLIC, h: DWORD, w : DWORD, r : BYTE, g : BYTE, b : BYT
 	mov esi, h
 	mov (RectComponent PTR [eax]).h, esi
 	mov esi, w
-	mov(RectComponent PTR[eax]).w, esi
+	mov (RectComponent PTR [eax]).w, esi
 
 	; // RGBA
 	mov al, r
-	mov(RectComponent PTR[eax]).r, al
+	mov (RectComponent PTR [eax]).r, al
 	mov al, g
-	mov(RectComponent PTR[eax]).g, al
+	mov (RectComponent PTR [eax]).g, al
 	mov al, b
-	mov(RectComponent PTR[eax]).b, al
+	mov (RectComponent PTR [eax]).b, al
 	mov al, a
-	mov(RectComponent PTR[eax]).a, al
+	mov (RectComponent PTR [eax]).a, al
 
 	ret ; // Return with the address of the memory block in HeapAlloc
 new_rect_component ENDP
