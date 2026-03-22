@@ -34,7 +34,7 @@ new_rect_component PROC PUBLIC, h: DWORD, w : DWORD, r : BYTE, g : BYTE, b : BYT
 new_rect_component ENDP
 
 free_rect_component PROC PUBLIC, pRect: DWORD
-	mov eax, pRect
+	INVOKE HeapFree, hHeap, 0, pRect
 	ret
 free_rect_component ENDP
 
