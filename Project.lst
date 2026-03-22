@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/22/26 18:43:10
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/22/26 18:45:48
 rect_component.asm					     Page 1 - 1
 
 
@@ -89,28 +89,44 @@ rect_component.asm					     Page 1 - 1
  00000000			new_rect_component PROC PUBLIC, h: DWORD, w : DWORD, r : BYTE, g : BYTE, b : BYTE, a : BYTE
  00000000  55		   *	    push   ebp
  00000001  8B EC	   *	    mov    ebp, esp
- 00000003  8B 45 08			mov eax, h
- 00000006  8B 45 0C			mov eax, w
- 00000009  8A 45 10			mov al, r
- 0000000C  8A 45 14			mov al, g
- 0000000F  8A 45 18			mov al, b
- 00000012  8A 45 1C			mov al, a
-					ret
- 00000015  C9		   *	    leave  
- 00000016  C2 0018	   *	    ret    00018h
- 00000019			new_rect_component ENDP
+					INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF RectComponent
+ 00000003  6A 10	   *	    push   +000000010h
+ 00000005  6A 04	   *	    push   +000000004h
+ 00000007  FF 35 00000000 E *	    push   hHeap
+ 0000000D  E8 00000000 E   *	    call   HeapAlloc
 
- 00000019			free_rect_component PROC PUBLIC, pRect: DWORD
- 00000019  55		   *	    push   ebp
- 0000001A  8B EC	   *	    mov    ebp, esp
- 0000001C  8B 45 08			mov eax, pRect
+					; // Height & Width
+ 00000012  8B 75 08			mov esi, h
+ 00000015  89 30			mov (RectComponent PTR [eax]).h, esi
+ 00000017  8B 75 0C			mov esi, w
+ 0000001A  89 70 04			mov(RectComponent PTR[eax]).w, esi
+
+					; // RGBA
+ 0000001D  8A 45 10			mov al, r
+ 00000020  88 40 08			mov(RectComponent PTR[eax]).r, al
+ 00000023  8A 45 14			mov al, g
+ 00000026  88 40 09			mov(RectComponent PTR[eax]).g, al
+ 00000029  8A 45 18			mov al, b
+ 0000002C  88 40 0A			mov(RectComponent PTR[eax]).b, al
+ 0000002F  8A 45 1C			mov al, a
+ 00000032  88 40 0B			mov(RectComponent PTR[eax]).a, al
+
+					ret ; // Return with the address of the memory block in HeapAlloc
+ 00000035  C9		   *	    leave  
+ 00000036  C2 0018	   *	    ret    00018h
+ 00000039			new_rect_component ENDP
+
+ 00000039			free_rect_component PROC PUBLIC, pRect: DWORD
+ 00000039  55		   *	    push   ebp
+ 0000003A  8B EC	   *	    mov    ebp, esp
+ 0000003C  8B 45 08			mov eax, pRect
 					ret
- 0000001F  C9		   *	    leave  
- 00000020  C2 0004	   *	    ret    00004h
- 00000023			free_rect_component ENDP
+ 0000003F  C9		   *	    leave  
+ 00000040  C2 0004	   *	    ret    00004h
+ 00000043			free_rect_component ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/22/26 18:43:10
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/22/26 18:45:48
 rect_component.asm					     Symbols 2 - 1
 
 
@@ -145,7 +161,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000023 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000043 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -156,10 +172,10 @@ GetProcessHeap . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 HeapAlloc  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-free_rect_component  . . . . . .	P Near	 00000019 _TEXT	Length= 0000000A Public STDCALL
+free_rect_component  . . . . . .	P Near	 00000039 _TEXT	Length= 0000000A Public STDCALL
   pRect  . . . . . . . . . . . .	DWord	 bp + 00000008
 initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-new_rect_component . . . . . . .	P Near	 00000000 _TEXT	Length= 00000019 Public STDCALL
+new_rect_component . . . . . . .	P Near	 00000000 _TEXT	Length= 00000039 Public STDCALL
   h  . . . . . . . . . . . . . .	DWord	 bp + 00000008
   w  . . . . . . . . . . . . . .	DWord	 bp + 0000000C
   r  . . . . . . . . . . . . . .	Byte	 bp + 00000010
