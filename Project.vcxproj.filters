@@ -66,10 +66,10 @@
     <MASM Include="transform_component.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
-    <MASM Include="main.asm">
+    <MASM Include="heap_functions.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
-    <MASM Include="heap_functions.asm">
+    <MASM Include="transform_component_test.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
   </ItemGroup>

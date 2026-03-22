@@ -12,8 +12,8 @@
   </ItemGroup>
   <ItemGroup>
     <MASM Include="heap_functions.asm" />
-    <MASM Include="main.asm" />
     <MASM Include="transform_component.asm" />
+    <MASM Include="transform_component_test.asm" />
     <None Include="game_object.inc">
       <FileType>Document</FileType>
     </None>
