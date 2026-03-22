@@ -7,7 +7,7 @@
 
 INCLUDE default_header.inc
 INCLUDE transform_component.inc
-
+INCLUDE heap_functions.inc
 
 .code
 new_transform_component PROC PUBLIC, x: DWORD, y: DWORD, ignoreCamera: DWORD

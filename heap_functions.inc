@@ -26,4 +26,9 @@ HeapAlloc		PROTO,	hHeap:DWORD, dwFlags:DWORD, dwBytes:DWORD
 HeapFree		PROTO,	hHeap:DWORD, dwFlags:DWORD, lpMem:DWORD
 HeapReAlloc		PROTO,	hHeap:DWORD, dwFlags:DWORD, lpMem:DWORD,	dwBytes:DWORD
 
+initialize_heap PROTO ; // This function is from heap_functions.asm. It gets the handle to the process heap and stores in hHeap
+
+; // Data
+EXTERNDEF hHeap:HANDLE ; // the heap handle is defined in heap_functions.asm
+
 ENDIF

@@ -30,7 +30,7 @@
       <Filter>Include\Engine</Filter>
     </None>
     <None Include="heap_functions.inc">
-      <Filter>Include</Filter>
+      <Filter>Include\Engine</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -63,10 +63,13 @@
     <MASM Include="renderer.asm">
       <Filter>Source\Rendering</Filter>
     </MASM>
+    <MASM Include="transform_component.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
     <MASM Include="main.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
-    <MASM Include="transform_component.asm">
+    <MASM Include="heap_functions.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
   </ItemGroup>

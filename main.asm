@@ -7,6 +7,7 @@
 ; // ==================================
 
 INCLUDE default_header.inc
+INCLUDE heap_functions.inc
 
 ExitProcess PROTO : DWORD
 
@@ -15,6 +16,7 @@ main PROC PUBLIC
 	; // Eventually, this is where the main loop and heart of the engine will be.
 	; // This loop will update at a fixed 30 frames per second and call scene_update
 	; // on the current scene.
+	INVOKE initialize_heap
 	INVOKE ExitProcess, 0
 main ENDP
 
