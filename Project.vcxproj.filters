@@ -75,5 +75,8 @@
     <MASM Include="main.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
+    <MASM Include="game_object.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
   </ItemGroup>
 </Project>
