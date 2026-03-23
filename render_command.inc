@@ -1,5 +1,5 @@
 ; // ==================================
-; // RenderCommand
+; // render_command.inc
 ; // ----------------------------------
 ; // A render command is meant to be compiled into
 ; // a list of commands and passed to the renderer
@@ -30,5 +30,8 @@ RenderCommand STRUCT
 	; // depending on the value of rcType
 	pRenderable DWORD ?
 RenderCommand ENDS
+
+; // Public renderer entry point for the command list
+renderCommands PROTO pRenderCommands:DWORD, numCommands:DWORD, pCamera:DWORD, pBuffer:DWORD
 
 ENDIF
