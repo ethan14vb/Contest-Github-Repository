@@ -31,7 +31,4 @@ RenderCommand STRUCT
 	pRenderable DWORD ?
 RenderCommand ENDS
 
-; // Public renderer entry point for the command list
-renderCommands PROTO pRenderCommands:DWORD, numCommands:DWORD, pCamera:DWORD, pBuffer:DWORD
-
 ENDIF

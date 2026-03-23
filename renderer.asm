@@ -290,12 +290,16 @@ drawRect PROC PRIVATE USES esi edi ebx ecx edx, pTrans:DWORD, pRect:DWORD, pCame
 	jz drawRect_done
 
 	; // screen position
-	mov eax, (TransformComponent PTR [pTrans]).x
-	mov edx, (TransformComponent PTR [pTrans]).y
-	.IF (TransformComponent PTR [pTrans]).ignoreCamera == 0
+	mov ebx, pTrans
+	mov eax, (TransformComponent PTR [ebx]).x
+	mov edx, (TransformComponent PTR [ebx]).y
+
+	mov ebx, pTrans
+	.IF [ebx].TransformComponent.ignoreCamera == 0
 		sub eax, (Camera PTR [pCamera]).x
 		sub edx, (Camera PTR [pCamera]).y
 	.ENDIF
+
 	mov sx, eax
 	mov sy, edx
 
@@ -362,9 +366,11 @@ drawSprite PROC PRIVATE USES esi edi ebx ecx edx, pTrans:DWORD, pSprite:DWORD, p
 	jz drawSprite_done
 
 	; // screen position
-	mov eax, (TransformComponent PTR [pTrans]).x
-	mov edx, (TransformComponent PTR [pTrans]).y
-	.IF (TransformComponent PTR [pTrans]).ignoreCamera == 0
+	mov ebx, pTrans
+	mov eax, (TransformComponent PTR [ebx]).x
+	mov edx, (TransformComponent PTR [ebx]).y
+
+	.IF [ebx].TransformComponent.ignoreCamera == 0
 		sub eax, (Camera PTR [pCamera]).x
 		sub edx, (Camera PTR [pCamera]).y
 	.ENDIF
