@@ -9,6 +9,8 @@
 INCLUDE default_header.inc
 INCLUDE engine_types.inc
 INCLUDE renderer.inc
+INCLUDE camera.inc
+INCLUDE render_command.inc
 
 ; // ********************************************
 ; // Windows function prototypes
@@ -272,5 +274,181 @@ initializeRenderer PROC PUBLIC USES eax
 
 	ret
 initializeRenderer ENDP
+
+; // ----------------------------------
+; // drawRect
+; // Private helper. Draws a filled rectangle to the buffer.
+; // Position is relative to camera (unless ignoreCamera set).
+; // No clipping.
+; // ----------------------------------
+drawRect PROC PRIVATE USES esi edi ebx ecx edx, pTrans:DWORD, pRect:DWORD, pCamera:DWORD, pBuffer:DWORD
+	local sx:DWORD, sy:DWORD, rw:DWORD, rh:DWORD, color:DWORD
+
+	; // skip if not visible
+	mov eax, (RectComponent PTR [pRect]).visible
+	test eax, eax
+	jz drawRect_done
+
+	; // screen position
+	mov eax, (TransformComponent PTR [pTrans]).x
+	mov edx, (TransformComponent PTR [pTrans]).y
+	.IF (TransformComponent PTR [pTrans]).ignoreCamera == 0
+		sub eax, (Camera PTR [pCamera]).x
+		sub edx, (Camera PTR [pCamera]).y
+	.ENDIF
+	mov sx, eax
+	mov sy, edx
+
+	; // size
+	mov eax, (RectComponent PTR [pRect]).w
+	mov rw, eax
+	mov eax, (RectComponent PTR [pRect]).h
+	mov rh, eax
+
+	; // build pixel dword (r g b a)
+	movzx eax, (RectComponent PTR [pRect]).r
+	movzx ebx, (RectComponent PTR [pRect]).g
+	shl ebx, 8
+	or eax, ebx
+	movzx ebx, (RectComponent PTR [pRect]).b
+	shl ebx, 16
+	or eax, ebx
+	movzx ebx, (RectComponent PTR [pRect]).a
+	shl ebx, 24
+	or eax, ebx
+	mov color, eax
+
+	; // draw loops
+	mov esi, sy
+	mov edx, sy
+	add edx, rh
+yloop_rect:
+	cmp esi, edx
+	jge drawRect_done
+	mov eax, esi
+	imul eax, SCREEN_WIDTH
+	add eax, sx
+	shl eax, 2
+	add eax, pBuffer
+	mov edi, eax
+	mov ecx, rw
+xloop_rect:
+	mov eax, color
+	mov [edi], eax
+	add edi, 4
+	dec ecx
+	jnz xloop_rect
+	inc esi
+	jmp yloop_rect
+
+drawRect_done:
+	ret
+drawRect ENDP
+
+; // ----------------------------------
+; // drawSprite
+; // Private helper. Blits sprite to the buffer.
+; // Position is relative to camera (unless ignoreCamera set).
+; // Anchor point (originX/originY) is placed at transform position.
+; // pTexture must point to a cellW*cellH Pixel buffer.
+; // No flipping, no spritesheet stride, no clipping.
+; // ----------------------------------
+drawSprite PROC PRIVATE USES esi edi ebx ecx edx, pTrans:DWORD, pSprite:DWORD, pCamera:DWORD, pBuffer:DWORD
+	local sx:DWORD, sy:DWORD, sw:DWORD, sh:DWORD, pTex:DWORD
+
+	; // skip if not visible
+	mov eax, (SpriteComponent PTR [pSprite]).visible
+	test eax, eax
+	jz drawSprite_done
+
+	; // screen position
+	mov eax, (TransformComponent PTR [pTrans]).x
+	mov edx, (TransformComponent PTR [pTrans]).y
+	.IF (TransformComponent PTR [pTrans]).ignoreCamera == 0
+		sub eax, (Camera PTR [pCamera]).x
+		sub edx, (Camera PTR [pCamera]).y
+	.ENDIF
+	; // anchor at transform
+	sub eax, (SpriteComponent PTR [pSprite]).originX
+	sub edx, (SpriteComponent PTR [pSprite]).originY
+	mov sx, eax
+	mov sy, edx
+
+	; // cell size
+	mov eax, (SpriteComponent PTR [pSprite]).cellW
+	mov sw, eax
+	mov eax, (SpriteComponent PTR [pSprite]).cellH
+	mov sh, eax
+
+	; // texture pointer
+	mov eax, (SpriteComponent PTR [pSprite]).pTexture
+	mov pTex, eax
+
+	; // draw loops
+	mov esi, sy
+	mov edx, sy
+	add edx, sh
+yloop_sprite:
+	cmp esi, edx
+	jge drawSprite_done
+	mov eax, esi
+	imul eax, SCREEN_WIDTH
+	add eax, sx
+	shl eax, 2
+	add eax, pBuffer
+	mov edi, eax
+	; // source row in texture
+	mov ebx, esi
+	sub ebx, sy
+	mov eax, sw
+	imul ebx, eax
+	shl ebx, 2
+	add ebx, pTex
+	mov ecx, sw
+xloop_sprite:
+	mov eax, [ebx]
+	mov [edi], eax
+	add ebx, 4
+	add edi, 4
+	dec ecx
+	jnz xloop_sprite
+	inc esi
+	jmp yloop_sprite
+
+drawSprite_done:
+	ret
+drawSprite ENDP
+
+; // ----------------------------------
+; // renderCommands
+; // Takes the render commands list and camera position,
+; // clears the RGB buffer to black, then draws every
+; // sprite (and rect) to create the frame.
+; // ----------------------------------
+renderCommands PROC PUBLIC USES esi ecx edx, pRenderCommands:DWORD, numCommands:DWORD, pCamera:DWORD, pBuffer:DWORD
+	; // clear buffer to black (r=0,g=0,b=0,a=255)
+	mov ecx, SCREEN_WIDTH * SCREEN_HEIGHT
+	mov edi, pBuffer
+	mov eax, 0FF000000h
+	rep stosd
+
+	; // process each command
+	mov esi, pRenderCommands
+	mov ecx, numCommands
+cmd_loop:
+	cmp ecx, 0
+	je render_done
+	dec ecx
+	mov edx, (RenderCommand PTR [esi]).rcType
+	.IF edx == RC_RECT
+		INVOKE drawRect, (RenderCommand PTR [esi]).pTransform, (RenderCommand PTR [esi]).pRenderable, pCamera, pBuffer
+	.ELSEIF edx == RC_SPRITE
+		INVOKE drawSprite, (RenderCommand PTR [esi]).pTransform, (RenderCommand PTR [esi]).pRenderable, pCamera, pBuffer
+	.ENDIF
+	add esi, SIZEOF RenderCommand
+	jmp cmd_loop
+render_done:
+	ret
+renderCommands ENDP
 
 END
