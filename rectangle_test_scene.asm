@@ -7,12 +7,15 @@
 INCLUDE default_header.inc
 INCLUDE rectangle_test_scene.inc
 INCLUDE component_ids.inc
+INCLUDE game_object_ids.inc
 
 .data
 RectTestScene_Data LABEL BYTE ; // The label is set to BYTE so the data can be traversed with flexibility
 	DWORD 2 ; // Number of GameObjects
 
 	; // GameObject 1: A red square
+	DWORD DEFAULT_GAME_OBJECT_ID ; // The type of GameObject 
+	DWORD 0 ; // The length of the initializer parameters for this GameObject is 0
 	DWORD 2 ; // Number of components
 		; // Component 1: RectComponent
 		DWORD RECT_COMPONENT_ID
@@ -30,6 +33,8 @@ RectTestScene_Data LABEL BYTE ; // The label is set to BYTE so the data can be t
 		DWORD 0		; // ignoreCamera
 
 	; // GameObject 2: A blue square
+	DWORD DEFAULT_GAME_OBJECT_ID ; // The type of GameObject 
+	DWORD 0 ; // The length of the initializer parameters for this GameObject is 0
 	DWORD 2 ; // Number of components
 		; // Component 1: RectComponent
 		DWORD RECT_COMPONENT_ID
