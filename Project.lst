@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/23/26 19:26:58
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/23/26 21:46:26
 game_object.asm						     Page 1 - 1
 
 
@@ -95,40 +95,39 @@ game_object.asm						     Page 1 - 1
 			      C 
 
  00000000			.code
- 00000000			new_game_object PROC PUBLIC, numComponents: DWORD, pComponents: DWORD
+				; // ----------------------------------
+				; // init_game_object
+				; // Initializes memory with the contents of a GameObject
+				; // 
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
+				; // ----------------------------------
+ 00000000			init_game_object PROC USES esi, numComponents : DWORD, pComponents : DWORD
  00000000  55		   *	    push   ebp
  00000001  8B EC	   *	    mov    ebp, esp
-					INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF GameObject
- 00000003  6A 0C	   *	    push   +00000000Ch
- 00000005  6A 04	   *	    push   +000000004h
- 00000007  FF 35 00000000 E *	    push   hHeap
- 0000000D  E8 00000000 E   *	    call   HeapAlloc
+ 00000003  56		   *	    push   esi
+ 00000004  8B 75 08			mov esi, numComponents
+ 00000007  89 31			mov (GameObject PTR [ecx]).numComponents, esi
+ 00000009  8B 75 0C			mov esi, pComponents
+ 0000000C  89 71 04			mov (GameObject PTR [ecx]).pComponents, esi
+ 0000000F			init_game_object ENDP
+game_object.asm(33) : warning A6001:no return from procedure
 
- 00000012  8B 75 08			mov esi, numComponents
- 00000015  89 30			mov (GameObject PTR [eax]).numComponents, esi
- 00000017  8B 75 0C			mov esi, pComponents
- 0000001A  89 70 04			mov (GameObject PTR [eax]).pComponents, esi
-
-					ret ; // Return with the address of the memory block in HeapAlloc
- 0000001D  C9		   *	    leave  
- 0000001E  C2 0008	   *	    ret    00008h
- 00000021			new_game_object ENDP
-
- 00000021			free_game_object PROC PUBLIC, pGameObject: DWORD
- 00000021  55		   *	    push   ebp
- 00000022  8B EC	   *	    mov    ebp, esp
+ 0000000F			free_game_object PROC PUBLIC, pGameObject: DWORD
+ 0000000F  55		   *	    push   ebp
+ 00000010  8B EC	   *	    mov    ebp, esp
 					INVOKE HeapFree, hHeap, 0, pGameObject
- 00000024  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 00000027  6A 00	   *	    push   +000000000h
- 00000029  FF 35 00000000 E *	    push   hHeap
- 0000002F  E8 00000000 E   *	    call   HeapFree
+ 00000012  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000015  6A 00	   *	    push   +000000000h
+ 00000017  FF 35 00000000 E *	    push   hHeap
+ 0000001D  E8 00000000 E   *	    call   HeapFree
 					ret
- 00000034  C9		   *	    leave  
- 00000035  C2 0004	   *	    ret    00004h
- 00000038			free_game_object ENDP
+ 00000022  C9		   *	    leave  
+ 00000023  C2 0004	   *	    ret    00004h
+ 00000026			free_game_object ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/23/26 19:26:58
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/23/26 21:46:26
 game_object.asm						     Symbols 2 - 1
 
 
@@ -163,7 +162,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000038 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000026 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -174,12 +173,12 @@ GetProcessHeap . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 HeapAlloc  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-free_game_object . . . . . . . .	P Near	 00000021 _TEXT	Length= 00000017 Public STDCALL
+free_game_object . . . . . . . .	P Near	 0000000F _TEXT	Length= 00000017 Public STDCALL
   pGameObject  . . . . . . . . .	DWord	 bp + 00000008
-initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-new_game_object  . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000021 Public STDCALL
+init_game_object . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000000F Private STDCALL
   numComponents  . . . . . . . .	DWord	 bp + 00000008
   pComponents  . . . . . . . . .	DWord	 bp + 0000000C
+initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 
 
 Symbols:
@@ -203,5 +202,5 @@ HEAP_ZERO_MEMORY . . . . . . . .	Number	 00000008h
 NULL . . . . . . . . . . . . . .	Number	 00000000h   
 hHeap  . . . . . . . . . . . . .	DWord	 00000000 FLAT	External STDCALL
 
-	   0 Warnings
+	   1 Warnings
 	   0 Errors

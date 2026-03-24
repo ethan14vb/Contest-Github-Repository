@@ -18,16 +18,19 @@ INCLUDE game_object.inc
 INCLUDE heap_functions.inc
 
 .code
-new_game_object PROC PUBLIC, numComponents: DWORD, pComponents: DWORD
-	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF GameObject
-
+; // ----------------------------------
+; // init_game_object
+; // Initializes memory with the contents of a GameObject
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+init_game_object PROC USES esi, numComponents : DWORD, pComponents : DWORD
 	mov esi, numComponents
-	mov (GameObject PTR [eax]).numComponents, esi
+	mov (GameObject PTR [ecx]).numComponents, esi
 	mov esi, pComponents
-	mov (GameObject PTR [eax]).pComponents, esi
-
-	ret ; // Return with the address of the memory block in HeapAlloc
-new_game_object ENDP
+	mov (GameObject PTR [ecx]).pComponents, esi
+init_game_object ENDP
 
 free_game_object PROC PUBLIC, pGameObject: DWORD
 	INVOKE HeapFree, hHeap, 0, pGameObject
