@@ -6,30 +6,38 @@ amountOfGamesObjects: DWORD
 ```
 
 which shows the amount of GameObjects in the scene. This is followed by data descriptions of the GameObjects.
-When specifying a GameObject, you must write its ID, the data for its initializer methods, the amount of its 
+When specifying a GameObject, you must write its type-ID, the data for its initializer methods, the amount of its 
 components, and then descriptions of its component data.
 
 So to define a GameObject:
 
 ```asm
 gameObjectType: ENUM_GAME_OBJECT_ID
-; // Initializer data for this type of game object goes here
+; // Optionally, initializer data for this type of game object goes here
+; // The parser understands how much initializer data to expect based on gameObjectType
 numberOfComponents: DWORD
 ; // Component descriptions go here
 ```
 
-For the Components, first have the ID of the component type and then follow it with the data for that Component. 
+For the Components, first write the component type-ID and then follow it with the data for that Component. 
 
 In more detail, that is:
 ```asm
 componentType: ENUM_COMPONENT_ID
 ; // The initializer data for that component goes here
+; // Once again, the parser understands how much initializer data to expect based on componentType
 ```
 
 A limitation of this data format is that these objects cannot be initialized with data that references other GameObjects
-or Components. Design your GameObjects and Components with this limitation in mind.
+or Components because the objects have not been created yet and do not exist in memory. Design your GameObjects, 
+Components, and game logic with this limitation in mind.
 
-Here is an example of the format in action for a specific example:
+Here is an example of the format in action for a specific example. 
+The following scene_data describes a scene with two GameObjects:
+-------------------------------------------------------------------
+1. A default GameObject with a transform and rect component 
+2. A fake user-created subclass of GameObject called processor that takes 1 DWORD initializer parameter
+
 ```asm
 scene_data LABEL BYTE ; // The label is set to BYTE so the data can be BYTE addressable with MASM complaining
 	DWORD 2 ; // Number of GameObjects
