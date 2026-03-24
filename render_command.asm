@@ -12,6 +12,13 @@ INCLUDE render_command.inc
 INCLUDE heap_functions.inc
 
 .code
+; // ----------------------------------
+; // init_render_command
+; // Initializes memory with the contents of a RenderCommand
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
 init_render_command PROC PUBLIC USES esi, rcType: RC_ENUM, pTransform : DWORD, pRenderable : DWORD
 	mov esi, rcType
 	mov (RenderCommand PTR [ecx]).rcType, esi

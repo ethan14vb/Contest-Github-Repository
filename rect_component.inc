@@ -23,6 +23,8 @@ RectComponent STRUCT
 	visible DWORD ?
 RectComponent ENDS
 
+; // Constructor methods
+init_rect_component PROTO h: DWORD, w : DWORD, r : BYTE, g : BYTE, b : BYTE, a : BYTE
 new_rect_component PROTO h: DWORD, w: DWORD, r: BYTE, g: BYTE, b:  BYTE, a: BYTE
 free_rect_component PROTO pRect: DWORD
 

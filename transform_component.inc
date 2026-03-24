@@ -22,6 +22,8 @@ TransformComponent STRUCT
 	; // scaleY DWORD ?
 TransformComponent ENDS
 
+; // Constructor methods
+init_transform_component PROTO x: DWORD, y : DWORD, ignoreCamera : DWORD
 new_transform_component PROTO x: DWORD, y: DWORD, ignoreCamera: DWORD
 free_transform_component PROTO pTransform: DWORD
 

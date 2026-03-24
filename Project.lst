@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/23/26 22:59:34
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/23/26 23:15:11
 render_command.asm					     Page 1 - 1
 
 
@@ -56,6 +56,8 @@ render_command.asm					     Page 1 - 1
 			      C 	; // scaleY DWORD ?
 			      C TransformComponent ENDS
 			      C 
+			      C ; // Constructor methods
+			      C init_transform_component PROTO x: DWORD, y : DWORD, ignoreCamera : DWORD
 			      C new_transform_component PROTO x: DWORD, y: DWORD, ignoreCamera: DWORD
 			      C free_transform_component PROTO pTransform: DWORD
 			      C 
@@ -87,6 +89,8 @@ render_command.asm					     Page 1 - 1
  0000000C  00000000	      C 	visible DWORD ?
 			      C RectComponent ENDS
 			      C 
+			      C ; // Constructor methods
+			      C init_rect_component PROTO h: DWORD, w : DWORD, r : BYTE, g : BYTE, b : BYTE, a : BYTE
 			      C new_rect_component PROTO h: DWORD, w: DWORD, r: BYTE, g: BYTE, b:  BYTE, a: BYTE
 			      C free_rect_component PROTO pRect: DWORD
 			      C 
@@ -143,6 +147,11 @@ render_command.asm					     Page 1 - 1
  00000008  00000000	      C 	pRenderable DWORD ?
 			      C RenderCommand ENDS
 			      C 
+			      C ; // Constructor methods
+			      C init_render_command PROTO rcType: RC_ENUM, pTransform : DWORD, pRenderable : DWORD
+			      C new_render_command PROTO rcType: RC_ENUM, pTransform: DWORD, pRenderable: DWORD
+			      C free_render_command PROTO pRenderCommand: DWORD
+			      C 
 			      C ENDIF
 			      C 
 				INCLUDE heap_functions.inc
@@ -183,6 +192,13 @@ render_command.asm					     Page 1 - 1
 			      C 
 
  00000000			.code
+				; // ----------------------------------
+				; // init_render_command
+				; // Initializes memory with the contents of a RenderCommand
+				; // 
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
+				; // ----------------------------------
  00000000			init_render_command PROC PUBLIC USES esi, rcType: RC_ENUM, pTransform : DWORD, pRenderable : DWORD
  00000000  55		   *	    push   ebp
  00000001  8B EC	   *	    mov    ebp, esp
@@ -235,7 +251,7 @@ render_command.asm					     Page 1 - 1
  00000059			free_render_command ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/23/26 22:59:34
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/23/26 23:15:11
 render_command.asm					     Symbols 2 - 1
 
 
@@ -305,10 +321,12 @@ free_rect_component  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 free_render_command  . . . . . .	P Near	 00000042 _TEXT	Length= 00000017 Public STDCALL
   pRenderCommand . . . . . . . .	DWord	 bp + 00000008
 free_transform_component . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+init_rect_component  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_render_command  . . . . . .	P Near	 00000000 _TEXT	Length= 0000001A Public STDCALL
   rcType . . . . . . . . . . . .	DWord	 bp + 00000008
   pTransform . . . . . . . . . .	DWord	 bp + 0000000C
   pRenderable  . . . . . . . . .	DWord	 bp + 00000010
+init_transform_component . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_rect_component . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_render_command . . . . . . .	P Near	 0000001A _TEXT	Length= 00000028 Public STDCALL

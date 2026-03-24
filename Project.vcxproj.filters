@@ -75,11 +75,11 @@
     <MASM Include="game_object.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
-    <MASM Include="main.asm">
-      <Filter>Source\Engine</Filter>
-    </MASM>
     <MASM Include="render_command.asm">
       <Filter>Source\Rendering</Filter>
+    </MASM>
+    <MASM Include="main.asm">
+      <Filter>Source\Engine</Filter>
     </MASM>
   </ItemGroup>
 </Project>
