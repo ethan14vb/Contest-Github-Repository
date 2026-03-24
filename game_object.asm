@@ -29,24 +29,38 @@ GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_objec
 ; // add_component
 ; // Initializes memory with the contents of a GameObject
 ; // ----------------------------------
-add_component PROC PUBLIC, pGameObject: DWORD, pComponent: DWORD
-	mov eax, pGameObject ; // Temporary useless code to avoid MASM bugs during a commit
-	mov eax, pComponent
+add_component PROC PUBLIC USES eax ebx esi edi, pGameObject: DWORD, pComponent: DWORD
+	mov esi, pGameObject
+	mov eax, (GameObject PTR [esi]).numComponents
+	mov ebx, (GameObject PTR [esi]).maxComponents
 
-	; // Pseudocode
-	; // ------------------------------
-	; // if (pGameObject->numComponents >= pGameObject->maxComponents) {
-	; //	// Resize
-	; //	HeapReAlloc(hHeap, HEAP_GENERATE_EXCEPTIONS, pGameObject->pComponents, pGameObject->maxComponents * 20);
-	; //
-	; //	// Append
-	; //	*(pGameObject->pComponents)[pGameObject->numComponents] = pComponent;
-	; //	pGameObject->numComponents++;
-	; // } else {
-	; //	// Append
-	; //	*(pGameObject->pComponents)[pGameObject->numComponents] = pComponent;
-	; //	pGameObject->numComponents++;
-	; // }
+	; // if (pGameObject->numComponents >= pGameObject->maxComponents) 
+	.IF (eax >= ebx)
+		; // Double the size of the list
+		shl (GameObject PTR [esi]).maxComponents, 1
+
+		mov eax, (GameObject PTR[esi]).maxComponents
+		shl eax, 2 ; // maxSize * 4 where 4 is SIZEOF DWORD 
+		INVOKE HeapReAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, (GameObject PTR[esi]).pComponents, eax
+		mov (GameObject PTR [esi]).pComponents, eax
+
+		; // Append the pointer to the end of the list
+		mov eax, (GameObject PTR [esi]).numComponents
+		mov edi, (GameObject PTR [esi]).pComponents
+		mov ebx, pComponent
+
+		mov [edi + eax * 4], ebx 
+		inc (GameObject PTR [esi]).numComponents
+	.ELSE
+		; // Append the pointer to the end of the list
+		mov eax, (GameObject PTR [esi]).numComponents
+		mov edi, (GameObject PTR [esi]).pComponents
+		mov ebx, pComponent
+
+		mov [edi + eax * 4], ebx 
+		inc (GameObject PTR [esi]).numComponents
+	.ENDIF
+
 	ret
 add_component ENDP
 
