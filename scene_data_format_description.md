@@ -32,9 +32,11 @@ A limitation of this data format is that these objects cannot be initialized wit
 or Components because the objects have not been created yet and do not exist in memory. Design your GameObjects, 
 Components, and game logic with this limitation in mind.
 
+Example:
+-------------------------------------------------------------------
 Here is an example of the format in action for a specific example. 
 The following scene_data describes a scene with two GameObjects:
--------------------------------------------------------------------
+
 1. A default GameObject with a transform and rect component 
 2. A fake user-created subclass of GameObject called processor that takes 1 DWORD initializer parameter
 
