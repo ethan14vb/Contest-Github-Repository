@@ -46,10 +46,10 @@ add_component ENDP
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-init_game_object PROC PUBLIC USES esi ebx, numComponents : DWORD, pComponents : DWORD
+init_game_object PROC PUBLIC USES esi ebx, maxComponents : DWORD, pComponents : DWORD
 	; // Set up class members
-	mov esi, numComponents
-	mov (GameObject PTR [ecx]).numComponents, esi
+	mov esi, maxComponents
+	mov (GameObject PTR [ecx]).maxComponents, esi
 	mov esi, pComponents
 	mov (GameObject PTR [ecx]).pComponents, esi
 
@@ -63,10 +63,10 @@ init_game_object ENDP
 ; // new_game_object
 ; // Reserves heap space for the Object with parameters calls the initializer method
 ; // ----------------------------------
-new_game_object PROC PUBLIC USES ecx, numComponents : DWORD, pComponents : DWORD
+new_game_object PROC PUBLIC USES ecx, maxComponents : DWORD, pComponents : DWORD
 	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF GameObject
 	mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
-	INVOKE init_game_object, numComponents, pComponents
+	INVOKE init_game_object, maxComponents, pComponents
 
 	ret ; // Return with the address of the memory block in HeapAlloc
 new_game_object ENDP
