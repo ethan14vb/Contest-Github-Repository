@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 15:57:31
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 15:59:04
 scene.asm						     Page 1 - 1
 
 
@@ -135,10 +135,10 @@ scene.asm						     Page 1 - 1
 				; // free_scene
 				; // Convenient method for freeing a Scene
 				; // ----------------------------------
- 0000003F			free_scene PROC PUBLIC, pGameObject: DWORD
+ 0000003F			free_scene PROC PUBLIC, pGameObjects: DWORD
  0000003F  55		   *	    push   ebp
  00000040  8B EC	   *	    mov    ebp, esp
-					INVOKE HeapFree, hHeap, 0, pGameObject
+					INVOKE HeapFree, hHeap, 0, pGameObjects
  00000042  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
  00000045  6A 00	   *	    push   +000000000h
  00000047  FF 35 00000000 E *	    push   hHeap
@@ -190,7 +190,7 @@ scene.asm						     Page 1 - 1
  00000059			scene_exit ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 15:57:31
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 15:59:04
 scene.asm						     Symbols 2 - 1
 
 
@@ -233,7 +233,7 @@ HeapAlloc  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_scene . . . . . . . . . . .	P Near	 0000003F _TEXT	Length= 00000017 Public STDCALL
-  pGameObject  . . . . . . . . .	DWord	 bp + 00000008
+  pGameObjects . . . . . . . . .	DWord	 bp + 00000008
 init_scene . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000017 Public STDCALL
   numGameObjects . . . . . . . .	DWord	 bp + 00000008
   maxGameObjects . . . . . . . .	DWord	 bp + 0000000C

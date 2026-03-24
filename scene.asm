@@ -45,8 +45,8 @@ new_scene ENDP
 ; // free_scene
 ; // Convenient method for freeing a Scene
 ; // ----------------------------------
-free_scene PROC PUBLIC, pGameObject: DWORD
-	INVOKE HeapFree, hHeap, 0, pGameObject
+free_scene PROC PUBLIC, pGameObjects: DWORD
+	INVOKE HeapFree, hHeap, 0, pGameObjects
 	ret
 free_scene ENDP
 
