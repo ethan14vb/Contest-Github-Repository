@@ -39,6 +39,10 @@ init_game_object PROC USES esi, numComponents : DWORD, pComponents : DWORD
 	; // TODO
 init_game_object ENDP
 
+; // ----------------------------------
+; // new_game_object
+; // Reserves heap space for the Object with parameters calls the initializer method
+; // ----------------------------------
 new_game_object PROC PUBLIC USES ecx, numComponents : DWORD, pComponents : DWORD
 	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF GameObject
 	mov ecx, eax ; // Move the memory address to eax so it can function as a "this" pointer
@@ -47,6 +51,10 @@ new_game_object PROC PUBLIC USES ecx, numComponents : DWORD, pComponents : DWORD
 	ret ; // Return with the address of the memory block in HeapAlloc
 new_game_object ENDP
 
+; // ----------------------------------
+; // free_game_object
+; // Convenient method for freeing a GameObject
+; // ----------------------------------
 free_game_object PROC PUBLIC, pGameObject: DWORD
 	INVOKE HeapFree, hHeap, 0, pGameObject
 	ret
@@ -59,6 +67,7 @@ free_game_object ENDP
 ; // ----------------------------------
 ; // game_object_start
 ; // Default blank start method for a GameObject
+; // Can be left blank, or overriden by the virtual function table
 ; // 
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
@@ -70,6 +79,7 @@ game_object_start ENDP
 ; // ----------------------------------
 ; // game_object_update
 ; // Default blank update method for a GameObject
+; // Can be left blank, or overriden by the virtual function table
 ; // 
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
@@ -81,6 +91,7 @@ game_object_update ENDP
 ; // ----------------------------------
 ; // game_object_exit
 ; // Default blank exit method for a GameObject
+; // Can be left blank, or overriden by the virtual function table
 ; // 
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
