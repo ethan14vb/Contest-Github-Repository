@@ -56,6 +56,13 @@ free_game_object ENDP
 ; // Class methods
 ; // ********************************************
 
+; // ----------------------------------
+; // game_object_start
+; // Default blank start method for a GameObject
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
 game_object_start PROC
 	ret
 game_object_start ENDP
