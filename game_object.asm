@@ -67,6 +67,13 @@ game_object_start PROC
 	ret
 game_object_start ENDP
 
+; // ----------------------------------
+; // game_object_update
+; // Default blank update method for a GameObject
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
 game_object_update PROC
 	ret
 game_object_update ENDP
