@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 16:13:10
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 17:37:06
 game_object.asm						     Page 1 - 1
 
 
@@ -99,11 +99,32 @@ game_object.asm						     Page 1 - 1
 			      C 
 
  00000000			.data
- 00000000 00000059 R		GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_object_update, OFFSET game_object_exit>
-	   0000005A R
-	   0000005B R
+ 00000000 00000066 R		GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_object_update, OFFSET game_object_exit>
+	   00000067 R
+	   00000068 R
 
  00000000			.code
+				; // ********************************************
+				; // Static methods
+				; // ********************************************
+
+				; // ----------------------------------
+				; // add_component
+				; // Initializes memory with the contents of a GameObject
+				; // 
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
+				; // ----------------------------------
+ 00000000			add_component PROC PUBLIC, pGameObject, pComponent
+ 00000000  55		   *	    push   ebp
+ 00000001  8B EC	   *	    mov    ebp, esp
+ 00000003  8B 45 08			mov eax, pGameObject ; // Temporary useless code to avoid MASM bugs during a commit
+ 00000006  8B 45 0C			mov eax, pComponent
+					ret
+ 00000009  C9		   *	    leave  
+ 0000000A  C2 0008	   *	    ret    00008h
+ 0000000D			add_component ENDP
+
 				; // ********************************************
 				; // Constructor Methods
 				; // ********************************************
@@ -115,72 +136,72 @@ game_object.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000000			init_game_object PROC PUBLIC USES esi ebx, numComponents : DWORD, pComponents : DWORD
+ 0000000D			init_game_object PROC PUBLIC USES esi ebx, numComponents : DWORD, pComponents : DWORD
 					; // Set up class members
- 00000000  55		   *	    push   ebp
- 00000001  8B EC	   *	    mov    ebp, esp
- 00000003  56		   *	    push   esi
- 00000004  53		   *	    push   ebx
- 00000005  8B 75 08			mov esi, numComponents
- 00000008  89 31			mov (GameObject PTR [ecx]).numComponents, esi
- 0000000A  8B 75 0C			mov esi, pComponents
- 0000000D  89 71 04			mov (GameObject PTR [ecx]).pComponents, esi
+ 0000000D  55		   *	    push   ebp
+ 0000000E  8B EC	   *	    mov    ebp, esp
+ 00000010  56		   *	    push   esi
+ 00000011  53		   *	    push   ebx
+ 00000012  8B 75 08			mov esi, numComponents
+ 00000015  89 31			mov (GameObject PTR [ecx]).numComponents, esi
+ 00000017  8B 75 0C			mov esi, pComponents
+ 0000001A  89 71 04			mov (GameObject PTR [ecx]).pComponents, esi
 
 					; // Set up vTable
- 00000010  C7 41 08			mov (GameObject PTR[ecx]).pVt, OFFSET GAMEOBJECT_VTABLE
+ 0000001D  C7 41 08			mov (GameObject PTR[ecx]).pVt, OFFSET GAMEOBJECT_VTABLE
 	   00000000 R
 
 					ret
- 00000017  5B		   *	    pop    ebx
- 00000018  5E		   *	    pop    esi
- 00000019  C9		   *	    leave  
- 0000001A  C2 0008	   *	    ret    00008h
- 0000001D			init_game_object ENDP
+ 00000024  5B		   *	    pop    ebx
+ 00000025  5E		   *	    pop    esi
+ 00000026  C9		   *	    leave  
+ 00000027  C2 0008	   *	    ret    00008h
+ 0000002A			init_game_object ENDP
 
 				; // ----------------------------------
 				; // new_game_object
 				; // Reserves heap space for the Object with parameters calls the initializer method
 				; // ----------------------------------
- 0000001D			new_game_object PROC PUBLIC USES ecx, numComponents : DWORD, pComponents : DWORD
- 0000001D  55		   *	    push   ebp
- 0000001E  8B EC	   *	    mov    ebp, esp
- 00000020  51		   *	    push   ecx
+ 0000002A			new_game_object PROC PUBLIC USES ecx, numComponents : DWORD, pComponents : DWORD
+ 0000002A  55		   *	    push   ebp
+ 0000002B  8B EC	   *	    mov    ebp, esp
+ 0000002D  51		   *	    push   ecx
 					INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF GameObject
- 00000021  6A 0C	   *	    push   +00000000Ch
- 00000023  6A 04	   *	    push   +000000004h
- 00000025  FF 35 00000000 E *	    push   hHeap
- 0000002B  E8 00000000 E   *	    call   HeapAlloc
- 00000030  8B C8			mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
+ 0000002E  6A 0C	   *	    push   +00000000Ch
+ 00000030  6A 04	   *	    push   +000000004h
+ 00000032  FF 35 00000000 E *	    push   hHeap
+ 00000038  E8 00000000 E   *	    call   HeapAlloc
+ 0000003D  8B C8			mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
 					INVOKE init_game_object, numComponents, pComponents
- 00000032  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
- 00000035  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 00000038  E8 FFFFFFC3	   *	    call   init_game_object
+ 0000003F  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
+ 00000042  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000045  E8 FFFFFFC3	   *	    call   init_game_object
 
 					ret ; // Return with the address of the memory block in HeapAlloc
- 0000003D  59		   *	    pop    ecx
- 0000003E  C9		   *	    leave  
- 0000003F  C2 0008	   *	    ret    00008h
- 00000042			new_game_object ENDP
+ 0000004A  59		   *	    pop    ecx
+ 0000004B  C9		   *	    leave  
+ 0000004C  C2 0008	   *	    ret    00008h
+ 0000004F			new_game_object ENDP
 
 				; // ----------------------------------
 				; // free_game_object
 				; // Convenient method for freeing a GameObject
 				; // ----------------------------------
- 00000042			free_game_object PROC PUBLIC, pGameObject: DWORD
- 00000042  55		   *	    push   ebp
- 00000043  8B EC	   *	    mov    ebp, esp
+ 0000004F			free_game_object PROC PUBLIC, pGameObject: DWORD
+ 0000004F  55		   *	    push   ebp
+ 00000050  8B EC	   *	    mov    ebp, esp
 					INVOKE HeapFree, hHeap, 0, pGameObject
- 00000045  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 00000048  6A 00	   *	    push   +000000000h
- 0000004A  FF 35 00000000 E *	    push   hHeap
- 00000050  E8 00000000 E   *	    call   HeapFree
+ 00000052  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000055  6A 00	   *	    push   +000000000h
+ 00000057  FF 35 00000000 E *	    push   hHeap
+ 0000005D  E8 00000000 E   *	    call   HeapFree
 					ret
- 00000055  C9		   *	    leave  
- 00000056  C2 0004	   *	    ret    00004h
- 00000059			free_game_object ENDP
+ 00000062  C9		   *	    leave  
+ 00000063  C2 0004	   *	    ret    00004h
+ 00000066			free_game_object ENDP
 
 				; // ********************************************
-				; // Class methods
+				; // Instance methods
 				; // ********************************************
 
 				; // ----------------------------------
@@ -191,9 +212,9 @@ game_object.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000059			game_object_start PROC
- 00000059  C3				ret
- 0000005A			game_object_start ENDP
+ 00000066			game_object_start PROC
+ 00000066  C3				ret
+ 00000067			game_object_start ENDP
 
 				; // ----------------------------------
 				; // game_object_update
@@ -203,9 +224,9 @@ game_object.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 0000005A			game_object_update PROC
- 0000005A  C3				ret
- 0000005B			game_object_update ENDP
+ 00000067			game_object_update PROC
+ 00000067  C3				ret
+ 00000068			game_object_update ENDP
 
 				; // ----------------------------------
 				; // game_object_exit
@@ -215,12 +236,12 @@ game_object.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 0000005B			game_object_exit PROC
- 0000005B  C3				ret
- 0000005C			game_object_exit ENDP
+ 00000068			game_object_exit PROC
+ 00000068  C3				ret
+ 00000069			game_object_exit ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 16:13:10
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 17:37:06
 game_object.asm						     Symbols 2 - 1
 
 
@@ -255,7 +276,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 0000000C DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000005C DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000069 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -266,16 +287,19 @@ GetProcessHeap . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 HeapAlloc  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-free_game_object . . . . . . . .	P Near	 00000042 _TEXT	Length= 00000017 Public STDCALL
+add_component  . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000000D Public STDCALL
   pGameObject  . . . . . . . . .	DWord	 bp + 00000008
-game_object_exit . . . . . . . .	P Near	 0000005B _TEXT	Length= 00000001 Private STDCALL
-game_object_start  . . . . . . .	P Near	 00000059 _TEXT	Length= 00000001 Private STDCALL
-game_object_update . . . . . . .	P Near	 0000005A _TEXT	Length= 00000001 Private STDCALL
-init_game_object . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000001D Public STDCALL
+  pComponent . . . . . . . . . .	DWord	 bp + 0000000C
+free_game_object . . . . . . . .	P Near	 0000004F _TEXT	Length= 00000017 Public STDCALL
+  pGameObject  . . . . . . . . .	DWord	 bp + 00000008
+game_object_exit . . . . . . . .	P Near	 00000068 _TEXT	Length= 00000001 Private STDCALL
+game_object_start  . . . . . . .	P Near	 00000066 _TEXT	Length= 00000001 Private STDCALL
+game_object_update . . . . . . .	P Near	 00000067 _TEXT	Length= 00000001 Private STDCALL
+init_game_object . . . . . . . .	P Near	 0000000D _TEXT	Length= 0000001D Public STDCALL
   numComponents  . . . . . . . .	DWord	 bp + 00000008
   pComponents  . . . . . . . . .	DWord	 bp + 0000000C
 initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-new_game_object  . . . . . . . .	P Near	 0000001D _TEXT	Length= 00000025 Public STDCALL
+new_game_object  . . . . . . . .	P Near	 0000002A _TEXT	Length= 00000025 Public STDCALL
   numComponents  . . . . . . . .	DWord	 bp + 00000008
   pComponents  . . . . . . . . .	DWord	 bp + 0000000C
 

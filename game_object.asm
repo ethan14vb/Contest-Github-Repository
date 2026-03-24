@@ -22,6 +22,23 @@ GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_objec
 
 .code
 ; // ********************************************
+; // Static methods
+; // ********************************************
+
+; // ----------------------------------
+; // add_component
+; // Initializes memory with the contents of a GameObject
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+add_component PROC PUBLIC, pGameObject, pComponent
+	mov eax, pGameObject ; // Temporary useless code to avoid MASM bugs during a commit
+	mov eax, pComponent
+	ret
+add_component ENDP
+
+; // ********************************************
 ; // Constructor Methods
 ; // ********************************************
 
@@ -67,7 +84,7 @@ free_game_object PROC PUBLIC, pGameObject: DWORD
 free_game_object ENDP
 
 ; // ********************************************
-; // Class methods
+; // Instance methods
 ; // ********************************************
 
 ; // ----------------------------------
