@@ -9,9 +9,31 @@
 ; // ==================================
 
 INCLUDE default_header.inc
+INCLUDE heap_functions.inc
 INCLUDE scene.inc
 
 .code
+; // ********************************************
+; // Constructor Methods
+; // ********************************************
+
+; // ----------------------------------
+; // init_scene
+; // Initializes memory with the contents of a Scene
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+init_scene PROC PUBLIC USES esi, numGameObjects : DWORD, maxGameObjects : DWORD, pGameObjects : DWORD
+	INVOKE init_scene, numGameObjects, maxGameObjects, pGameObjects ; // placeholder just to avoid MASM bugs
+	ret
+init_scene ENDP
+
+
+; // ********************************************
+; // Class methods
+; // ********************************************
+
 ; // ----------------------------------
 ; // scene_start
 ; // Initializes the scene and allocates resources that will be used such as spritesheets,
