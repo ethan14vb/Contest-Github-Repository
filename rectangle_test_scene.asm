@@ -8,7 +8,7 @@ INCLUDE default_header.inc
 INCLUDE rectangle_test_scene.inc
 
 .data
-RectTestScene_Data LABEL BYTE
+RectTestScene_Data LABEL BYTE ; // The label is set to BYTE so the data can be traversed with flexibility
 	DWORD 1 ; // Just some test values
 	DWORD 2
 	DWORD 3
