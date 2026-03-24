@@ -24,6 +24,7 @@
     <MASM Include="renderer.asm" />
     <MASM Include="scene.asm" />
     <None Include="heap_functions.inc" />
+    <None Include="rectangle_test_scene.inc" />
     <None Include="sprite_component.inc">
       <FileType>Document</FileType>
     </None>
