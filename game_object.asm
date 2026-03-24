@@ -78,6 +78,13 @@ game_object_update PROC
 	ret
 game_object_update ENDP
 
+; // ----------------------------------
+; // game_object_exit
+; // Default blank exit method for a GameObject
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
 game_object_exit PROC
 	ret
 game_object_exit ENDP
