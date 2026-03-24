@@ -8,9 +8,16 @@
 IFNDEF COMPONENT_IDS_INC
 COMPONENT_IDS_INC EQU 1
 
+; // A helper function to make defining a bunch of enums smoother
+enumId = 0
+DEF_ENUM MACRO enum_name
+	enum_name = enumId
+	enumId = enumId + 1
+ENDM
+
 ; // List of component identifiers
-RECT_COMPONENT = 0
-SPRITE_COMPONENT = 1
-TRANSFORM_COMPONENT = 2
+DEF_ENUM RECT_COMPONENT
+DEF_ENUM SPRITE_COMPONENT
+DEF_ENUM TRANSFORM_COMPONENT
 
 ENDIF
