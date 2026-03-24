@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 15:00:45
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 15:03:06
 game_object.asm						     Page 1 - 1
 
 
@@ -95,6 +95,10 @@ game_object.asm						     Page 1 - 1
 			      C 
 
  00000000			.code
+				; // ********************************************
+				; // Constructor Methods
+				; // ********************************************
+
 				; // ----------------------------------
 				; // init_game_object
 				; // Initializes memory with the contents of a GameObject
@@ -114,7 +118,7 @@ game_object.asm						     Page 1 - 1
 					; // Initilaize the virtual function table
 					; // TODO
  0000000F			init_game_object ENDP
-game_object.asm(36) : warning A6001:no return from procedure
+game_object.asm(40) : warning A6001:no return from procedure
 
  0000000F			new_game_object PROC PUBLIC USES ecx, numComponents : DWORD, pComponents : DWORD
  0000000F  55		   *	    push   ebp
@@ -150,8 +154,24 @@ game_object.asm(36) : warning A6001:no return from procedure
  00000048  C2 0004	   *	    ret    00004h
  0000004B			free_game_object ENDP
 
+				; // ********************************************
+				; // Class methods
+				; // ********************************************
+
+ 0000004B			game_object_start PROC
+ 0000004B  C3				ret
+ 0000004C			game_object_start ENDP
+
+ 0000004C			game_object_update PROC
+ 0000004C  C3				ret
+ 0000004D			game_object_update ENDP
+
+ 0000004D			game_object_exit PROC
+ 0000004D  C3				ret
+ 0000004E			game_object_exit ENDP
+
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 15:00:45
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 15:03:06
 game_object.asm						     Symbols 2 - 1
 
 
@@ -186,7 +206,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000004B DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000004E DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -199,6 +219,9 @@ HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_game_object . . . . . . . .	P Near	 00000034 _TEXT	Length= 00000017 Public STDCALL
   pGameObject  . . . . . . . . .	DWord	 bp + 00000008
+game_object_exit . . . . . . . .	P Near	 0000004D _TEXT	Length= 00000001 Private STDCALL
+game_object_start  . . . . . . .	P Near	 0000004B _TEXT	Length= 00000001 Private STDCALL
+game_object_update . . . . . . .	P Near	 0000004C _TEXT	Length= 00000001 Private STDCALL
 init_game_object . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000000F Private STDCALL
   numComponents  . . . . . . . .	DWord	 bp + 00000008
   pComponents  . . . . . . . . .	DWord	 bp + 0000000C

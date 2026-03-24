@@ -18,6 +18,10 @@ INCLUDE game_object.inc
 INCLUDE heap_functions.inc
 
 .code
+; // ********************************************
+; // Constructor Methods
+; // ********************************************
+
 ; // ----------------------------------
 ; // init_game_object
 ; // Initializes memory with the contents of a GameObject
@@ -47,5 +51,21 @@ free_game_object PROC PUBLIC, pGameObject: DWORD
 	INVOKE HeapFree, hHeap, 0, pGameObject
 	ret
 free_game_object ENDP
+
+; // ********************************************
+; // Class methods
+; // ********************************************
+
+game_object_start PROC
+	ret
+game_object_start ENDP
+
+game_object_update PROC
+	ret
+game_object_update ENDP
+
+game_object_exit PROC
+	ret
+game_object_exit ENDP
 
 END 
