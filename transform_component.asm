@@ -11,7 +11,7 @@ INCLUDE heap_functions.inc
 
 .code
 ; // ----------------------------------
-; // init_game_object
+; // init_transform_component
 ; // Initializes memory with the contents of a TransformComponent
 ; // 
 ; // Register Parameters: 

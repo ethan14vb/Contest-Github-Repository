@@ -11,24 +11,38 @@ INCLUDE rect_component.inc
 INCLUDE heap_functions.inc
 
 .code
-new_rect_component PROC PUBLIC USES ebx esi, h: DWORD, w : DWORD, r : BYTE, g : BYTE, b : BYTE, a : BYTE
-	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF RectComponent
-
+; // ----------------------------------
+; // init_rect_component
+; // Initializes memory with the contents of a RectComponent
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+init_rect_component PROC PUBLIC USES ebx esi, h: DWORD, w : DWORD, r : BYTE, g : BYTE, b : BYTE, a : BYTE
 	; // Height & Width
 	mov esi, h
-	mov (RectComponent PTR [eax]).h, esi
+	mov (RectComponent PTR [ecx]).h, esi
 	mov esi, w
-	mov (RectComponent PTR [eax]).w, esi
+	mov (RectComponent PTR [ecx]).w, esi
 
 	; // RGBA
 	mov bl, r
-	mov (RectComponent PTR [eax]).r, bl
+	mov (RectComponent PTR [ecx]).r, bl
 	mov bl, g
-	mov (RectComponent PTR [eax]).g, bl
+	mov (RectComponent PTR [ecx]).g, bl
 	mov bl, b
-	mov (RectComponent PTR [eax]).b, bl
+	mov (RectComponent PTR [ecx]).b, bl
 	mov bl, a
-	mov (RectComponent PTR [eax]).a, bl
+	mov (RectComponent PTR [ecx]).a, bl
+
+	mov eax, ecx
+	ret
+init_rect_component ENDP
+
+new_rect_component PROC PUBLIC USES ebx esi, h: DWORD, w : DWORD, r : BYTE, g : BYTE, b : BYTE, a : BYTE
+	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF RectComponent
+	mov ecx, eax; // Move the memory address to eax so it can function as a "this" pointer
+	INVOKE init_rect_component, h, w, r, g, b, a
 
 	ret ; // Return with the address of the memory block in HeapAlloc
 new_rect_component ENDP
