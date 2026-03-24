@@ -17,6 +17,9 @@ INCLUDE default_header.inc
 INCLUDE game_object.inc
 INCLUDE heap_functions.inc
 
+.data
+GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_object_update, OFFSET game_object_exit>
+
 .code
 ; // ********************************************
 ; // Constructor Methods
@@ -29,14 +32,17 @@ INCLUDE heap_functions.inc
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-init_game_object PROC PUBLIC USES esi, numComponents : DWORD, pComponents : DWORD
+init_game_object PROC PUBLIC USES esi ebx, numComponents : DWORD, pComponents : DWORD
+	; // Set up class members
 	mov esi, numComponents
 	mov (GameObject PTR [ecx]).numComponents, esi
 	mov esi, pComponents
 	mov (GameObject PTR [ecx]).pComponents, esi
 
-	; // Initilaize the virtual function table
-	; // TODO
+	; // Set up vTable
+	mov (GameObject PTR[ecx]).pVt, OFFSET GAMEOBJECT_VTABLE
+
+	ret
 init_game_object ENDP
 
 ; // ----------------------------------
