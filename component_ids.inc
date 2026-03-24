@@ -1,12 +1,12 @@
 ; // ==================================
-; // components.inc
+; // component_ids.inc
 ; // ----------------------------------
 ; // A set of "enum" style macros that identify component types 
-; // in the data definition of a scene.
+; // for the data definition and parsing of a scene's data.
 ; // ==================================
 
-IFNDEF COMPONENTS_INC
-COMPONENTS_INC EQU 1
+IFNDEF COMPONENT_IDS_INC
+COMPONENT_IDS_INC EQU 1
 
 ; // List of component identifiers
 RECT_COMPONENT = 0

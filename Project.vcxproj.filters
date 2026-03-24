@@ -35,7 +35,7 @@
     <None Include="rectangle_test_scene.inc">
       <Filter>Resource\Scenes</Filter>
     </None>
-    <None Include="components.inc">
+    <None Include="component_ids.inc">
       <Filter>Include\Resource</Filter>
     </None>
   </ItemGroup>
