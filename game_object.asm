@@ -40,7 +40,7 @@ add_component PROC PUBLIC USES eax ebx esi edi, pGameObject: DWORD, pComponent: 
 		shl (GameObject PTR [esi]).maxComponents, 1
 
 		mov eax, (GameObject PTR[esi]).maxComponents
-		shl eax, 2 ; // maxSize * 4 where 4 is SIZEOF DWORD 
+		shl eax, 2 ; // maxComponents * 4 where 4 is SIZEOF DWORD 
 		INVOKE HeapReAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, (GameObject PTR[esi]).pComponents, eax
 		mov (GameObject PTR [esi]).pComponents, eax
 
