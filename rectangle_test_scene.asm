@@ -10,8 +10,17 @@ INCLUDE component_ids.inc
 
 .data
 RectTestScene_Data LABEL BYTE ; // The label is set to BYTE so the data can be traversed with flexibility
-	DWORD 1 ; // Just some test values
-	DWORD 2
-	DWORD 3
+	DWORD 2 ; // Number of GameObjects
+
+	; // GameObject 1: A red square
+	DWORD 2 ; // Number of components
+		; // Component 1: RectComponent
+		DWORD RECT_COMPONENT_ID
+		DWORD 5		; // Height
+		DWORD 6		; // Width
+		BYTE 255	; // r
+		BYTE 0		; // g
+		BYTE 0		; // b
+		BYTE 255	; // a
 
 END
