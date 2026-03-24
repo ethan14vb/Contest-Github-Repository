@@ -30,7 +30,18 @@ init_game_object PROC USES esi, numComponents : DWORD, pComponents : DWORD
 	mov (GameObject PTR [ecx]).numComponents, esi
 	mov esi, pComponents
 	mov (GameObject PTR [ecx]).pComponents, esi
+
+	; // Initilaize the virtual function table
+	; // TODO
 init_game_object ENDP
+
+new_game_object PROC PUBLIC USES ecx, numComponents : DWORD, pComponents : DWORD
+	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF GameObject
+	mov ecx, eax ; // Move the memory address to eax so it can function as a "this" pointer
+	INVOKE init_game_object, numComponents, pComponents
+
+	ret ; // Return with the address of the memory block in HeapAlloc
+new_game_object ENDP
 
 free_game_object PROC PUBLIC, pGameObject: DWORD
 	INVOKE HeapFree, hHeap, 0, pGameObject
