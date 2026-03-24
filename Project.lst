@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 15:59:04
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 16:00:16
 scene.asm						     Page 1 - 1
 
 
@@ -74,6 +74,10 @@ scene.asm						     Page 1 - 1
  00000004  00000000	      C 	maxGameObjects DWORD ? ; // Maximum size of the game objects list
  00000008  00000000	      C 	pGameObjects DWORD ? ; // List containing game objects
 			      C Scene ENDS
+			      C 
+			      C init_scene PROTO numGameObjects : DWORD, maxGameObjects : DWORD, pGameObjects : DWORD
+			      C new_scene PROTO numGameObjects : DWORD, maxGameObjects : DWORD, pGameObjects : DWORD
+			      C free_scene PROTO pGameObjects: DWORD
 			      C 
 			      C ENDIF
 			      C 
@@ -190,7 +194,7 @@ scene.asm						     Page 1 - 1
  00000059			scene_exit ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 15:59:04
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 16:00:16
 scene.asm						     Symbols 2 - 1
 
 

@@ -17,4 +17,8 @@ Scene STRUCT
 	pGameObjects DWORD ? ; // List containing game objects
 Scene ENDS
 
+init_scene PROTO numGameObjects : DWORD, maxGameObjects : DWORD, pGameObjects : DWORD
+new_scene PROTO numGameObjects : DWORD, maxGameObjects : DWORD, pGameObjects : DWORD
+free_scene PROTO pGameObjects: DWORD
+
 ENDIF
