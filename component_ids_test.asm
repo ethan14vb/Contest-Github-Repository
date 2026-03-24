@@ -8,9 +8,17 @@
 ; // run, and feel free to debug and test.
 ; // ==================================
 INCLUDE default_header.inc
+INCLUDE component_ids.inc
+
 ExitProcess PROTO : DWORD
+
 .code
 main PROC PUBLIC
-INVOKE ExitProcess, 0
+	mov eax, RECT_COMPONENT
+	mov eax, SPRITE_COMPONENT
+	mov eax, TRANSFORM_COMPONENT
+	
+	INVOKE ExitProcess, 0
 main ENDP
+
 END main

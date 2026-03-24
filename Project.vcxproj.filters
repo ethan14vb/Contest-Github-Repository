@@ -90,11 +90,11 @@
     <MASM Include="render_command.asm">
       <Filter>Source\Rendering</Filter>
     </MASM>
-    <MASM Include="main.asm">
-      <Filter>Source\Engine</Filter>
-    </MASM>
     <MASM Include="rectangle_test_scene.asm">
       <Filter>Resource\Scenes</Filter>
+    </MASM>
+    <MASM Include="component_ids_test.asm">
+      <Filter>Source\Engine</Filter>
     </MASM>
   </ItemGroup>
 </Project>
