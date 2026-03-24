@@ -32,6 +32,21 @@ GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_objec
 add_component PROC PUBLIC, pGameObject: DWORD, pComponent: DWORD
 	mov eax, pGameObject ; // Temporary useless code to avoid MASM bugs during a commit
 	mov eax, pComponent
+
+	; // Pseudocode
+	; // ------------------------------
+	; // if (pGameObject->numComponents >= pGameObject->maxComponents) {
+	; //	// Resize
+	; //	HeapReAlloc(hHeap, HEAP_GENERATE_EXCEPTIONS, pGameObject->pComponents, pGameObject->maxComponents * 20);
+	; //
+	; //	// Append
+	; //	*(pGameObject->pComponents)[pGameObject->numComponents] = pComponent;
+	; //	pGameObject->numComponents++;
+	; // } else {
+	; //	// Append
+	; //	*(pGameObject->pComponents)[pGameObject->numComponents] = pComponent;
+	; //	pGameObject->numComponents++;
+	; // }
 	ret
 add_component ENDP
 
