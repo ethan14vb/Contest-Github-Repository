@@ -1,7 +1,7 @@
 ; // ==================================
 ; // rectangle_test_scene.asm
 ; // ----------------------------------
-; // A scene to test the rendering of RectComponents.
+; // Data defining a scene to test the rendering of RectComponents.
 ; // ==================================
 
 INCLUDE default_header.inc
