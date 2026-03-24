@@ -35,6 +35,9 @@
     <None Include="rectangle_test_scene.inc">
       <Filter>Resource\Scenes</Filter>
     </None>
+    <None Include="components.inc">
+      <Filter>Include\Resource</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">
@@ -60,6 +63,9 @@
     </Filter>
     <Filter Include="Resource\Scenes">
       <UniqueIdentifier>{107099d3-5bbe-4f80-b2ee-4de45e966fb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Resource">
+      <UniqueIdentifier>{c9047129-f14e-414e-b0b7-b5e9be8e34a0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
