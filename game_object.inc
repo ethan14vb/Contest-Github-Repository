@@ -24,6 +24,7 @@ GameObject_vtable ENDS
 
 GameObject STRUCT
 	numComponents DWORD ?
+	maxComponents DWORD ?
 	pComponents DWORD ? ; Pointer to a table of components
 	pVt DWORD ? ; Pointer to a virtual function table
 GameObject ENDS
