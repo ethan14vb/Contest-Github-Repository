@@ -1,3 +1,6 @@
+Scene data descriptions explained:
+-------------------------------------------------------------------
+
 Scenes in this engine are initialized through a particular data format that you can see examples of in the 
 .asm files in this filter. This format starts with:
 
