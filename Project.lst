@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 17:43:17
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 17:45:41
 game_object.asm						     Page 1 - 1
 
 
@@ -50,7 +50,7 @@ game_object.asm						     Page 1 - 1
 			      C GameObject_vtable ENDS
 			      C 
  00000010		      C GameObject STRUCT
- 00000000  00000000	      C 	numComponents DWORD ?
+ 00000000  00000000	      C 	numComponents DWORD 0
  00000004  00000000	      C 	maxComponents DWORD ?
  00000008  00000000	      C 	pComponents DWORD ? ; Pointer to a table of components
  0000000C  00000000	      C 	pVt DWORD ? ; Pointer to a virtual function table
@@ -243,7 +243,7 @@ game_object.asm						     Page 1 - 1
  0000006A			game_object_exit ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 17:43:17
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 17:45:41
 game_object.asm						     Symbols 2 - 1
 
 
