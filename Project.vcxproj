@@ -12,8 +12,8 @@
   </ItemGroup>
   <ItemGroup>
     <MASM Include="game_object.asm" />
+    <MASM Include="game_object_test.asm" />
     <MASM Include="heap_functions.asm" />
-    <MASM Include="main.asm" />
     <MASM Include="rectangle_test_scene.asm" />
     <MASM Include="rect_component.asm" />
     <MASM Include="render_command.asm" />
