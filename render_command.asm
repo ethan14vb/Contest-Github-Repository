@@ -13,7 +13,12 @@ INCLUDE heap_functions.inc
 
 .code
 init_render_command PROC PUBLIC USES esi, rcType: RC_ENUM, pTransform : DWORD, pRenderable : DWORD
-	INVOKE init_render_command, rcType, pTransform, pRenderable ; // placeholder line to stay under the 20 line max commit size and still compile
+	mov esi, rcType
+	mov (RenderCommand PTR [ecx]).rcType, esi
+	mov esi, pTransform
+	mov (RenderCommand PTR [ecx]).pTransform, esi
+	mov esi, pRenderable
+	mov (RenderCommand PTR [ecx]).pRenderable, esi
 	ret
 init_render_command ENDP
 
