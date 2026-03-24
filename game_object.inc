@@ -28,4 +28,8 @@ GameObject STRUCT
 	pVt DWORD ? ; Pointer to a virtual function table
 GameObject ENDS
 
+init_game_object PROTO numComponents : DWORD, pComponents : DWORD
+new_game_object PROTO numComponents : DWORD, pComponents : DWORD
+free_game_object PROTO pGameObject: DWORD
+
 ENDIF

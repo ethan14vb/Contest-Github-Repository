@@ -29,7 +29,7 @@ INCLUDE heap_functions.inc
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-init_game_object PROC USES esi, numComponents : DWORD, pComponents : DWORD
+init_game_object PROC PUBLIC USES esi, numComponents : DWORD, pComponents : DWORD
 	mov esi, numComponents
 	mov (GameObject PTR [ecx]).numComponents, esi
 	mov esi, pComponents
