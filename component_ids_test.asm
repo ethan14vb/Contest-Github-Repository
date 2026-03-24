@@ -14,9 +14,9 @@ ExitProcess PROTO : DWORD
 
 .code
 main PROC PUBLIC
-	mov eax, RECT_COMPONENT
-	mov eax, SPRITE_COMPONENT
-	mov eax, TRANSFORM_COMPONENT
+	mov eax, RECT_COMPONENT_ID
+	mov eax, SPRITE_COMPONENT_ID
+	mov eax, TRANSFORM_COMPONENT_ID
 	
 	INVOKE ExitProcess, 0
 main ENDP

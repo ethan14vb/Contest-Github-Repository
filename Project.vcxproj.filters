@@ -93,7 +93,7 @@
     <MASM Include="rectangle_test_scene.asm">
       <Filter>Resource\Scenes</Filter>
     </MASM>
-    <MASM Include="component_ids_test.asm">
+    <MASM Include="main.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
   </ItemGroup>
