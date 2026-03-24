@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 17:45:41
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 18:18:41
 game_object.asm						     Page 1 - 1
 
 
@@ -60,8 +60,8 @@ game_object.asm						     Page 1 - 1
 			      C add_component PROTO pGameObject: DWORD, pComponent: DWORD
 			      C 
 			      C ; // Constructors
-			      C init_game_object PROTO maxComponents : DWORD, pComponents : DWORD
-			      C new_game_object PROTO maxComponents : DWORD, pComponents : DWORD
+			      C init_game_object PROTO maxComponents : DWORD
+			      C new_game_object PROTO maxComponents : DWORD
 			      C free_game_object PROTO pGameObject: DWORD
 			      C 
 			      C ENDIF
@@ -104,9 +104,9 @@ game_object.asm						     Page 1 - 1
 			      C 
 
  00000000			.data
- 00000000 00000067 R		GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_object_update, OFFSET game_object_exit>
-	   00000068 R
-	   00000069 R
+ 00000000 0000007B R		GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_object_update, OFFSET game_object_exit>
+	   0000007C R
+	   0000007D R
 
  00000000			.code
 				; // ********************************************
@@ -138,69 +138,80 @@ game_object.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 0000000D			init_game_object PROC PUBLIC USES esi ebx, maxComponents : DWORD, pComponents : DWORD
+ 0000000D			init_game_object PROC PUBLIC USES esi ebx edx, maxComponents : DWORD
 					; // Set up class members
  0000000D  55		   *	    push   ebp
  0000000E  8B EC	   *	    mov    ebp, esp
  00000010  56		   *	    push   esi
  00000011  53		   *	    push   ebx
- 00000012  8B 75 08			mov esi, maxComponents
- 00000015  89 71 04			mov (GameObject PTR [ecx]).maxComponents, esi
- 00000018  8B 75 0C			mov esi, pComponents
- 0000001B  89 71 08			mov (GameObject PTR [ecx]).pComponents, esi
+ 00000012  52		   *	    push   edx
+ 00000013  8B 75 08			mov esi, maxComponents
+ 00000016  89 71 04			mov (GameObject PTR [ecx]).maxComponents, esi
 
 					; // Set up vTable
- 0000001E  C7 41 0C			mov (GameObject PTR[ecx]).pVt, OFFSET GAMEOBJECT_VTABLE
+ 00000019  C7 41 0C			mov (GameObject PTR[ecx]).pVt, OFFSET GAMEOBJECT_VTABLE
 	   00000000 R
 
+					; // Now set up the component pointer table
+ 00000020  8B 45 08			mov eax, maxComponents
+ 00000023  BA 00000004			mov edx, SIZEOF DWORD
+ 00000028  F7 E2			mul edx
+
+					INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, eax
+ 0000002A  50		   *	    push   eax
+ 0000002B  6A 04	   *	    push   +000000004h
+ 0000002D  FF 35 00000000 E *	    push   hHeap
+ 00000033  E8 00000000 E   *	    call   HeapAlloc
+ 00000038  89 41 08			mov (GameObject PTR[ecx]).pComponents, eax
+
 					ret
- 00000025  5B		   *	    pop    ebx
- 00000026  5E		   *	    pop    esi
- 00000027  C9		   *	    leave  
- 00000028  C2 0008	   *	    ret    00008h
- 0000002B			init_game_object ENDP
+ 0000003B  5A		   *	    pop    edx
+ 0000003C  5B		   *	    pop    ebx
+ 0000003D  5E		   *	    pop    esi
+ 0000003E  C9		   *	    leave  
+ 0000003F  C2 0004	   *	    ret    00004h
+ 00000042			init_game_object ENDP
 
 				; // ----------------------------------
 				; // new_game_object
 				; // Reserves heap space for the Object with parameters calls the initializer method
 				; // ----------------------------------
- 0000002B			new_game_object PROC PUBLIC USES ecx, maxComponents : DWORD, pComponents : DWORD
- 0000002B  55		   *	    push   ebp
- 0000002C  8B EC	   *	    mov    ebp, esp
- 0000002E  51		   *	    push   ecx
+ 00000042			new_game_object PROC PUBLIC USES ecx, maxComponents : DWORD
+ 00000042  55		   *	    push   ebp
+ 00000043  8B EC	   *	    mov    ebp, esp
+ 00000045  51		   *	    push   ecx
 					INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF GameObject
- 0000002F  6A 10	   *	    push   +000000010h
- 00000031  6A 04	   *	    push   +000000004h
- 00000033  FF 35 00000000 E *	    push   hHeap
- 00000039  E8 00000000 E   *	    call   HeapAlloc
- 0000003E  8B C8			mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
-					INVOKE init_game_object, maxComponents, pComponents
- 00000040  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
- 00000043  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 00000046  E8 FFFFFFC2	   *	    call   init_game_object
+ 00000046  6A 10	   *	    push   +000000010h
+ 00000048  6A 04	   *	    push   +000000004h
+ 0000004A  FF 35 00000000 E *	    push   hHeap
+ 00000050  E8 00000000 E   *	    call   HeapAlloc
+ 00000055  8B C8			mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
+					INVOKE init_game_object, maxComponents
+ 00000057  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 0000005A  E8 FFFFFFAE	   *	    call   init_game_object
 
 					ret ; // Return with the address of the memory block in HeapAlloc
- 0000004B  59		   *	    pop    ecx
- 0000004C  C9		   *	    leave  
- 0000004D  C2 0008	   *	    ret    00008h
- 00000050			new_game_object ENDP
+ 0000005F  59		   *	    pop    ecx
+ 00000060  C9		   *	    leave  
+ 00000061  C2 0004	   *	    ret    00004h
+ 00000064			new_game_object ENDP
 
 				; // ----------------------------------
 				; // free_game_object
 				; // Convenient method for freeing a GameObject
 				; // ----------------------------------
- 00000050			free_game_object PROC PUBLIC, pGameObject: DWORD
- 00000050  55		   *	    push   ebp
- 00000051  8B EC	   *	    mov    ebp, esp
+ 00000064			free_game_object PROC PUBLIC, pGameObject: DWORD
+ 00000064  55		   *	    push   ebp
+ 00000065  8B EC	   *	    mov    ebp, esp
 					INVOKE HeapFree, hHeap, 0, pGameObject
- 00000053  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 00000056  6A 00	   *	    push   +000000000h
- 00000058  FF 35 00000000 E *	    push   hHeap
- 0000005E  E8 00000000 E   *	    call   HeapFree
+ 00000067  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 0000006A  6A 00	   *	    push   +000000000h
+ 0000006C  FF 35 00000000 E *	    push   hHeap
+ 00000072  E8 00000000 E   *	    call   HeapFree
 					ret
- 00000063  C9		   *	    leave  
- 00000064  C2 0004	   *	    ret    00004h
- 00000067			free_game_object ENDP
+ 00000077  C9		   *	    leave  
+ 00000078  C2 0004	   *	    ret    00004h
+ 0000007B			free_game_object ENDP
 
 				; // ********************************************
 				; // Instance methods
@@ -214,9 +225,9 @@ game_object.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000067			game_object_start PROC
- 00000067  C3				ret
- 00000068			game_object_start ENDP
+ 0000007B			game_object_start PROC
+ 0000007B  C3				ret
+ 0000007C			game_object_start ENDP
 
 				; // ----------------------------------
 				; // game_object_update
@@ -226,9 +237,9 @@ game_object.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000068			game_object_update PROC
- 00000068  C3				ret
- 00000069			game_object_update ENDP
+ 0000007C			game_object_update PROC
+ 0000007C  C3				ret
+ 0000007D			game_object_update ENDP
 
 				; // ----------------------------------
 				; // game_object_exit
@@ -238,12 +249,12 @@ game_object.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000069			game_object_exit PROC
- 00000069  C3				ret
- 0000006A			game_object_exit ENDP
+ 0000007D			game_object_exit PROC
+ 0000007D  C3				ret
+ 0000007E			game_object_exit ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 17:45:41
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 18:18:41
 game_object.asm						     Symbols 2 - 1
 
 
@@ -279,7 +290,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 0000000C DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000006A DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000007E DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -293,18 +304,16 @@ HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 add_component  . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000000D Public STDCALL
   pGameObject  . . . . . . . . .	DWord	 bp + 00000008
   pComponent . . . . . . . . . .	DWord	 bp + 0000000C
-free_game_object . . . . . . . .	P Near	 00000050 _TEXT	Length= 00000017 Public STDCALL
+free_game_object . . . . . . . .	P Near	 00000064 _TEXT	Length= 00000017 Public STDCALL
   pGameObject  . . . . . . . . .	DWord	 bp + 00000008
-game_object_exit . . . . . . . .	P Near	 00000069 _TEXT	Length= 00000001 Private STDCALL
-game_object_start  . . . . . . .	P Near	 00000067 _TEXT	Length= 00000001 Private STDCALL
-game_object_update . . . . . . .	P Near	 00000068 _TEXT	Length= 00000001 Private STDCALL
-init_game_object . . . . . . . .	P Near	 0000000D _TEXT	Length= 0000001E Public STDCALL
+game_object_exit . . . . . . . .	P Near	 0000007D _TEXT	Length= 00000001 Private STDCALL
+game_object_start  . . . . . . .	P Near	 0000007B _TEXT	Length= 00000001 Private STDCALL
+game_object_update . . . . . . .	P Near	 0000007C _TEXT	Length= 00000001 Private STDCALL
+init_game_object . . . . . . . .	P Near	 0000000D _TEXT	Length= 00000035 Public STDCALL
   maxComponents  . . . . . . . .	DWord	 bp + 00000008
-  pComponents  . . . . . . . . .	DWord	 bp + 0000000C
 initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-new_game_object  . . . . . . . .	P Near	 0000002B _TEXT	Length= 00000025 Public STDCALL
+new_game_object  . . . . . . . .	P Near	 00000042 _TEXT	Length= 00000022 Public STDCALL
   maxComponents  . . . . . . . .	DWord	 bp + 00000008
-  pComponents  . . . . . . . . .	DWord	 bp + 0000000C
 
 
 Symbols:
