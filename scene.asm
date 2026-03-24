@@ -29,6 +29,27 @@ init_scene PROC PUBLIC USES esi, numGameObjects : DWORD, maxGameObjects : DWORD,
 	ret
 init_scene ENDP
 
+; // ----------------------------------
+; // new_scene
+; // Reserves heap space for the scene with parameters and calls the initializer method
+; // ----------------------------------
+new_scene PROC PUBLIC USES ecx, numGameObjects : DWORD, maxGameObjects : DWORD, pGameObjects : DWORD
+	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF Scene
+	mov ecx, eax; // Move the memory address to ecx so it can function as a "this" pointer
+	INVOKE init_scene, numGameObjects, maxGameObjects, pGameObjects
+
+	ret; // Return with the address of the memory block in HeapAlloc
+new_scene ENDP
+
+; // ----------------------------------
+; // free_scene
+; // Convenient method for freeing a Scene
+; // ----------------------------------
+free_scene PROC PUBLIC, pGameObject: DWORD
+	INVOKE HeapFree, hHeap, 0, pGameObject
+	ret
+free_scene ENDP
+
 
 ; // ********************************************
 ; // Class methods
