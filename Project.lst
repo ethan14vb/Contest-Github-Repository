@@ -1,20 +1,12 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/23/26 21:46:26
-game_object.asm						     Page 1 - 1
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/23/26 21:53:27
+transform_component.asm					     Page 1 - 1
 
 
 				; // ==================================
-				; // GameObject
+				; // TransformComponent
 				; // ----------------------------------
-				; //	GameObjects are the core elements of a scene
-				; // that contain gameplay logic and anything the player
-				; // will see.
-				; //	The GameObject STRUCT is intended to be 'subclassed' by 
-				; // overriding the virtual function table.
-				; //	GameObjects contain a list of components that
-				; // define utility behavior such as sprites to render
-				; // or animation states. These componenets are updated
-				; // by the scene_update to keep their auxillary functionality
-				; // separate from main game logic.
+				; // Defines where in space a GameObject should be
+				; // represented.
 				; // ==================================
 
 				INCLUDE default_header.inc
@@ -24,36 +16,33 @@ game_object.asm						     Page 1 - 1
 			      C .stack 4096
 			      C OPTION PROC : PRIVATE
 			      C 
-				INCLUDE game_object.inc
+				INCLUDE transform_component.inc
 			      C ; // ==================================
-			      C ; // GameObject
+			      C ; // TransformComponent
 			      C ; // ----------------------------------
-			      C ; //	GameObjects are the core elements of a scene
-			      C ; // that contain gameplay logic and anything the player
-			      C ; // will see.
-			      C ; //	This STRUCT is intended to be 'subclassed' by 
-			      C ; // overriding the virtual function table.
-			      C ; //	GameObjects contain a list of components that
-			      C ; // define utility behavior such as sprites to render
-			      C ; // or animation states. These componenets are updated
-			      C ; // by the scene_update to keep their auxillary functionality
-			      C ; // separate from main game logic.
+			      C ; // Defines where in space a GameObject should be
+			      C ; // represented.
 			      C ; // ==================================
 			      C 
-			      C IFNDEF GAME_OBJECT_INC
- = 00000001		      C GAME_OBJECT_INC EQU 1
+			      C IFNDEF TRANSFORM_COMPONENT_INC
+ = 00000001		      C TRANSFORM_COMPONENT_INC EQU 1
 			      C 
- 0000000C		      C GameObject_vtable STRUCT
- 00000000  00000000	      C 	pStart DWORD ? ; For initialization of the GameObject
- 00000004  00000000	      C 	pUpdate DWORD ? ; For game logic that will run every frame update
- 00000008  00000000	      C 	pExit DWORD ? ; Called when the GameObject is removed
-			      C GameObject_vtable ENDS
+ 0000000C		      C TransformComponent STRUCT
+ 00000000  00000000	      C 	x DWORD ?
+ 00000004  00000000	      C 	y DWORD ?
 			      C 
- 0000000C		      C GameObject STRUCT
- 00000000  00000000	      C 	numComponents DWORD ?
- 00000004  00000000	      C 	pComponents DWORD ? ; Pointer to a table of components
- 00000008  00000000	      C 	pVt DWORD ? ; Pointer to a virtual function table
-			      C GameObject ENDS
+			      C 	; // Whether to ignore the camera offset when rendering.
+			      C 	; // Used for drawing UI items
+ 00000008  00000000	      C 	ignoreCamera DWORD ?
+			      C 
+			      C 	; // Out of scope for this project
+			      C 	; // rotation DWORD ?
+			      C 	; // scaleX DWORD ?
+			      C 	; // scaleY DWORD ?
+			      C TransformComponent ENDS
+			      C 
+			      C new_transform_component PROTO x: DWORD, y: DWORD, ignoreCamera: DWORD
+			      C free_transform_component PROTO pTransform: DWORD
 			      C 
 			      C ENDIF
 			      C 
@@ -97,38 +86,65 @@ game_object.asm						     Page 1 - 1
  00000000			.code
 				; // ----------------------------------
 				; // init_game_object
-				; // Initializes memory with the contents of a GameObject
+				; // Initializes memory with the contents of a TransformComponent
 				; // 
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000000			init_game_object PROC USES esi, numComponents : DWORD, pComponents : DWORD
+ 00000000			init_transform_component PROC PUBLIC USES esi, x: DWORD, y : DWORD, ignoreCamera : DWORD
  00000000  55		   *	    push   ebp
  00000001  8B EC	   *	    mov    ebp, esp
  00000003  56		   *	    push   esi
- 00000004  8B 75 08			mov esi, numComponents
- 00000007  89 31			mov (GameObject PTR [ecx]).numComponents, esi
- 00000009  8B 75 0C			mov esi, pComponents
- 0000000C  89 71 04			mov (GameObject PTR [ecx]).pComponents, esi
- 0000000F			init_game_object ENDP
-game_object.asm(33) : warning A6001:no return from procedure
-
- 0000000F			free_game_object PROC PUBLIC, pGameObject: DWORD
- 0000000F  55		   *	    push   ebp
- 00000010  8B EC	   *	    mov    ebp, esp
-					INVOKE HeapFree, hHeap, 0, pGameObject
- 00000012  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 00000015  6A 00	   *	    push   +000000000h
- 00000017  FF 35 00000000 E *	    push   hHeap
- 0000001D  E8 00000000 E   *	    call   HeapFree
+ 00000004  8B 75 08			mov esi, x
+ 00000007  89 31			mov (TransformComponent PTR [ecx]).x, esi
+ 00000009  8B 75 0C			mov esi, y
+ 0000000C  89 71 04			mov (TransformComponent PTR [ecx]).y, esi
+ 0000000F  8B 75 10			mov esi, ignoreCamera
+ 00000012  89 71 08			mov (TransformComponent PTR [ecx]).ignoreCamera, esi
 					ret
- 00000022  C9		   *	    leave  
- 00000023  C2 0004	   *	    ret    00004h
- 00000026			free_game_object ENDP
+ 00000015  5E		   *	    pop    esi
+ 00000016  C9		   *	    leave  
+ 00000017  C2 000C	   *	    ret    0000Ch
+ 0000001A			init_transform_component ENDP
+
+ 0000001A			new_transform_component PROC PUBLIC USES ecx, x: DWORD, y: DWORD, ignoreCamera: DWORD
+ 0000001A  55		   *	    push   ebp
+ 0000001B  8B EC	   *	    mov    ebp, esp
+ 0000001D  51		   *	    push   ecx
+					INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF TransformComponent
+ 0000001E  6A 0C	   *	    push   +00000000Ch
+ 00000020  6A 04	   *	    push   +000000004h
+ 00000022  FF 35 00000000 E *	    push   hHeap
+ 00000028  E8 00000000 E   *	    call   HeapAlloc
+ 0000002D  8B C8			mov ecx, eax ; // Move the memory address to eax so it can function as a "this" pointer
+					INVOKE init_transform_component, x, y, ignoreCamera
+ 0000002F  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
+ 00000032  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
+ 00000035  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000038  E8 FFFFFFC3	   *	    call   init_transform_component
+
+					ret ; // Return with the address of the memory block in HeapAlloc
+ 0000003D  59		   *	    pop    ecx
+ 0000003E  C9		   *	    leave  
+ 0000003F  C2 000C	   *	    ret    0000Ch
+ 00000042			new_transform_component ENDP
+
+ 00000042			free_transform_component PROC PUBLIC, pTransform: DWORD
+ 00000042  55		   *	    push   ebp
+ 00000043  8B EC	   *	    mov    ebp, esp
+					INVOKE HeapFree, hHeap, 0, pTransform
+ 00000045  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000048  6A 00	   *	    push   +000000000h
+ 0000004A  FF 35 00000000 E *	    push   hHeap
+ 00000050  E8 00000000 E   *	    call   HeapFree
+					ret
+ 00000055  C9		   *	    leave  
+ 00000056  C2 0004	   *	    ret    00004h
+ 00000059			free_transform_component ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/23/26 21:46:26
-game_object.asm						     Symbols 2 - 1
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/23/26 21:53:27
+transform_component.asm					     Symbols 2 - 1
 
 
 
@@ -138,14 +154,10 @@ Structures and Unions:
                 N a m e                  Size
                                          Offset      Type
 
-GameObject_vtable  . . . . . . .	 0000000C
-  pStart . . . . . . . . . . . .	 00000000	 DWord
-  pUpdate  . . . . . . . . . . .	 00000004	 DWord
-  pExit  . . . . . . . . . . . .	 00000008	 DWord
-GameObject . . . . . . . . . . .	 0000000C
-  numComponents  . . . . . . . .	 00000000	 DWord
-  pComponents  . . . . . . . . .	 00000004	 DWord
-  pVt  . . . . . . . . . . . . .	 00000008	 DWord
+TransformComponent . . . . . . .	 0000000C
+  x  . . . . . . . . . . . . . .	 00000000	 DWord
+  y  . . . . . . . . . . . . . .	 00000004	 DWord
+  ignoreCamera . . . . . . . . .	 00000008	 DWord
 
 
 Types:
@@ -162,7 +174,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000026 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000059 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -173,12 +185,17 @@ GetProcessHeap . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 HeapAlloc  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-free_game_object . . . . . . . .	P Near	 0000000F _TEXT	Length= 00000017 Public STDCALL
-  pGameObject  . . . . . . . . .	DWord	 bp + 00000008
-init_game_object . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000000F Private STDCALL
-  numComponents  . . . . . . . .	DWord	 bp + 00000008
-  pComponents  . . . . . . . . .	DWord	 bp + 0000000C
+free_transform_component . . . .	P Near	 00000042 _TEXT	Length= 00000017 Public STDCALL
+  pTransform . . . . . . . . . .	DWord	 bp + 00000008
+init_transform_component . . . .	P Near	 00000000 _TEXT	Length= 0000001A Public STDCALL
+  x  . . . . . . . . . . . . . .	DWord	 bp + 00000008
+  y  . . . . . . . . . . . . . .	DWord	 bp + 0000000C
+  ignoreCamera . . . . . . . . .	DWord	 bp + 00000010
 initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+new_transform_component  . . . .	P Near	 0000001A _TEXT	Length= 00000028 Public STDCALL
+  x  . . . . . . . . . . . . . .	DWord	 bp + 00000008
+  y  . . . . . . . . . . . . . .	DWord	 bp + 0000000C
+  ignoreCamera . . . . . . . . .	DWord	 bp + 00000010
 
 
 Symbols:
@@ -194,13 +211,13 @@ Symbols:
 @fardata?  . . . . . . . . . . .	Text   	 FLAT
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
-GAME_OBJECT_INC  . . . . . . . .	Number	 00000001h   
 HEAP_FUNCTIONS_INC . . . . . . .	Number	 00000001h   
 HEAP_GENERATE_EXCEPTIONS . . . .	Number	 00000004h   
 HEAP_NO_SERIALIZE  . . . . . . .	Number	 00000001h   
 HEAP_ZERO_MEMORY . . . . . . . .	Number	 00000008h   
 NULL . . . . . . . . . . . . . .	Number	 00000000h   
+TRANSFORM_COMPONENT_INC  . . . .	Number	 00000001h   
 hHeap  . . . . . . . . . . . . .	DWord	 00000000 FLAT	External STDCALL
 
-	   1 Warnings
+	   0 Warnings
 	   0 Errors
