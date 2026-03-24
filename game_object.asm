@@ -28,11 +28,8 @@ GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_objec
 ; // ----------------------------------
 ; // add_component
 ; // Initializes memory with the contents of a GameObject
-; // 
-; // Register Parameters: 
-; //	ecx - THIS pointer
 ; // ----------------------------------
-add_component PROC PUBLIC, pGameObject, pComponent
+add_component PROC PUBLIC, pGameObject: DWORD, pComponent: DWORD
 	mov eax, pGameObject ; // Temporary useless code to avoid MASM bugs during a commit
 	mov eax, pComponent
 	ret

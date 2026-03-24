@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 17:37:06
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 17:39:30
 game_object.asm						     Page 1 - 1
 
 
@@ -55,6 +55,10 @@ game_object.asm						     Page 1 - 1
  00000008  00000000	      C 	pVt DWORD ? ; Pointer to a virtual function table
 			      C GameObject ENDS
 			      C 
+			      C ; // Static methods
+			      C add_component PROTO pGameObject: DWORD, pComponent: DWORD
+			      C 
+			      C ; // Constructors
 			      C init_game_object PROTO numComponents : DWORD, pComponents : DWORD
 			      C new_game_object PROTO numComponents : DWORD, pComponents : DWORD
 			      C free_game_object PROTO pGameObject: DWORD
@@ -111,11 +115,8 @@ game_object.asm						     Page 1 - 1
 				; // ----------------------------------
 				; // add_component
 				; // Initializes memory with the contents of a GameObject
-				; // 
-				; // Register Parameters: 
-				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000000			add_component PROC PUBLIC, pGameObject, pComponent
+ 00000000			add_component PROC PUBLIC, pGameObject: DWORD, pComponent: DWORD
  00000000  55		   *	    push   ebp
  00000001  8B EC	   *	    mov    ebp, esp
  00000003  8B 45 08			mov eax, pGameObject ; // Temporary useless code to avoid MASM bugs during a commit
@@ -241,7 +242,7 @@ game_object.asm						     Page 1 - 1
  00000069			game_object_exit ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 17:37:06
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 17:39:30
 game_object.asm						     Symbols 2 - 1
 
 
