@@ -45,7 +45,7 @@ init_game_object ENDP
 ; // ----------------------------------
 new_game_object PROC PUBLIC USES ecx, numComponents : DWORD, pComponents : DWORD
 	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF GameObject
-	mov ecx, eax ; // Move the memory address to eax so it can function as a "this" pointer
+	mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
 	INVOKE init_game_object, numComponents, pComponents
 
 	ret ; // Return with the address of the memory block in HeapAlloc

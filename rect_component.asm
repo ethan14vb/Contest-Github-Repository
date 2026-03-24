@@ -41,7 +41,7 @@ init_rect_component ENDP
 
 new_rect_component PROC PUBLIC USES ebx esi, h: DWORD, w : DWORD, r : BYTE, g : BYTE, b : BYTE, a : BYTE
 	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF RectComponent
-	mov ecx, eax; // Move the memory address to eax so it can function as a "this" pointer
+	mov ecx, eax; // Move the memory address to ecx so it can function as a "this" pointer
 	INVOKE init_rect_component, h, w, r, g, b, a
 
 	ret ; // Return with the address of the memory block in HeapAlloc

@@ -29,7 +29,7 @@ init_transform_component ENDP
 
 new_transform_component PROC PUBLIC USES ecx, x: DWORD, y: DWORD, ignoreCamera: DWORD
 	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF TransformComponent
-	mov ecx, eax ; // Move the memory address to eax so it can function as a "this" pointer
+	mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
 	INVOKE init_transform_component, x, y, ignoreCamera
 
 	ret ; // Return with the address of the memory block in HeapAlloc
