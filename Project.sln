@@ -13,6 +13,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{96660186-4B14-4BA1-91B2-22693D51ECA3}"
 	ProjectSection(SolutionItems) = preProject
 		classes_test.asm = classes_test.asm
+		component_ids.inc = component_ids.inc
 		heap_functions_test.asm = heap_functions_test.asm
 		include_everything_test.asm = include_everything_test.asm
 		renderer_test.asm = renderer_test.asm
