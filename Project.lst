@@ -1,14 +1,15 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/23/26 23:15:11
-render_command.asm					     Page 1 - 1
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 10:00:33
+scene.asm						     Page 1 - 1
 
 
 				; // ==================================
-				; // render_command.asm
+				; // scene.asm
 				; // ----------------------------------
-				; // A render command is meant to be compiled into
-				; // a list of commands and passed to the renderer
-				; // which will decide how exactly to render all of
-				; // the commands passed to it.
+				; // Scenes are classes that hold a single section of a game. A scene contains a
+				; // pointer to a list of GameObjects that is updated by the scene_update function.
+				; // The scene also updates simulations and any game logic that isn't handled directly
+				; // by GameObjects or their components. At the end of every update, the scene will
+				; // call the renderer module to render its contents.
 				; // ==================================
 
 				INCLUDE default_header.inc
@@ -18,241 +19,69 @@ render_command.asm					     Page 1 - 1
 			      C .stack 4096
 			      C OPTION PROC : PRIVATE
 			      C 
-				INCLUDE render_command.inc
+				INCLUDE scene.inc
 			      C ; // ==================================
-			      C ; // render_command.inc
+			      C ; // Scene
 			      C ; // ----------------------------------
-			      C ; // A render command is meant to be compiled into
-			      C ; // a list of commands and passed to the renderer
-			      C ; // which will decide how exactly to render all of
-			      C ; // the commands passed to it.
+			      C ; // Scenes are classes that hold a single section of a game. A scene contains a
+			      C ; // pointer to a list of GameObjects that is updated by the scene_update function.
+			      C ; // The scene also updates simulations and any game logic that isn't handled directly
+			      C ; // by GameObjects or their components. At the end of every update, the scene will
+			      C ; // call the renderer module to render its contents.
 			      C ; // ==================================
 			      C 
-			      C IFNDEF RENDERER_COMMAND_INC
- = 00000001		      C RENDERER_COMMAND_INC EQU 1
+			      C IFNDEF SCENE_INC
+ = 00000001		      C SCENE_INC EQU 1
 			      C 
-			      C INCLUDE transform_component.inc
-			      C ; // ==================================
-			      C ; // TransformComponent
-			      C ; // ----------------------------------
-			      C ; // Defines where in space a GameObject should be
-			      C ; // represented.
-			      C ; // ==================================
-			      C 
-			      C IFNDEF TRANSFORM_COMPONENT_INC
- = 00000001		      C TRANSFORM_COMPONENT_INC EQU 1
-			      C 
- 0000000C		      C TransformComponent STRUCT
- 00000000  00000000	      C 	x DWORD ?
- 00000004  00000000	      C 	y DWORD ?
-			      C 
-			      C 	; // Whether to ignore the camera offset when rendering.
-			      C 	; // Used for drawing UI items
- 00000008  00000000	      C 	ignoreCamera DWORD ?
-			      C 
-			      C 	; // Out of scope for this project
-			      C 	; // rotation DWORD ?
-			      C 	; // scaleX DWORD ?
-			      C 	; // scaleY DWORD ?
-			      C TransformComponent ENDS
-			      C 
-			      C ; // Constructor methods
-			      C init_transform_component PROTO x: DWORD, y : DWORD, ignoreCamera : DWORD
-			      C new_transform_component PROTO x: DWORD, y: DWORD, ignoreCamera: DWORD
-			      C free_transform_component PROTO pTransform: DWORD
-			      C 
-			      C ENDIF
-			      C 
-			      C INCLUDE rect_component.inc
-			      C ; // ==================================
-			      C ; // RectComponent
-			      C ; // ----------------------------------
-			      C ; // Defines how a GameObject should appear using a rectangle.
-			      C ; // Should be used with a transform for proper functionality.
-			      C ; // The origin is defined by a transform.
-			      C ; // ==================================
-			      C 
-			      C IFNDEF RECT_COMMAND_INC
- = 00000001		      C RECT_COMMAND_INC EQU 1
-			      C 
- 00000010		      C RectComponent STRUCT
- 00000000  00000000	      C 	h DWORD ? ; // Height
- 00000004  00000000	      C 	w DWORD ? ; // Width
-			      C 
-			      C 	; // Color (For future development, this should be an RGBA object)
-			      C 	; // For simplicity reasons, it is 4 bytes for now. 
- 00000008  00		      C 	r BYTE ?
- 00000009  00		      C 	g BYTE ?
- 0000000A  00		      C 	b BYTE ?
- 0000000B  00		      C 	a BYTE ?
-			      C 
- 0000000C  00000000	      C 	visible DWORD ?
-			      C RectComponent ENDS
-			      C 
-			      C ; // Constructor methods
-			      C init_rect_component PROTO h: DWORD, w : DWORD, r : BYTE, g : BYTE, b : BYTE, a : BYTE
-			      C new_rect_component PROTO h: DWORD, w: DWORD, r: BYTE, g: BYTE, b:  BYTE, a: BYTE
-			      C free_rect_component PROTO pRect: DWORD
-			      C 
-			      C ENDIF
-			      C 
-			      C INCLUDE sprite_component.inc
-			      C ; // ==================================
-			      C ; // SpriteComponent
-			      C ; // ----------------------------------
-			      C ; // Defines how a GameObject should appear using a texture.
-			      C ; // Should be used with a transform for proper functionality.
-			      C ; // ==================================
-			      C 
-			      C IFNDEF SPRITE_COMPONENT_INC
- = 00000001		      C SPRITE_COMPONENT_INC EQU 1
-			      C 
- 00000028		      C SpriteComponent STRUCT
- 00000000  00000000	      C 	originX DWORD ?
- 00000004  00000000	      C 	originY DWORD ?
-			      C 
- 00000008  00000000	      C 	pTexture DWORD ?
-			      C 
-			      C 	; // Info about where the sprite is in the source buffer. (If using spritesheet cell)
- 0000000C  00000000	      C 	cellX DWORD ?
- 00000010  00000000	      C 	cellY DWORD ?
- 00000014  00000000	      C 	cellW DWORD ?
- 00000018  00000000	      C 	cellH DWORD ?
-			      C 
-			      C 	; // *************************
-			      C 	; // Booleans (Maybe later these can be compressed into flags to save space)
-			      C 	; // *************************
- 0000001C  00000000	      C 	flipX DWORD ?
- 00000020  00000000	      C 	flipY DWORD ? 
- 00000024  00000000	      C 	visible DWORD ?
-			      C SpriteComponent ENDS
-			      C 
-			      C ENDIF
-			      C 
-			      C 
-			      C ; // Enumerations
-			      C RC_ENUM TYPEDEF DWORD
-			      C 
- = 00000000		      C RC_RECT = 0 ; // RenderCommand Rectangle
- = 00000001		      C RC_SPRITE = 1 ; // RenderCommand Sprite NYI
-			      C 
- 0000000C		      C RenderCommand STRUCT
- 00000000  00000000	      C 	rcType RC_ENUM ? ; // Render command type
-			      C 
-			      C 	; // Pointer to the transform that describes where the object should be rendered
- 00000004  00000000	      C 	pTransform DWORD ?
-			      C 
-			      C 	; // Pointer to the renderable object. Could be a RectComponent, or a SpriteComponent 
-			      C 	; // depending on the value of rcType
- 00000008  00000000	      C 	pRenderable DWORD ?
-			      C RenderCommand ENDS
-			      C 
-			      C ; // Constructor methods
-			      C init_render_command PROTO rcType: RC_ENUM, pTransform : DWORD, pRenderable : DWORD
-			      C new_render_command PROTO rcType: RC_ENUM, pTransform: DWORD, pRenderable: DWORD
-			      C free_render_command PROTO pRenderCommand: DWORD
-			      C 
-			      C ENDIF
-			      C 
-				INCLUDE heap_functions.inc
-			      C ; // ==================================
-			      C ; // heap_functions.inc
-			      C ; // ----------------------------------
-			      C ; // Functions used for dynamic memory management. This file was
-			      C ; // added before we learned about heap memory management in class
-			      C ; // so we could have easy memory management. My resource for this 
-			      C ; // was the windows API reference and the class ch11 slides.
-			      C ; // ==================================
-			      C 
-			      C IFNDEF HEAP_FUNCTIONS_INC
- = 00000001		      C HEAP_FUNCTIONS_INC EQU 1
-			      C 
-			      C ; // Constants
- = 00000008		      C HEAP_ZERO_MEMORY          equ 00000008h
- = 00000004		      C HEAP_GENERATE_EXCEPTIONS  equ 00000004h
- = 00000001		      C HEAP_NO_SERIALIZE         equ 00000001h
-			      C 
- = 00000000		      C NULL   EQU 0
-			      C 
-			      C ; // Types
-			      C HANDLE TYPEDEF DWORD
-			      C 
-			      C ; // Protos
-			      C GetProcessHeap	PROTO
-			      C HeapAlloc		PROTO,	hHeap:DWORD, dwFlags:DWORD, dwBytes:DWORD
-			      C HeapFree		PROTO,	hHeap:DWORD, dwFlags:DWORD, lpMem:DWORD
-			      C HeapReAlloc		PROTO,	hHeap:DWORD, dwFlags:DWORD, lpMem:DWORD,	dwBytes:DWORD
-			      C 
-			      C initialize_heap PROTO ; // This function is from heap_functions.asm. It gets the handle to the process heap and stores in hHeap
-			      C 
-			      C ; // Data
-			      C EXTERNDEF hHeap:HANDLE ; // the heap handle is defined in heap_functions.asm
+ 0000000C		      C Scene STRUCT
+ 00000000  00000000	      C 	numGameObjects DWORD ?
+ 00000004  00000000	      C 	maxGameObjects DWORD ? ; // Maximum size of the game objects list
+ 00000008  00000000	      C 	pGameObjects DWORD ? ; // List containing game objects
+			      C Scene ENDS
 			      C 
 			      C ENDIF
 			      C 
 
  00000000			.code
 				; // ----------------------------------
-				; // init_render_command
-				; // Initializes memory with the contents of a RenderCommand
-				; // 
-				; // Register Parameters: 
-				; //	ecx - THIS pointer
+				; // scene_start
+				; // Initializes the scene and allocates resources that will be used such as spritesheets,
+				; // SFX, or other external files needed in the scene. 
 				; // ----------------------------------
- 00000000			init_render_command PROC PUBLIC USES esi, rcType: RC_ENUM, pTransform : DWORD, pRenderable : DWORD
- 00000000  55		   *	    push   ebp
- 00000001  8B EC	   *	    mov    ebp, esp
- 00000003  56		   *	    push   esi
- 00000004  8B 75 08			mov esi, rcType
- 00000007  89 31			mov (RenderCommand PTR [ecx]).rcType, esi
- 00000009  8B 75 0C			mov esi, pTransform
- 0000000C  89 71 04			mov (RenderCommand PTR [ecx]).pTransform, esi
- 0000000F  8B 75 10			mov esi, pRenderable
- 00000012  89 71 08			mov (RenderCommand PTR [ecx]).pRenderable, esi
-					ret
- 00000015  5E		   *	    pop    esi
- 00000016  C9		   *	    leave  
- 00000017  C2 000C	   *	    ret    0000Ch
- 0000001A			init_render_command ENDP
+ 00000000			scene_start PROC
+ 00000000  C3				ret
+ 00000001			scene_start ENDP
 
- 0000001A			new_render_command PROC PUBLIC USES ecx, rcType: RC_ENUM, pTransform: DWORD, pRenderable: DWORD
- 0000001A  55		   *	    push   ebp
- 0000001B  8B EC	   *	    mov    ebp, esp
- 0000001D  51		   *	    push   ecx
-					INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF RenderCommand
- 0000001E  6A 0C	   *	    push   +00000000Ch
- 00000020  6A 04	   *	    push   +000000004h
- 00000022  FF 35 00000000 E *	    push   hHeap
- 00000028  E8 00000000 E   *	    call   HeapAlloc
- 0000002D  8B C8			mov ecx, eax ; // Move the memory address to eax so it can function as a "this" pointer
-					INVOKE init_render_command, rcType, pTransform, pRenderable
- 0000002F  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
- 00000032  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
- 00000035  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 00000038  E8 FFFFFFC3	   *	    call   init_render_command
+				; // ----------------------------------
+				; // scene_update
+				; // Responsible for updating the game objects and simulations every frame.
+				; // ----------------------------------
+ 00000001			scene_update PROC
+					; // Take Input
 
-					ret ; // Return with the address of the memory block in HeapAlloc
- 0000003D  59		   *	    pop    ecx
- 0000003E  C9		   *	    leave  
- 0000003F  C2 000C	   *	    ret    0000Ch
- 00000042			new_render_command ENDP
+					; // Update Game Objects
+					; // for (GameObject o : *pGameObjects):
+					; //	o.update()
 
- 00000042			free_render_command PROC PUBLIC, pRenderCommand: DWORD
- 00000042  55		   *	    push   ebp
- 00000043  8B EC	   *	    mov    ebp, esp
-					INVOKE HeapFree, hHeap, 0, pRenderCommand
- 00000045  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 00000048  6A 00	   *	    push   +000000000h
- 0000004A  FF 35 00000000 E *	    push   hHeap
- 00000050  E8 00000000 E   *	    call   HeapFree
-					ret
- 00000055  C9		   *	    leave  
- 00000056  C2 0004	   *	    ret    00004h
- 00000059			free_render_command ENDP
+					; // Update components
+
+					; // Build render list
+
+					; // Pass render list to renderer
+ 00000001  C3				ret
+ 00000002			scene_update ENDP
+
+				; // ----------------------------------
+				; // scene_exit
+				; // A destructor that clears the scene and the resources allocated during scene_start.
+				; // ----------------------------------
+ 00000002			scene_exit PROC
+ 00000002  C3				ret
+ 00000003			scene_exit ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/23/26 23:15:11
-render_command.asm					     Symbols 2 - 1
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 10:00:33
+scene.asm						     Symbols 2 - 1
 
 
 
@@ -262,41 +91,10 @@ Structures and Unions:
                 N a m e                  Size
                                          Offset      Type
 
-RectComponent  . . . . . . . . .	 00000010
-  h  . . . . . . . . . . . . . .	 00000000	 DWord
-  w  . . . . . . . . . . . . . .	 00000004	 DWord
-  r  . . . . . . . . . . . . . .	 00000008	 Byte
-  g  . . . . . . . . . . . . . .	 00000009	 Byte
-  b  . . . . . . . . . . . . . .	 0000000A	 Byte
-  a  . . . . . . . . . . . . . .	 0000000B	 Byte
-  visible  . . . . . . . . . . .	 0000000C	 DWord
-RenderCommand  . . . . . . . . .	 0000000C
-  rcType . . . . . . . . . . . .	 00000000	 DWord
-  pTransform . . . . . . . . . .	 00000004	 DWord
-  pRenderable  . . . . . . . . .	 00000008	 DWord
-SpriteComponent  . . . . . . . .	 00000028
-  originX  . . . . . . . . . . .	 00000000	 DWord
-  originY  . . . . . . . . . . .	 00000004	 DWord
-  pTexture . . . . . . . . . . .	 00000008	 DWord
-  cellX  . . . . . . . . . . . .	 0000000C	 DWord
-  cellY  . . . . . . . . . . . .	 00000010	 DWord
-  cellW  . . . . . . . . . . . .	 00000014	 DWord
-  cellH  . . . . . . . . . . . .	 00000018	 DWord
-  flipX  . . . . . . . . . . . .	 0000001C	 DWord
-  flipY  . . . . . . . . . . . .	 00000020	 DWord
-  visible  . . . . . . . . . . .	 00000024	 DWord
-TransformComponent . . . . . . .	 0000000C
-  x  . . . . . . . . . . . . . .	 00000000	 DWord
-  y  . . . . . . . . . . . . . .	 00000004	 DWord
-  ignoreCamera . . . . . . . . .	 00000008	 DWord
-
-
-Types:
-
-                N a m e                  Size     Attr
-
-HANDLE . . . . . . . . . . . . .	 00000004     DWord
-RC_ENUM  . . . . . . . . . . . .	 00000004     DWord
+Scene  . . . . . . . . . . . . .	 0000000C
+  numGameObjects . . . . . . . .	 00000000	 DWord
+  maxGameObjects . . . . . . . .	 00000004	 DWord
+  pGameObjects . . . . . . . . .	 00000008	 DWord
 
 
 Segments and Groups:
@@ -306,34 +104,16 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000059 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000003 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
-GetProcessHeap . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-HeapAlloc  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-free_rect_component  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-free_render_command  . . . . . .	P Near	 00000042 _TEXT	Length= 00000017 Public STDCALL
-  pRenderCommand . . . . . . . .	DWord	 bp + 00000008
-free_transform_component . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-init_rect_component  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-init_render_command  . . . . . .	P Near	 00000000 _TEXT	Length= 0000001A Public STDCALL
-  rcType . . . . . . . . . . . .	DWord	 bp + 00000008
-  pTransform . . . . . . . . . .	DWord	 bp + 0000000C
-  pRenderable  . . . . . . . . .	DWord	 bp + 00000010
-init_transform_component . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-new_rect_component . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-new_render_command . . . . . . .	P Near	 0000001A _TEXT	Length= 00000028 Public STDCALL
-  rcType . . . . . . . . . . . .	DWord	 bp + 00000008
-  pTransform . . . . . . . . . .	DWord	 bp + 0000000C
-  pRenderable  . . . . . . . . .	DWord	 bp + 00000010
-new_transform_component  . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+scene_exit . . . . . . . . . . .	P Near	 00000002 _TEXT	Length= 00000001 Private STDCALL
+scene_start  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000001 Private STDCALL
+scene_update . . . . . . . . . .	P Near	 00000001 _TEXT	Length= 00000001 Private STDCALL
 
 
 Symbols:
@@ -349,18 +129,7 @@ Symbols:
 @fardata?  . . . . . . . . . . .	Text   	 FLAT
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
-HEAP_FUNCTIONS_INC . . . . . . .	Number	 00000001h   
-HEAP_GENERATE_EXCEPTIONS . . . .	Number	 00000004h   
-HEAP_NO_SERIALIZE  . . . . . . .	Number	 00000001h   
-HEAP_ZERO_MEMORY . . . . . . . .	Number	 00000008h   
-NULL . . . . . . . . . . . . . .	Number	 00000000h   
-RC_RECT  . . . . . . . . . . . .	Number	 00000000h   
-RC_SPRITE  . . . . . . . . . . .	Number	 00000001h   
-RECT_COMMAND_INC . . . . . . . .	Number	 00000001h   
-RENDERER_COMMAND_INC . . . . . .	Number	 00000001h   
-SPRITE_COMPONENT_INC . . . . . .	Number	 00000001h   
-TRANSFORM_COMPONENT_INC  . . . .	Number	 00000001h   
-hHeap  . . . . . . . . . . . . .	DWord	 00000000 FLAT	External STDCALL
+SCENE_INC  . . . . . . . . . . .	Number	 00000001h   
 
 	   0 Warnings
 	   0 Errors

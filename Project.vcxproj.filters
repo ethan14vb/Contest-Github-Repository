@@ -55,6 +55,9 @@
     <Filter Include="Source\Rendering">
       <UniqueIdentifier>{1a5080f9-bf19-4c04-a1ad-c215501bcfbb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource\Scenes">
+      <UniqueIdentifier>{107099d3-5bbe-4f80-b2ee-4de45e966fb9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <MASM Include="scene.asm">
@@ -80,6 +83,9 @@
     </MASM>
     <MASM Include="main.asm">
       <Filter>Source\Engine</Filter>
+    </MASM>
+    <MASM Include="rectangle_test_scene.asm">
+      <Filter>Resource\Scenes</Filter>
     </MASM>
   </ItemGroup>
 </Project>
