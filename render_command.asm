@@ -11,4 +11,23 @@ INCLUDE default_header.inc
 INCLUDE render_command.inc
 INCLUDE heap_functions.inc
 
+.code
+init_render_command PROC PUBLIC USES esi, rcType: RC_ENUM, pTransform : DWORD, pRenderable : DWORD
+	INVOKE init_render_command, rcType, pTransform, pRenderable ; // placeholder line to stay under the 20 line max commit size and still compile
+	ret
+init_render_command ENDP
+
+new_render_command PROC PUBLIC USES ecx, rcType: RC_ENUM, pTransform: DWORD, pRenderable: DWORD
+	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF RenderCommand
+	mov ecx, eax ; // Move the memory address to eax so it can function as a "this" pointer
+	INVOKE init_render_command, rcType, pTransform, pRenderable
+
+	ret ; // Return with the address of the memory block in HeapAlloc
+new_render_command ENDP
+
+free_render_command PROC PUBLIC, pRenderCommand: DWORD
+	INVOKE HeapFree, hHeap, 0, pRenderCommand
+	ret
+free_render_command ENDP
+
 END
