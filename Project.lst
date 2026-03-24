@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 11:17:52
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 11:18:17
 rectangle_test_scene.asm				     Page 1 - 1
 
 
@@ -71,8 +71,31 @@ rectangle_test_scene.asm				     Page 1 - 1
  00000016  00					BYTE 0		; // b
  00000017  FF					BYTE 255	; // a
 
+						; // Component 2: TransformComponent
+ 00000018  00000002				DWORD TRANSFORM_COMPONENT_ID
+ 0000001C  0000000A				DWORD 10	; // x
+ 00000020  0000000A				DWORD 10	; // y
+ 00000024  00000000				DWORD 0		; // ignoreCamera
+
+					; // GameObject 2: A blue square
+ 00000028  00000002			DWORD 2 ; // Number of components
+						; // Component 1: RectComponent
+ 0000002C  00000000				DWORD RECT_COMPONENT_ID
+ 00000030  00000006				DWORD 6		; // Height
+ 00000034  00000005				DWORD 5		; // Width
+ 00000038  00					BYTE 0		; // r
+ 00000039  00					BYTE 0		; // g
+ 0000003A  FF					BYTE 255	; // b
+ 0000003B  FF					BYTE 255	; // a
+
+						; // Component 2: TransformComponent
+ 0000003C  00000002				DWORD TRANSFORM_COMPONENT_ID
+ 00000040  00000028				DWORD 40	; // x
+ 00000044  0000000A				DWORD 10	; // y
+ 00000048  00000000				DWORD 0		; // ignoreCamera
+
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 11:17:52
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/24/26 11:18:17
 rectangle_test_scene.asm				     Symbols 2 - 1
 
 
@@ -91,7 +114,7 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000018 DWord	  Public  'DATA'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000004C DWord	  Public  'DATA'	
 _TEXT  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'CODE'	
 
 
