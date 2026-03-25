@@ -15,6 +15,7 @@
 
 INCLUDE default_header.inc
 INCLUDE game_object.inc
+INCLUDE component.inc
 INCLUDE heap_functions.inc
 
 .data
@@ -118,7 +119,30 @@ new_game_object ENDP
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-free_game_object PROC PUBLIC
+free_game_object PROC PUBLIC USES eax esi ebx
+	; // Destruct the components
+	mov esi, ecx ; // Move the this pointer to esi
+	mov eax, (GameObject PTR [esi]).pComponents
+	mov ebx, (GameObject PTR [esi]).numComponents
+
+	mov ecx, 0 ; // Loop counter (int i = 0)
+	.WHILE ecx < ebx
+		mov edx, [eax + ecx * 4] ; // edx = pComponents[i]
+
+		; // pComponents[i]->free()
+		push ecx
+		push eax
+		mov ecx, edx
+		INVOKE free_component_virtual
+		pop eax
+		pop ecx
+
+		inc ecx ; // i++
+	.ENDW
+
+	INVOKE HeapFree, hHeap, 0, eax ; // Free the Components pointer list
+	
+	mov ecx, esi ; // Restore the THIS pointer to ecx
 	INVOKE HeapFree, hHeap, 0, ecx
 	ret
 free_game_object ENDP

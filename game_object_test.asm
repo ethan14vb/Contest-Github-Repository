@@ -31,7 +31,8 @@ main PROC PUBLIC
 	INVOKE new_rect_component, 6, 7, 255, 255, 9, 255
 	INVOKE add_component, pGameObject, eax
 
-	INVOKE free_game_object, pGameObject
+	mov ecx, pGameObject
+	INVOKE free_game_object
 
 	INVOKE ExitProcess, 0
 	ret

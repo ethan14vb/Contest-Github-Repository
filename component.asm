@@ -48,7 +48,7 @@ free_component ENDP
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-free_component_virtual PROC PUBLIC
+free_component_virtual PROC PUBLIC USES ebx
 	mov ebx, (Component PTR [ecx]).pVt
 	mov ebx, (Component_vtable PTR [ebx]).pFree
 	call ebx
