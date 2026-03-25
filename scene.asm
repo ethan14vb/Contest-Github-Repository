@@ -25,7 +25,23 @@ INCLUDE scene.inc
 ; //	ecx - THIS pointer
 ; // ----------------------------------
 init_scene PROC PUBLIC USES esi, maxGameObjects : DWORD
-	INVOKE init_scene, maxGameObjects ; // placeholder just to avoid MASM bugs
+	; // Set up class members
+	mov esi, maxGameObjects
+	mov (Scene PTR [ecx]).maxGameObjects, esi
+	mov (Scene PTR [ecx]).numGameObjects, 0 ; // Initially, Scenes have no GameObjects
+
+	; // Now set up the GameObject pointer table
+	mov eax, maxGameObjects
+	mov edx, SIZEOF DWORD
+	mul edx
+
+	push ecx
+	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, eax
+	pop ecx
+	mov (Scene PTR[ecx]).pGameObjects, eax
+
+	mov eax, ecx ; // Return the this pointer
+
 	ret
 init_scene ENDP
 
@@ -35,10 +51,10 @@ init_scene ENDP
 ; // ----------------------------------
 new_scene PROC PUBLIC USES ecx, maxGameObjects : DWORD
 	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF Scene
-	mov ecx, eax; // Move the memory address to ecx so it can function as a "this" pointer
+	mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
 	INVOKE init_scene, maxGameObjects
 
-	ret; // Return with the address of the memory block in HeapAlloc
+	ret ; // Return with the address of the memory block in HeapAlloc
 new_scene ENDP
 
 ; // ----------------------------------
