@@ -102,10 +102,10 @@
     <MASM Include="rectangle_test_scene.asm">
       <Filter>Resource\Scenes</Filter>
     </MASM>
-    <MASM Include="main.asm">
+    <MASM Include="component.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
-    <MASM Include="component.asm">
+    <MASM Include="main.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
   </ItemGroup>

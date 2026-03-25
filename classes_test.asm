@@ -41,8 +41,13 @@ main PROC PUBLIC
 	mov (RenderCommand PTR [edi]).rcType, RC_SPRITE
 
 	; // Free the classes
-	INVOKE free_transform_component, pTrans
+	mov ecx, pTrans
+	mov ebx, (Component PTR [ecx]).pVt
+	mov ebx, (Component_vtable PTR [ebx]).pFree
+	call ebx
+
 	INVOKE free_rect_component, pRect
+	mov ecx, pRC
 	INVOKE free_render_command, pRC
 
 	INVOKE ExitProcess, 0
