@@ -19,6 +19,7 @@
     <MASM Include="rect_component.asm" />
     <MASM Include="render_command.asm" />
     <MASM Include="transform_component.asm" />
+    <None Include="component.inc" />
     <None Include="component_ids.inc" />
     <None Include="game_object.inc">
       <FileType>Document</FileType>

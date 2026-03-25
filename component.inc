@@ -1,0 +1,19 @@
+; // ==================================
+; // component.inc
+; // ----------------------------------
+; //	Components are utility helpers to GameObjects that
+; // allow for easy adding of features and a composition
+; // structure for them (HasA vs IsA). 
+; //	Some examples of components are SpriteComponents
+; // that describe what a GameObject should look like or
+; // TransformComponents that describe where a GameObject
+; // is located spatially. 
+; //	This is the generic component STRUCT that
+; // all components inherit from.
+; // ==================================
+
+IFNDEF COMPONENT_INC
+COMPONENT_INC EQU 1
+
+
+ENDIF
