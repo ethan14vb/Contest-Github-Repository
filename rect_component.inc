@@ -10,6 +10,8 @@ IFNDEF RECT_COMMAND_INC
 RECT_COMMAND_INC EQU 1
 
 RectComponent STRUCT
+	baseComponent Component <>
+
 	h DWORD ? ; // Height
 	w DWORD ? ; // Width
 

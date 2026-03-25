@@ -8,7 +8,11 @@
 IFNDEF TRANSFORM_COMPONENT_INC
 TRANSFORM_COMPONENT_INC EQU 1
 
+INCLUDE component.inc
+
 TransformComponent STRUCT
+	baseComponent Component <>
+
 	x DWORD ?
 	y DWORD ?
 

@@ -9,6 +9,8 @@ IFNDEF SPRITE_COMPONENT_INC
 SPRITE_COMPONENT_INC EQU 1
 
 SpriteComponent STRUCT
+	baseComponent Component <>
+
 	originX DWORD ?
 	originY DWORD ?
 
