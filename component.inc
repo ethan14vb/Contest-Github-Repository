@@ -15,5 +15,15 @@
 IFNDEF COMPONENT_INC
 COMPONENT_INC EQU 1
 
+INCLUDE component_ids.inc
+
+Component_vtable STRUCT
+	pFree DWORD ?
+Component_vtable ENDS
+
+Component STRUCT
+	componentType ENUM_COMPONENT_ID DEFAULT_COMPONENT_ID
+	pVt DWORD OFFSET Component_vtable
+Component ENDS
 
 ENDIF

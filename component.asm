@@ -14,5 +14,6 @@
 
 INCLUDE default_header.inc
 INCLUDE heap_functions.inc
+INCLUDE component.inc
 
 END
