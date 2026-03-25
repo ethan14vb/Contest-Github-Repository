@@ -26,4 +26,9 @@ Component STRUCT
 	pVt DWORD ?
 Component ENDS
 
+; // Constructor protos
+init_component PROTO
+new_component PROTO
+free_component PROTO
+
 ENDIF
