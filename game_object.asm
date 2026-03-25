@@ -79,6 +79,7 @@ init_game_object PROC PUBLIC USES esi ebx edx, maxComponents : DWORD
 	; // Set up class members
 	mov esi, maxComponents
 	mov (GameObject PTR [ecx]).maxComponents, esi
+	mov (GameObject PTR [ecx]).numComponents, 0 ; // Initially, GameObjects have no components
 
 	; // Set up vTable
 	mov (GameObject PTR[ecx]).pVt, OFFSET GAMEOBJECT_VTABLE
@@ -88,8 +89,12 @@ init_game_object PROC PUBLIC USES esi ebx edx, maxComponents : DWORD
 	mov edx, SIZEOF DWORD
 	mul edx
 
+	push ecx
 	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, eax
+	pop ecx
 	mov (GameObject PTR[ecx]).pComponents, eax
+
+	mov eax, ecx ; // Return the this pointer
 
 	ret
 init_game_object ENDP

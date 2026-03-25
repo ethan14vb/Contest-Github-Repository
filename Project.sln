@@ -14,6 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{96660186
 	ProjectSection(SolutionItems) = preProject
 		classes_test.asm = classes_test.asm
 		component_ids_test.asm = component_ids_test.asm
+		game_object_test.asm = game_object_test.asm
 		heap_functions_test.asm = heap_functions_test.asm
 		include_everything_test.asm = include_everything_test.asm
 		renderer_test.asm = renderer_test.asm
