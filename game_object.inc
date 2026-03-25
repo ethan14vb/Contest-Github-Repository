@@ -16,6 +16,10 @@
 IFNDEF GAME_OBJECT_INC
 GAME_OBJECT_INC EQU 1
 
+INCLUDE game_object_ids.inc
+
+ENUM_GAME_OBJECT_ID TYPEDEF DWORD
+
 GameObject_vtable STRUCT
 	pStart DWORD ? ; For initialization of the GameObject
 	pUpdate DWORD ? ; For game logic that will run every frame update
@@ -23,6 +27,7 @@ GameObject_vtable STRUCT
 GameObject_vtable ENDS
 
 GameObject STRUCT
+	gameObjectType ENUM_GAME_OBJECT_ID ?
 	numComponents DWORD ?
 	maxComponents DWORD ?
 	pComponents DWORD ? ; Pointer to a table of components

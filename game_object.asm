@@ -15,6 +15,7 @@
 
 INCLUDE default_header.inc
 INCLUDE game_object.inc
+INCLUDE game_object_ids.inc
 INCLUDE component.inc
 INCLUDE heap_functions.inc
 
@@ -77,13 +78,15 @@ add_component ENDP
 ; //	ecx - THIS pointer
 ; // ----------------------------------
 init_game_object PROC PUBLIC USES esi ebx edx, maxComponents : DWORD
+	mov (GameObject PTR [ecx]).gameObjectType, DEFAULT_GAME_OBJECT_ID
+
 	; // Set up class members
 	mov esi, maxComponents
 	mov (GameObject PTR [ecx]).maxComponents, esi
 	mov (GameObject PTR [ecx]).numComponents, 0 ; // Initially, GameObjects have no components
 
 	; // Set up vTable
-	mov (GameObject PTR[ecx]).pVt, OFFSET GAMEOBJECT_VTABLE
+	mov (GameObject PTR [ecx]).pVt, OFFSET GAMEOBJECT_VTABLE
 
 	; // Now set up the component pointer table
 	mov eax, maxComponents
