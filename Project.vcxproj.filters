@@ -41,9 +41,6 @@
     <None Include="game_object_ids.inc">
       <Filter>Include\Resource</Filter>
     </None>
-    <None Include="scene_data_format_description.md">
-      <Filter>Resource\Scenes</Filter>
-    </None>
     <None Include="component.inc">
       <Filter>Include\Engine</Filter>
     </None>

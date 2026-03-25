@@ -1,54 +1,22 @@
 ; // ==================================
 ; // rectangle_test_scene.asm
 ; // ----------------------------------
-; // Data defining a scene to test the rendering of RectComponents.
+; // Initializes a scene to have two rectangles to test the rendering
+; // capabilities for RectComponents.
 ; // ==================================
 
 INCLUDE default_header.inc
 INCLUDE rectangle_test_scene.inc
-INCLUDE component_ids.inc
-INCLUDE game_object_ids.inc
 
-.data
-RectTestScene_Data LABEL BYTE ; // The label is set to BYTE so the data can be traversed with flexibility
-	DWORD 2 ; // Number of GameObjects
-
-	; // GameObject 1: A red square
-	DWORD DEFAULT_GAME_OBJECT_ID ; // The type of GameObject 
-	DWORD 0 ; // The length of the initializer parameters for this GameObject is 0
-	DWORD 2 ; // Number of components
-		; // Component 1: RectComponent
-		DWORD RECT_COMPONENT_ID
-		DWORD 5		; // Height
-		DWORD 6		; // Width
-		BYTE 255	; // r
-		BYTE 0		; // g
-		BYTE 0		; // b
-		BYTE 255	; // a
-
-		; // Component 2: TransformComponent
-		DWORD TRANSFORM_COMPONENT_ID
-		DWORD 10	; // x
-		DWORD 10	; // y
-		DWORD 0		; // ignoreCamera
-
-	; // GameObject 2: A blue square
-	DWORD DEFAULT_GAME_OBJECT_ID ; // The type of GameObject 
-	DWORD 0 ; // The length of the initializer parameters for this GameObject is 0
-	DWORD 2 ; // Number of components
-		; // Component 1: RectComponent
-		DWORD RECT_COMPONENT_ID
-		DWORD 6		; // Height
-		DWORD 5		; // Width
-		BYTE 0		; // r
-		BYTE 0		; // g
-		BYTE 255	; // b
-		BYTE 255	; // a
-
-		; // Component 2: TransformComponent
-		DWORD TRANSFORM_COMPONENT_ID
-		DWORD 40	; // x
-		DWORD 10	; // y
-		DWORD 0		; // ignoreCamera
+.code
+; // ----------------------------------
+; // populate_rectangle_test_scene
+; // Call this method on an empty Scene to fill it
+; // with the rectangle test scene contents.
+; // ----------------------------------
+populate_rectangle_test_scene PROC, pScene: DWORD
+	mov eax, pScene ; // Dummy instruction to avoid MASM assemble time errors
+	ret
+populate_rectangle_test_scene ENDP
 
 END
