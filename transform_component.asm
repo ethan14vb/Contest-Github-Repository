@@ -23,7 +23,6 @@ COMPONENT_VTABLE Component_vtable <OFFSET free_transform_component>
 ; // ----------------------------------
 init_transform_component PROC PUBLIC USES esi, x: DWORD, y : DWORD, ignoreCamera : DWORD
 	; // Parent constructor
-	INVOKE init_component
 	mov (Component PTR [ecx]).componentType, TRANSFORM_COMPONENT_ID
 	mov (Component PTR [ecx]).pVt, OFFSET COMPONENT_VTABLE
 
