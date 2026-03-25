@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/25/26 12:43:00
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/25/26 13:05:34
 scene.asm						     Page 1 - 1
 
 
@@ -75,9 +75,9 @@ scene.asm						     Page 1 - 1
  00000008  00000000	      C 	pGameObjects DWORD ? ; // List containing game objects
 			      C Scene ENDS
 			      C 
-			      C init_scene PROTO numGameObjects : DWORD, maxGameObjects : DWORD, pGameObjects : DWORD
-			      C new_scene PROTO numGameObjects : DWORD, maxGameObjects : DWORD, pGameObjects : DWORD
-			      C free_scene PROTO pGameObjects: DWORD
+			      C init_scene PROTO maxGameObjects : DWORD
+			      C new_scene PROTO maxGameObjects : DWORD
+			      C free_scene PROTO
 			      C 
 			      C ENDIF
 			      C 
@@ -94,63 +94,58 @@ scene.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000000			init_scene PROC PUBLIC USES esi, numGameObjects : DWORD, maxGameObjects : DWORD, pGameObjects : DWORD
+ 00000000			init_scene PROC PUBLIC USES esi, maxGameObjects : DWORD
  00000000  55		   *	    push   ebp
  00000001  8B EC	   *	    mov    ebp, esp
  00000003  56		   *	    push   esi
-					INVOKE init_scene, numGameObjects, maxGameObjects, pGameObjects ; // placeholder just to avoid MASM bugs
- 00000004  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
- 00000007  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
- 0000000A  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 0000000D  E8 FFFFFFEE	   *	    call   init_scene
+					INVOKE init_scene, maxGameObjects ; // placeholder just to avoid MASM bugs
+ 00000004  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000007  E8 FFFFFFF4	   *	    call   init_scene
 					ret
- 00000012  5E		   *	    pop    esi
- 00000013  C9		   *	    leave  
- 00000014  C2 000C	   *	    ret    0000Ch
- 00000017			init_scene ENDP
+ 0000000C  5E		   *	    pop    esi
+ 0000000D  C9		   *	    leave  
+ 0000000E  C2 0004	   *	    ret    00004h
+ 00000011			init_scene ENDP
 
 				; // ----------------------------------
 				; // new_scene
 				; // Reserves heap space for the scene with parameters and calls the initializer method
 				; // ----------------------------------
- 00000017			new_scene PROC PUBLIC USES ecx, numGameObjects : DWORD, maxGameObjects : DWORD, pGameObjects : DWORD
- 00000017  55		   *	    push   ebp
- 00000018  8B EC	   *	    mov    ebp, esp
- 0000001A  51		   *	    push   ecx
+ 00000011			new_scene PROC PUBLIC USES ecx, maxGameObjects : DWORD
+ 00000011  55		   *	    push   ebp
+ 00000012  8B EC	   *	    mov    ebp, esp
+ 00000014  51		   *	    push   ecx
 					INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF Scene
- 0000001B  6A 0C	   *	    push   +00000000Ch
- 0000001D  6A 04	   *	    push   +000000004h
- 0000001F  FF 35 00000000 E *	    push   hHeap
- 00000025  E8 00000000 E   *	    call   HeapAlloc
- 0000002A  8B C8			mov ecx, eax; // Move the memory address to ecx so it can function as a "this" pointer
-					INVOKE init_scene, numGameObjects, maxGameObjects, pGameObjects
- 0000002C  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
- 0000002F  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
- 00000032  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 00000035  E8 FFFFFFC6	   *	    call   init_scene
+ 00000015  6A 0C	   *	    push   +00000000Ch
+ 00000017  6A 04	   *	    push   +000000004h
+ 00000019  FF 35 00000000 E *	    push   hHeap
+ 0000001F  E8 00000000 E   *	    call   HeapAlloc
+ 00000024  8B C8			mov ecx, eax; // Move the memory address to ecx so it can function as a "this" pointer
+					INVOKE init_scene, maxGameObjects
+ 00000026  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000029  E8 FFFFFFD2	   *	    call   init_scene
 
 					ret; // Return with the address of the memory block in HeapAlloc
- 0000003A  59		   *	    pop    ecx
- 0000003B  C9		   *	    leave  
- 0000003C  C2 000C	   *	    ret    0000Ch
- 0000003F			new_scene ENDP
+ 0000002E  59		   *	    pop    ecx
+ 0000002F  C9		   *	    leave  
+ 00000030  C2 0004	   *	    ret    00004h
+ 00000033			new_scene ENDP
 
 				; // ----------------------------------
 				; // free_scene
 				; // Convenient method for freeing a Scene
+				; //
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
 				; // ----------------------------------
- 0000003F			free_scene PROC PUBLIC, pGameObjects: DWORD
- 0000003F  55		   *	    push   ebp
- 00000040  8B EC	   *	    mov    ebp, esp
-					INVOKE HeapFree, hHeap, 0, pGameObjects
- 00000042  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 00000045  6A 00	   *	    push   +000000000h
- 00000047  FF 35 00000000 E *	    push   hHeap
- 0000004D  E8 00000000 E   *	    call   HeapFree
-					ret
- 00000052  C9		   *	    leave  
- 00000053  C2 0004	   *	    ret    00004h
- 00000056			free_scene ENDP
+ 00000033			free_scene PROC PUBLIC
+					INVOKE HeapFree, hHeap, 0, ecx
+ 00000033  51		   *	    push   ecx
+ 00000034  6A 00	   *	    push   +000000000h
+ 00000036  FF 35 00000000 E *	    push   hHeap
+ 0000003C  E8 00000000 E   *	    call   HeapFree
+ 00000041  C3				ret
+ 00000042			free_scene ENDP
 
 
 				; // ********************************************
@@ -162,15 +157,15 @@ scene.asm						     Page 1 - 1
 				; // Initializes the scene and allocates resources that will be used such as spritesheets,
 				; // SFX, or other external files needed in the scene. 
 				; // ----------------------------------
- 00000056			scene_start PROC
- 00000056  C3				ret
- 00000057			scene_start ENDP
+ 00000042			scene_start PROC
+ 00000042  C3				ret
+ 00000043			scene_start ENDP
 
 				; // ----------------------------------
 				; // scene_update
 				; // Responsible for updating the game objects and simulations every frame.
 				; // ----------------------------------
- 00000057			scene_update PROC
+ 00000043			scene_update PROC
 					; // Take Input
 
 					; // Update Game Objects
@@ -182,19 +177,22 @@ scene.asm						     Page 1 - 1
 					; // Build render list
 
 					; // Pass render list to renderer
- 00000057  C3				ret
- 00000058			scene_update ENDP
+ 00000043  C3				ret
+ 00000044			scene_update ENDP
 
 				; // ----------------------------------
 				; // scene_exit
-				; // A destructor that clears the scene and the resources allocated during scene_start.
+				; // Clears the resources allocated during scene_start.
+				; //
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000058			scene_exit PROC
- 00000058  C3				ret
- 00000059			scene_exit ENDP
+ 00000044			scene_exit PROC
+ 00000044  C3				ret
+ 00000045			scene_exit ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/25/26 12:43:00
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/25/26 13:05:34
 scene.asm						     Symbols 2 - 1
 
 
@@ -225,7 +223,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000059 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000045 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -236,20 +234,15 @@ GetProcessHeap . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 HeapAlloc  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-free_scene . . . . . . . . . . .	P Near	 0000003F _TEXT	Length= 00000017 Public STDCALL
-  pGameObjects . . . . . . . . .	DWord	 bp + 00000008
-init_scene . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000017 Public STDCALL
-  numGameObjects . . . . . . . .	DWord	 bp + 00000008
-  maxGameObjects . . . . . . . .	DWord	 bp + 0000000C
-  pGameObjects . . . . . . . . .	DWord	 bp + 00000010
+free_scene . . . . . . . . . . .	P Near	 00000033 _TEXT	Length= 0000000F Public STDCALL
+init_scene . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000011 Public STDCALL
+  maxGameObjects . . . . . . . .	DWord	 bp + 00000008
 initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-new_scene  . . . . . . . . . . .	P Near	 00000017 _TEXT	Length= 00000028 Public STDCALL
-  numGameObjects . . . . . . . .	DWord	 bp + 00000008
-  maxGameObjects . . . . . . . .	DWord	 bp + 0000000C
-  pGameObjects . . . . . . . . .	DWord	 bp + 00000010
-scene_exit . . . . . . . . . . .	P Near	 00000058 _TEXT	Length= 00000001 Private STDCALL
-scene_start  . . . . . . . . . .	P Near	 00000056 _TEXT	Length= 00000001 Private STDCALL
-scene_update . . . . . . . . . .	P Near	 00000057 _TEXT	Length= 00000001 Private STDCALL
+new_scene  . . . . . . . . . . .	P Near	 00000011 _TEXT	Length= 00000022 Public STDCALL
+  maxGameObjects . . . . . . . .	DWord	 bp + 00000008
+scene_exit . . . . . . . . . . .	P Near	 00000044 _TEXT	Length= 00000001 Private STDCALL
+scene_start  . . . . . . . . . .	P Near	 00000042 _TEXT	Length= 00000001 Private STDCALL
+scene_update . . . . . . . . . .	P Near	 00000043 _TEXT	Length= 00000001 Private STDCALL
 
 
 Symbols:

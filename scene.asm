@@ -24,8 +24,8 @@ INCLUDE scene.inc
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-init_scene PROC PUBLIC USES esi, numGameObjects : DWORD, maxGameObjects : DWORD, pGameObjects : DWORD
-	INVOKE init_scene, numGameObjects, maxGameObjects, pGameObjects ; // placeholder just to avoid MASM bugs
+init_scene PROC PUBLIC USES esi, maxGameObjects : DWORD
+	INVOKE init_scene, maxGameObjects ; // placeholder just to avoid MASM bugs
 	ret
 init_scene ENDP
 
@@ -33,10 +33,10 @@ init_scene ENDP
 ; // new_scene
 ; // Reserves heap space for the scene with parameters and calls the initializer method
 ; // ----------------------------------
-new_scene PROC PUBLIC USES ecx, numGameObjects : DWORD, maxGameObjects : DWORD, pGameObjects : DWORD
+new_scene PROC PUBLIC USES ecx, maxGameObjects : DWORD
 	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF Scene
 	mov ecx, eax; // Move the memory address to ecx so it can function as a "this" pointer
-	INVOKE init_scene, numGameObjects, maxGameObjects, pGameObjects
+	INVOKE init_scene, maxGameObjects
 
 	ret; // Return with the address of the memory block in HeapAlloc
 new_scene ENDP
@@ -44,9 +44,12 @@ new_scene ENDP
 ; // ----------------------------------
 ; // free_scene
 ; // Convenient method for freeing a Scene
+; //
+; // Register Parameters: 
+; //	ecx - THIS pointer
 ; // ----------------------------------
-free_scene PROC PUBLIC, pGameObjects: DWORD
-	INVOKE HeapFree, hHeap, 0, pGameObjects
+free_scene PROC PUBLIC
+	INVOKE HeapFree, hHeap, 0, ecx
 	ret
 free_scene ENDP
 
@@ -85,7 +88,10 @@ scene_update ENDP
 
 ; // ----------------------------------
 ; // scene_exit
-; // A destructor that clears the scene and the resources allocated during scene_start.
+; // Clears the resources allocated during scene_start.
+; //
+; // Register Parameters: 
+; //	ecx - THIS pointer
 ; // ----------------------------------
 scene_exit PROC
 	ret
