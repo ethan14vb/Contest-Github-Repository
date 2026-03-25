@@ -35,6 +35,6 @@ add_component PROTO pGameObject: DWORD, pComponent: DWORD
 ; // Constructors
 init_game_object PROTO maxComponents : DWORD
 new_game_object PROTO maxComponents : DWORD
-free_game_object PROTO pGameObject: DWORD
+free_game_object PROTO
 
 ENDIF

@@ -114,9 +114,12 @@ new_game_object ENDP
 ; // ----------------------------------
 ; // free_game_object
 ; // Convenient method for freeing a GameObject
+; //
+; // Register Parameters: 
+; //	ecx - THIS pointer
 ; // ----------------------------------
-free_game_object PROC PUBLIC, pGameObject: DWORD
-	INVOKE HeapFree, hHeap, 0, pGameObject
+free_game_object PROC PUBLIC
+	INVOKE HeapFree, hHeap, 0, ecx
 	ret
 free_game_object ENDP
 
