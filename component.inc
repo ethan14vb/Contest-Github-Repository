@@ -23,7 +23,7 @@ Component_vtable ENDS
 
 Component STRUCT
 	componentType ENUM_COMPONENT_ID DEFAULT_COMPONENT_ID
-	pVt DWORD OFFSET Component_vtable
+	pVt DWORD ?
 Component ENDS
 
 ENDIF
