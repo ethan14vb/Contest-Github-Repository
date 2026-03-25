@@ -42,11 +42,11 @@ main PROC PUBLIC
 
 	; // Free the classes
 	mov ecx, pTrans
-	mov ebx, (Component PTR [ecx]).pVt
-	mov ebx, (Component_vtable PTR [ebx]).pFree
-	call ebx
+	INVOKE free_component_virtual
 
-	INVOKE free_rect_component, pRect
+	mov ecx, pRect
+	INVOKE free_component_virtual
+
 	mov ecx, pRC
 	INVOKE free_render_command, pRC
 

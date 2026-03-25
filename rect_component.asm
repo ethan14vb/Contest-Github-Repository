@@ -19,6 +19,10 @@ INCLUDE heap_functions.inc
 ; //	ecx - THIS pointer
 ; // ----------------------------------
 init_rect_component PROC PUBLIC USES ebx esi, h: DWORD, w : DWORD, r : BYTE, g : BYTE, b : BYTE, a : BYTE
+	; // Parent constructor
+	INVOKE init_component
+	mov (Component PTR [ecx]).componentType, RECT_COMPONENT_ID
+
 	; // Height & Width
 	mov esi, h
 	mov (RectComponent PTR [ecx]).h, esi
@@ -39,6 +43,11 @@ init_rect_component PROC PUBLIC USES ebx esi, h: DWORD, w : DWORD, r : BYTE, g :
 	ret
 init_rect_component ENDP
 
+; // ----------------------------------
+; // new_rect_component
+; // Allocates memory for a RectComponent and then calls
+; // the initializer method on it.
+; // ----------------------------------
 new_rect_component PROC PUBLIC USES ebx esi, h: DWORD, w : DWORD, r : BYTE, g : BYTE, b : BYTE, a : BYTE
 	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF RectComponent
 	mov ecx, eax; // Move the memory address to ecx so it can function as a "this" pointer
@@ -46,10 +55,5 @@ new_rect_component PROC PUBLIC USES ebx esi, h: DWORD, w : DWORD, r : BYTE, g : 
 
 	ret ; // Return with the address of the memory block in HeapAlloc
 new_rect_component ENDP
-
-free_rect_component PROC PUBLIC, pRect: DWORD
-	INVOKE HeapFree, hHeap, 0, pRect
-	ret
-free_rect_component ENDP
 
 END 

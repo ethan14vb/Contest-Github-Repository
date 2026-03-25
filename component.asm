@@ -41,4 +41,18 @@ free_component PROC PUBLIC
 	ret
 free_component ENDP
 
+; // ----------------------------------
+; // free_component_virtual
+; // Calls the component's virtual free method
+; //
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+free_component_virtual PROC PUBLIC
+	mov ebx, (Component PTR [ecx]).pVt
+	mov ebx, (Component_vtable PTR [ebx]).pFree
+	call ebx
+	ret
+free_component_virtual ENDP
+
 END

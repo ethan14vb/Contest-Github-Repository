@@ -30,5 +30,6 @@ Component ENDS
 init_component PROTO
 new_component PROTO
 free_component PROTO
+free_component_virtual PROTO
 
 ENDIF
