@@ -21,9 +21,10 @@ INCLUDE game_object_ids.inc
 ENUM_GAME_OBJECT_ID TYPEDEF DWORD
 
 GameObject_vtable STRUCT
-	pStart DWORD ? ; For initialization of the GameObject
+	pStart DWORD ? ; For game logic that should run just after the GameObjec is initialized
 	pUpdate DWORD ? ; For game logic that will run every frame update
-	pExit DWORD ? ; Called when the GameObject is removed
+	pExit DWORD ? ; For game logic that should run just before the GameObject is freed
+	pFree DWORD ? ; Destructor
 GameObject_vtable ENDS
 
 GameObject STRUCT
