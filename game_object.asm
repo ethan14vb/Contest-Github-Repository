@@ -167,6 +167,20 @@ game_object_start PROC
 game_object_start ENDP
 
 ; // ----------------------------------
+; // game_object_start_virtual
+; // Calls the GameObject's virtual start method
+; //
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+game_object_start_virtual PROC PUBLIC USES ebx
+	mov ebx, (GameObject PTR [ecx]).pVt
+	mov ebx, (GameObject_vtable PTR [ebx]).pStart
+	call ebx
+	ret
+game_object_start_virtual ENDP
+
+; // ----------------------------------
 ; // game_object_update
 ; // Default blank update method for a GameObject
 ; // Can be left blank, or overriden by the virtual function table

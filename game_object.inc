@@ -43,4 +43,7 @@ init_game_object PROTO maxComponents : DWORD
 new_game_object PROTO maxComponents : DWORD
 free_game_object PROTO
 
+; // Instance methods
+game_object_start_virtual PROTO
+
 ENDIF
