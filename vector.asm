@@ -86,7 +86,32 @@ push_back PROC USES eax ebx edx edi, element: DWORD
 	ret
 push_back ENDP
 
-remove_element PROC
+remove_element PROC USES edi ebx, element: DWORD
+	mov edi, ecx ; // Move the THIS pointer to edi
+
+	mov eax, (Vector PTR [edi]).pData
+	mov ebx, (Vector PTR [edi]).count
+
+	mov ecx, 0
+	.WHILE ecx < ebx
+		mov edx, [eax + ecx * 4] ; // edx = pData[i]
+		
+		.IF edx == element
+			; // Found the elemnt, swap and pop it
+			dec (Vector PTR [edi]).count ; // "pop" the last element
+
+			mov ebx, (Vector PTR [edi]).count
+			mov edx, [eax + ebx * 4] ; // edx = pData[count - 1]
+
+			mov [eax + ecx * 4], edx ; // Swap the current position with the end position
+
+			mov eax, 0 ; // Return 0 = successful removal
+			ret
+		.ENDIF
+		inc ecx
+	.ENDW
+
+	mov eax, 1 ; // Return 1 = failed to find element
 	ret
 remove_element ENDP
 
