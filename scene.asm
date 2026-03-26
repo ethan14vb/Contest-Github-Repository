@@ -92,23 +92,26 @@ scene_update PROC, deltaTime: REAL4
 
 	; // Process start queue
 	; // for (GameObject o : *pStartQueue):
-	; //	pGameObjects.push_back(o)
+	; //	pGameObjects->push_back(o)
 	; //	o.Start()
+	; //
+	; // *pStartQueue->clear()
 
 	; // Update time sensitive components (such as timers and tweens)
-	; // for (Component c : *pTimeSensitiveComponents):
-	; //	if (c.pending_free == true)
-	; //		continue
-	; //
-	; //	c.Update(deltaTime)
+	; // for (GameObject o : *pGameObjects):
+	; //	for (Component c : o->pComponents)
+	; //		if (c.componentType == TIMER_COMPONENT_TYPE)
+	; //			c.Update(deltaTime)
 
 	; // Update Game Object logic
 	; // for (GameObject o : *pGameObjects):
 	; //	o.update(deltaTime)
 
 	; // Update animator components
-	; // for (AnimatorComponent a  : *pAnimationComponents)
-	; //	a.update(deltaTime)
+	; // for (GameObject o : *pGameObjects):
+	; //	for (Component c : o->pComponents)
+	; //		if (c.componentType == ANIMATOR_COMPONENT_TYPE)
+	; //			c.Update(deltaTime)
 
 	; // Free any GameObjects that were queued to be freed by gameplay logic
 	; // for (GameObject o : *pQueueFreeGameObjects)
@@ -116,8 +119,10 @@ scene_update PROC, deltaTime: REAL4
 
 	; // Build render list
 	; // renderCommands.clear()
-	; // for (RenderableComponent r : *pRenderableComponents):
-	; //	renderCommands.push_back(new RenderCommand(r))
+	; // for (GameObject o : *pGameObjects):
+	; //	for (Component c : o->pComponents)
+	; //		if (c.componentType == SPRITE_COMPONENT_TYPE || c.componentType == RECT_COMPONENT_TYPE)
+	; //			renderCommands.push_back(new RenderCommand(r))
 
 	; // Pass render list to renderer
 	; // renderer.renderFrame(renderCommands)
