@@ -2,7 +2,8 @@
 ; // vector.asm
 ; // ----------------------------------
 ; // Vectors are dynamic arrays meant to mimic 
-; // C++'s std::vector lists. 
+; // C++'s std::vector lists. In this implementation, 
+; // for simplicity, they can only hold DWORDs.
 ; // ==================================
 
 INCLUDE default_header.inc
@@ -54,7 +55,34 @@ free_vector ENDP
 ; // ********************************************
 ; // Instance methods
 ; // ********************************************
-push_back PROC
+push_back PROC USES eax ebx edx edi, element: DWORD
+	mov eax, (Vector PTR [ecx]).pData
+	mov ebx, (Vector PTR [ecx]).count
+	mov edx, (Vector PTR [ecx]).capacity
+
+	; // Check if the vector needs to be resized first
+	.IF ebx == edx
+		; // Double the capacity
+		shl edx, 1 
+		mov (Vector PTR [ecx]).capacity, edx
+
+		; // ReAlloc the data
+		push ecx
+		INVOKE HeapReAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, (Vector PTR [ecx]).pData, edx
+		pop ecx
+
+		mov (Vector PTR [ecx]).pData, eax
+
+	.ENDIF
+
+	; // Insert the data
+	mov edi, (Vector PTR [ecx]).pData
+	mov eax, (Vector PTR [ecx]).count
+	mov ebx, element
+
+	mov [edi + eax * 4], ebx 
+	inc (Vector PTR [ecx]).count
+
 	ret
 push_back ENDP
 

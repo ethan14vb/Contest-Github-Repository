@@ -1,8 +1,9 @@
 ; // ==================================
-; // vector.inc
+; // vector.asm
 ; // ----------------------------------
 ; // Vectors are dynamic arrays meant to mimic 
-; // C++'s std::vector lists. 
+; // C++'s std::vector lists. In this implementation, 
+; // for simplicity, they can only hold DWORDs.
 ; // ==================================
 
 IFNDEF VECTOR_INC

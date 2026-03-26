@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 16:12:43
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 16:26:46
 vector.asm						     Page 1 - 1
 
 
@@ -6,7 +6,8 @@ vector.asm						     Page 1 - 1
 				; // vector.asm
 				; // ----------------------------------
 				; // Vectors are dynamic arrays meant to mimic 
-				; // C++'s std::vector lists. 
+				; // C++'s std::vector lists. In this implementation, 
+				; // for simplicity, they can only hold DWORDs.
 				; // ==================================
 
 				INCLUDE default_header.inc
@@ -54,10 +55,11 @@ vector.asm						     Page 1 - 1
 			      C 
 				INCLUDE vector.inc
 			      C ; // ==================================
-			      C ; // vector.inc
+			      C ; // vector.asm
 			      C ; // ----------------------------------
 			      C ; // Vectors are dynamic arrays meant to mimic 
-			      C ; // C++'s std::vector lists. 
+			      C ; // C++'s std::vector lists. In this implementation, 
+			      C ; // for simplicity, they can only hold DWORDs.
 			      C ; // ==================================
 			      C 
 			      C IFNDEF VECTOR_INC
@@ -106,7 +108,7 @@ vector.asm						     Page 1 - 1
  0000002C  C9		   *	    leave  
  0000002D  C2 0008	   *	    ret    00008h
  00000030			init_vector ENDP
-vector.asm(34) : warning A6004:procedure argument or local not referenced : pData
+vector.asm(35) : warning A6004:procedure argument or local not referenced : pData
 
  00000030			new_vector PROC USES ecx, pData: DWORD, capacity: DWORD
  00000030  55		   *	    push   ebp
@@ -153,16 +155,63 @@ vector.asm(34) : warning A6004:procedure argument or local not referenced : pDat
 				; // ********************************************
 				; // Instance methods
 				; // ********************************************
- 00000076			push_back PROC
- 00000076  C3				ret
- 00000077			push_back ENDP
+ 00000076			push_back PROC USES eax ebx edx edi, element: DWORD
+ 00000076  55		   *	    push   ebp
+ 00000077  8B EC	   *	    mov    ebp, esp
+ 00000079  50		   *	    push   eax
+ 0000007A  53		   *	    push   ebx
+ 0000007B  52		   *	    push   edx
+ 0000007C  57		   *	    push   edi
+ 0000007D  8B 01			mov eax, (Vector PTR [ecx]).pData
+ 0000007F  8B 59 04			mov ebx, (Vector PTR [ecx]).count
+ 00000082  8B 51 08			mov edx, (Vector PTR [ecx]).capacity
 
- 00000077			remove_element PROC
- 00000077  C3				ret
- 00000078			remove_element ENDP
+					; // Check if the vector needs to be resized first
+					.IF ebx == edx
+ 00000085  3B DA	   *	    cmp    ebx, edx
+ 00000087  75 19	   *	    jne    @C0001
+						; // Double the capacity
+ 00000089  D1 E2				shl edx, 1 
+ 0000008B  89 51 08				mov (Vector PTR [ecx]).capacity, edx
+
+						; // ReAlloc the data
+ 0000008E  51					push ecx
+						INVOKE HeapReAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, (Vector PTR [ecx]).pData, edx
+ 0000008F  52		   *	    push   edx
+ 00000090  FF 31	   *	    push   dword  ptr [ecx]
+ 00000092  6A 04	   *	    push   +000000004h
+ 00000094  FF 35 00000000 E *	    push   hHeap
+ 0000009A  E8 00000000 E   *	    call   HeapReAlloc
+ 0000009F  59					pop ecx
+
+ 000000A0  89 01				mov (Vector PTR [ecx]).pData, eax
+
+					.ENDIF
+ 000000A2		   *@C0001:
+
+					; // Insert the data
+ 000000A2  8B 39			mov edi, (Vector PTR [ecx]).pData
+ 000000A4  8B 41 04			mov eax, (Vector PTR [ecx]).count
+ 000000A7  8B 5D 08			mov ebx, element
+
+ 000000AA  89 1C 87			mov [edi + eax * 4], ebx 
+ 000000AD  FF 41 04			inc (Vector PTR [ecx]).count
+
+					ret
+ 000000B0  5F		   *	    pop    edi
+ 000000B1  5A		   *	    pop    edx
+ 000000B2  5B		   *	    pop    ebx
+ 000000B3  58		   *	    pop    eax
+ 000000B4  C9		   *	    leave  
+ 000000B5  C2 0004	   *	    ret    00004h
+ 000000B8			push_back ENDP
+
+ 000000B8			remove_element PROC
+ 000000B8  C3				ret
+ 000000B9			remove_element ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 16:12:43
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 16:26:46
 vector.asm						     Symbols 2 - 1
 
 
@@ -193,7 +242,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000078 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000B9 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -212,8 +261,9 @@ initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 new_vector . . . . . . . . . . .	P Near	 00000030 _TEXT	Length= 00000025 Private STDCALL
   pData  . . . . . . . . . . . .	DWord	 bp + 00000008
   capacity . . . . . . . . . . .	DWord	 bp + 0000000C
-push_back  . . . . . . . . . . .	P Near	 00000076 _TEXT	Length= 00000001 Private STDCALL
-remove_element . . . . . . . . .	P Near	 00000077 _TEXT	Length= 00000001 Private STDCALL
+push_back  . . . . . . . . . . .	P Near	 00000076 _TEXT	Length= 00000042 Private STDCALL
+  element  . . . . . . . . . . .	DWord	 bp + 00000008
+remove_element . . . . . . . . .	P Near	 000000B8 _TEXT	Length= 00000001 Private STDCALL
 
 
 Symbols:
