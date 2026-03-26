@@ -1,0 +1,10 @@
+IFNDEF VECTOR_INC
+VECTOR_INC EQU 1
+
+Vector STRUCT
+	pData		DWORD ?
+	count		DWORD ?
+	capacity	DWORD ?
+Vector ENDS
+
+ENDIF
