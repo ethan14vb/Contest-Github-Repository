@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 19:09:17
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 19:50:47
 scene.asm						     Page 1 - 1
 
 
@@ -122,9 +122,13 @@ scene.asm						     Page 1 - 1
 	   00000000
 			      C Scene ENDS
 			      C 
+			      C ; // Constructors
 			      C init_scene PROTO maxGameObjects		: DWORD
 			      C new_scene PROTO maxGameObjects		: DWORD
 			      C free_scene PROTO
+			      C 
+			      C ; // Instance methods
+			      C instantiate_game_object PROTO pGameObject: DWORD
 			      C 
 			      C ENDIF
 			      C 
@@ -222,19 +226,35 @@ scene.asm						     Page 1 - 1
 				; // ********************************************
 
 				; // ----------------------------------
-				; // scene_start
-				; // Initializes the scene and allocates resources that will be used such as spritesheets,
-				; // SFX, or other external files needed in the scene. 
+				; // add_game_object
+				; // Adds a game object to the scene's start queue
+				; //
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
 				; // ----------------------------------
- 0000006B			scene_start PROC
- 0000006B  C3				ret
- 0000006C			scene_start ENDP
+ 0000006B			instantiate_game_object PROC PUBLIC USES esi, pGameObject: DWORD
+ 0000006B  55		   *	    push   ebp
+ 0000006C  8B EC	   *	    mov    ebp, esp
+ 0000006E  56		   *	    push   esi
+ 0000006F  8B F1			mov esi, ecx ; // Store the THIS pointer in ecx
+
+ 00000071  8D 49 0C			lea ecx, (Scene PTR[ecx]).startQueue
+					INVOKE push_back, pGameObject
+ 00000074  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000077  E8 00000000 E   *	    call   push_back
+
+ 0000007C  8B CE			mov ecx, esi ; // Restore the THIS pointer
+					ret
+ 0000007E  5E		   *	    pop    esi
+ 0000007F  C9		   *	    leave  
+ 00000080  C2 0004	   *	    ret    00004h
+ 00000083			instantiate_game_object ENDP
 
 				; // ----------------------------------
 				; // scene_update
 				; // Responsible for updating the game objects and simulations every frame.
 				; // ----------------------------------
- 0000006C			scene_update PROC, deltaTime: REAL4
+ 00000083			scene_update PROC, deltaTime: REAL4
 					; // Take Input and set input flags
 
 					; // Process start queue
@@ -273,27 +293,16 @@ scene.asm						     Page 1 - 1
 
 					; // Pass render list to renderer
 					; // renderer.renderFrame(renderCommands)
- 0000006C  55		   *	    push   ebp
- 0000006D  8B EC	   *	    mov    ebp, esp
+ 00000083  55		   *	    push   ebp
+ 00000084  8B EC	   *	    mov    ebp, esp
 					ret
- 0000006F  C9		   *	    leave  
- 00000070  C2 0004	   *	    ret    00004h
- 00000073			scene_update ENDP
-scene.asm(130) : warning A6004:procedure argument or local not referenced : deltaTime
-
-				; // ----------------------------------
-				; // scene_exit
-				; // Clears the resources allocated during scene_start.
-				; //
-				; // Register Parameters: 
-				; //	ecx - THIS pointer
-				; // ----------------------------------
- 00000073			scene_exit PROC
- 00000073  C3				ret
- 00000074			scene_exit ENDP
+ 00000086  C9		   *	    leave  
+ 00000087  C2 0004	   *	    ret    00004h
+ 0000008A			scene_update ENDP
+scene.asm(138) : warning A6004:procedure argument or local not referenced : deltaTime
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 19:09:17
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 19:50:47
 scene.asm						     Symbols 2 - 1
 
 
@@ -329,7 +338,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000074 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000008A DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -346,14 +355,14 @@ init_scene . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000038 Public 
   maxGameObjects . . . . . . . .	DWord	 bp + 00000008
 init_unordered_vector  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+instantiate_game_object  . . . .	P Near	 0000006B _TEXT	Length= 00000018 Public STDCALL
+  pGameObject  . . . . . . . . .	DWord	 bp + 00000008
 new_scene  . . . . . . . . . . .	P Near	 00000038 _TEXT	Length= 00000024 Public STDCALL
   maxGameObjects . . . . . . . .	DWord	 bp + 00000008
 new_unordered_vector . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 push_back  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 remove_element . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-scene_exit . . . . . . . . . . .	P Near	 00000073 _TEXT	Length= 00000001 Private STDCALL
-scene_start  . . . . . . . . . .	P Near	 0000006B _TEXT	Length= 00000001 Private STDCALL
-scene_update . . . . . . . . . .	P Near	 0000006C _TEXT	Length= 00000007 Private STDCALL
+scene_update . . . . . . . . . .	P Near	 00000083 _TEXT	Length= 00000007 Private STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
 
 

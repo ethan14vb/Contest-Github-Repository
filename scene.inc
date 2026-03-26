@@ -27,8 +27,12 @@ Scene STRUCT
 	renderCommands UnorderedVector<>
 Scene ENDS
 
+; // Constructors
 init_scene PROTO maxGameObjects		: DWORD
 new_scene PROTO maxGameObjects		: DWORD
 free_scene PROTO
+
+; // Instance methods
+instantiate_game_object PROTO pGameObject: DWORD
 
 ENDIF

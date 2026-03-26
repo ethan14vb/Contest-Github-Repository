@@ -75,13 +75,21 @@ free_scene ENDP
 ; // ********************************************
 
 ; // ----------------------------------
-; // scene_start
-; // Initializes the scene and allocates resources that will be used such as spritesheets,
-; // SFX, or other external files needed in the scene. 
+; // add_game_object
+; // Adds a game object to the scene's start queue
+; //
+; // Register Parameters: 
+; //	ecx - THIS pointer
 ; // ----------------------------------
-scene_start PROC
+instantiate_game_object PROC PUBLIC USES esi, pGameObject: DWORD
+	mov esi, ecx ; // Store the THIS pointer in ecx
+
+	lea ecx, (Scene PTR[ecx]).startQueue
+	INVOKE push_back, pGameObject
+
+	mov ecx, esi ; // Restore the THIS pointer
 	ret
-scene_start ENDP
+instantiate_game_object ENDP
 
 ; // ----------------------------------
 ; // scene_update
@@ -128,16 +136,5 @@ scene_update PROC, deltaTime: REAL4
 	; // renderer.renderFrame(renderCommands)
 	ret
 scene_update ENDP
-
-; // ----------------------------------
-; // scene_exit
-; // Clears the resources allocated during scene_start.
-; //
-; // Register Parameters: 
-; //	ecx - THIS pointer
-; // ----------------------------------
-scene_exit PROC
-	ret
-scene_exit ENDP
 
 END
