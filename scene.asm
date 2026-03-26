@@ -38,6 +38,8 @@ init_scene PROC PUBLIC USES esi, maxGameObjects : DWORD
 	
 	lea ecx, (Scene PTR [esi]).renderCommands
 	INVOKE init_unordered_vector, maxGameObjects
+
+	mov ecx, esi ; // Restore my THIS pointer
 		
 	ret
 init_scene ENDP
@@ -50,6 +52,7 @@ new_scene PROC PUBLIC USES ecx, maxGameObjects : DWORD
 	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF Scene
 	mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
 	INVOKE init_scene, maxGameObjects
+	mov eax, ecx ; // Now return the THIS pointer
 
 	ret ; // Return with the address of the memory block in HeapAlloc
 new_scene ENDP

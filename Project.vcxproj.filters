@@ -108,7 +108,7 @@
     <MASM Include="unordered_vector.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
-    <MASM Include="scene_test.asm">
+    <MASM Include="main.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
   </ItemGroup>
