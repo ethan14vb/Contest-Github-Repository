@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 16:02:17
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 16:04:09
 vector.asm						     Page 1 - 1
 
 
@@ -76,60 +76,76 @@ vector.asm						     Page 1 - 1
 				; // ********************************************
 				; // Constructor Methods
 				; // ********************************************
- 00000000			init_vector PROC
- 00000000  C3				ret
- 00000001			init_vector ENDP
+ 00000000			init_vector PROC, pData: DWORD, count : DWORD, capacity : DWORD
+					; // 
+ 00000000  55		   *	    push   ebp
+ 00000001  8B EC	   *	    mov    ebp, esp
+					INVOKE init_vector, pData, count, capacity
+ 00000003  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
+ 00000006  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
+ 00000009  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 0000000C  E8 FFFFFFEF	   *	    call   init_vector
+					ret
+ 00000011  C9		   *	    leave  
+ 00000012  C2 000C	   *	    ret    0000Ch
+ 00000015			init_vector ENDP
 
- 00000001			new_vector PROC USES ecx
- 00000001  51		   *	    push   ecx
+ 00000015			new_vector PROC USES ecx, pData: DWORD, count: DWORD, capacity: DWORD
+ 00000015  55		   *	    push   ebp
+ 00000016  8B EC	   *	    mov    ebp, esp
+ 00000018  51		   *	    push   ecx
 					INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF Vector
- 00000002  6A 0C	   *	    push   +00000000Ch
- 00000004  6A 04	   *	    push   +000000004h
- 00000006  FF 35 00000000 E *	    push   hHeap
- 0000000C  E8 00000000 E   *	    call   HeapAlloc
- 00000011  8B C8			mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
-					INVOKE init_vector
- 00000013  E8 FFFFFFE8	   *	    call   init_vector
+ 00000019  6A 0C	   *	    push   +00000000Ch
+ 0000001B  6A 04	   *	    push   +000000004h
+ 0000001D  FF 35 00000000 E *	    push   hHeap
+ 00000023  E8 00000000 E   *	    call   HeapAlloc
+ 00000028  8B C8			mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
+					INVOKE init_vector, pData, count, capacity
+ 0000002A  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
+ 0000002D  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
+ 00000030  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000033  E8 FFFFFFC8	   *	    call   init_vector
 
 					ret
- 00000018  59		   *	    pop    ecx
- 00000019  C3		   *	    ret    00000h
- 0000001A			new_vector ENDP
+ 00000038  59		   *	    pop    ecx
+ 00000039  C9		   *	    leave  
+ 0000003A  C2 000C	   *	    ret    0000Ch
+ 0000003D			new_vector ENDP
 
- 0000001A			free_vector PROC USES esi
+ 0000003D			free_vector PROC USES esi
 					; // Free the data list
- 0000001A  56		   *	    push   esi
- 0000001B  8B 31			mov esi, (Vector PTR [ecx]).pData
+ 0000003D  56		   *	    push   esi
+ 0000003E  8B 31			mov esi, (Vector PTR [ecx]).pData
 					INVOKE HeapFree, hHeap, 0, esi
- 0000001D  56		   *	    push   esi
- 0000001E  6A 00	   *	    push   +000000000h
- 00000020  FF 35 00000000 E *	    push   hHeap
- 00000026  E8 00000000 E   *	    call   HeapFree
+ 00000040  56		   *	    push   esi
+ 00000041  6A 00	   *	    push   +000000000h
+ 00000043  FF 35 00000000 E *	    push   hHeap
+ 00000049  E8 00000000 E   *	    call   HeapFree
 
 					; // Free myself
 					INVOKE HeapFree, hHeap, 0, ecx
- 0000002B  51		   *	    push   ecx
- 0000002C  6A 00	   *	    push   +000000000h
- 0000002E  FF 35 00000000 E *	    push   hHeap
- 00000034  E8 00000000 E   *	    call   HeapFree
+ 0000004E  51		   *	    push   ecx
+ 0000004F  6A 00	   *	    push   +000000000h
+ 00000051  FF 35 00000000 E *	    push   hHeap
+ 00000057  E8 00000000 E   *	    call   HeapFree
 					ret
- 00000039  5E		   *	    pop    esi
- 0000003A  C3		   *	    ret    00000h
- 0000003B			free_vector ENDP
+ 0000005C  5E		   *	    pop    esi
+ 0000005D  C3		   *	    ret    00000h
+ 0000005E			free_vector ENDP
 
 				; // ********************************************
 				; // Instance methods
 				; // ********************************************
- 0000003B			push_back PROC
- 0000003B  C3				ret
- 0000003C			push_back ENDP
+ 0000005E			push_back PROC
+ 0000005E  C3				ret
+ 0000005F			push_back ENDP
 
- 0000003C			remove_element PROC
- 0000003C  C3				ret
- 0000003D			remove_element ENDP
+ 0000005F			remove_element PROC
+ 0000005F  C3				ret
+ 00000060			remove_element ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 16:02:17
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 16:04:09
 vector.asm						     Symbols 2 - 1
 
 
@@ -160,7 +176,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000003D DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000060 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -171,12 +187,18 @@ GetProcessHeap . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 HeapAlloc  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-free_vector  . . . . . . . . . .	P Near	 0000001A _TEXT	Length= 00000021 Private STDCALL
-init_vector  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000001 Private STDCALL
+free_vector  . . . . . . . . . .	P Near	 0000003D _TEXT	Length= 00000021 Private STDCALL
+init_vector  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000015 Private STDCALL
+  pData  . . . . . . . . . . . .	DWord	 bp + 00000008
+  count  . . . . . . . . . . . .	DWord	 bp + 0000000C
+  capacity . . . . . . . . . . .	DWord	 bp + 00000010
 initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-new_vector . . . . . . . . . . .	P Near	 00000001 _TEXT	Length= 00000019 Private STDCALL
-push_back  . . . . . . . . . . .	P Near	 0000003B _TEXT	Length= 00000001 Private STDCALL
-remove_element . . . . . . . . .	P Near	 0000003C _TEXT	Length= 00000001 Private STDCALL
+new_vector . . . . . . . . . . .	P Near	 00000015 _TEXT	Length= 00000028 Private STDCALL
+  pData  . . . . . . . . . . . .	DWord	 bp + 00000008
+  count  . . . . . . . . . . . .	DWord	 bp + 0000000C
+  capacity . . . . . . . . . . .	DWord	 bp + 00000010
+push_back  . . . . . . . . . . .	P Near	 0000005E _TEXT	Length= 00000001 Private STDCALL
+remove_element . . . . . . . . .	P Near	 0000005F _TEXT	Length= 00000001 Private STDCALL
 
 
 Symbols:

@@ -13,14 +13,16 @@ INCLUDE vector.inc
 ; // ********************************************
 ; // Constructor Methods
 ; // ********************************************
-init_vector PROC
+init_vector PROC, pData: DWORD, count : DWORD, capacity : DWORD
+	; // 
+	INVOKE init_vector, pData, count, capacity
 	ret
 init_vector ENDP
 
-new_vector PROC USES ecx
+new_vector PROC USES ecx, pData: DWORD, count: DWORD, capacity: DWORD
 	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF Vector
 	mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
-	INVOKE init_vector
+	INVOKE init_vector, pData, count, capacity
 
 	ret
 new_vector ENDP
