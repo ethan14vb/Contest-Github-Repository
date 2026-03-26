@@ -1,20 +1,21 @@
 ; // ==================================
-; // vector.asm
+; // unordered_vector.asm
 ; // ----------------------------------
-; // Vectors are dynamic arrays meant to mimic 
-; // C++'s std::vector lists. In this implementation, 
-; // for simplicity, they can only hold DWORDs.
+; // unordered_vector are dynamic arrays of DWORDs
+; // whose contents are not guaranteed to be in the same
+; // order after a removal. They are typically used for 
+; // pools of GameObject pointers whose order doesn't matter.
 ; // ==================================
 
 INCLUDE default_header.inc
 INCLUDE heap_functions.inc
-INCLUDE vector.inc
+INCLUDE unordered_vector.inc
 
 .code
 ; // ********************************************
 ; // Constructor Methods
 ; // ********************************************
-init_vector PROC USES esi, pData: DWORD, capacity : DWORD
+init_unordered_vector PROC USES esi, capacity : DWORD
 	; // Allocate space for the data
 	mov eax, capacity
 	shl eax, 2 ; // multiply capacity by 4, SIZEOF DWORD
@@ -23,65 +24,65 @@ init_vector PROC USES esi, pData: DWORD, capacity : DWORD
 	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, eax
 	pop ecx
 
-	mov (Vector PTR [ecx]).pData, eax
+	mov (UnorderedVector PTR [ecx]).pData, eax
 
 	; // Initialize other member data
-	mov (Vector PTR [ecx]).count, 0
+	mov (UnorderedVector PTR [ecx]).count, 0
 	mov esi, capacity
-	mov (Vector PTR [ecx]).capacity, esi
+	mov (UnorderedVector PTR [ecx]).capacity, esi
 
 	mov eax, ecx ; // Return the this pointer
 	ret
-init_vector ENDP
+init_unordered_vector ENDP
 
-new_vector PROC USES ecx, pData: DWORD, capacity: DWORD
-	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF Vector
+new_unordered_vector PROC USES ecx, capacity: DWORD
+	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF UnorderedVector
 	mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
-	INVOKE init_vector, pData, capacity
+	INVOKE init_unordered_vector, capacity
 
 	ret
-new_vector ENDP
+new_unordered_vector ENDP
 
-free_vector PROC USES esi
+free_unordered_vector PROC USES esi
 	; // Free the data list
-	mov esi, (Vector PTR [ecx]).pData
+	mov esi, (UnorderedVector PTR [ecx]).pData
 	INVOKE HeapFree, hHeap, 0, esi
 
 	; // Free myself
 	INVOKE HeapFree, hHeap, 0, ecx
 	ret
-free_vector ENDP
+free_unordered_vector ENDP
 
 ; // ********************************************
 ; // Instance methods
 ; // ********************************************
 push_back PROC USES eax ebx edx edi, element: DWORD
-	mov eax, (Vector PTR [ecx]).pData
-	mov ebx, (Vector PTR [ecx]).count
-	mov edx, (Vector PTR [ecx]).capacity
+	mov eax, (UnorderedVector PTR [ecx]).pData
+	mov ebx, (UnorderedVector PTR [ecx]).count
+	mov edx, (UnorderedVector PTR [ecx]).capacity
 
 	; // Check if the vector needs to be resized first
 	.IF ebx == edx
 		; // Double the capacity
 		shl edx, 1 
-		mov (Vector PTR [ecx]).capacity, edx
+		mov (UnorderedVector PTR [ecx]).capacity, edx
 
 		; // ReAlloc the data
 		push ecx
-		INVOKE HeapReAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, (Vector PTR [ecx]).pData, edx
+		INVOKE HeapReAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, (UnorderedVector PTR [ecx]).pData, edx
 		pop ecx
 
-		mov (Vector PTR [ecx]).pData, eax
+		mov (UnorderedVector PTR [ecx]).pData, eax
 
 	.ENDIF
 
 	; // Insert the data
-	mov edi, (Vector PTR [ecx]).pData
-	mov eax, (Vector PTR [ecx]).count
+	mov edi, (UnorderedVector PTR [ecx]).pData
+	mov eax, (UnorderedVector PTR [ecx]).count
 	mov ebx, element
 
 	mov [edi + eax * 4], ebx 
-	inc (Vector PTR [ecx]).count
+	inc (UnorderedVector PTR [ecx]).count
 
 	ret
 push_back ENDP
@@ -89,8 +90,8 @@ push_back ENDP
 remove_element PROC USES edi ebx, element: DWORD
 	mov edi, ecx ; // Move the THIS pointer to edi
 
-	mov eax, (Vector PTR [edi]).pData
-	mov ebx, (Vector PTR [edi]).count
+	mov eax, (UnorderedVector PTR [edi]).pData
+	mov ebx, (UnorderedVector PTR [edi]).count
 
 	mov ecx, 0
 	.WHILE ecx < ebx
@@ -98,9 +99,9 @@ remove_element PROC USES edi ebx, element: DWORD
 		
 		.IF edx == element
 			; // Found the elemnt, swap and pop it
-			dec (Vector PTR [edi]).count ; // "pop" the last element
+			dec (UnorderedVector PTR [edi]).count ; // "pop" the last element
 
-			mov ebx, (Vector PTR [edi]).count
+			mov ebx, (UnorderedVector PTR [edi]).count
 			mov edx, [eax + ebx * 4] ; // edx = pData[count - 1]
 
 			mov [eax + ecx * 4], edx ; // Swap the current position with the end position

@@ -19,7 +19,7 @@
     <MASM Include="rect_component.asm" />
     <MASM Include="render_command.asm" />
     <MASM Include="transform_component.asm" />
-    <MASM Include="vector.asm" />
+    <MASM Include="unordered_vector.asm" />
     <None Include="component.inc" />
     <None Include="component_ids.inc" />
     <None Include="game_object.inc">
@@ -33,7 +33,7 @@
     <None Include="sprite_component.inc">
       <FileType>Document</FileType>
     </None>
-    <None Include="vector.inc" />
+    <None Include="unordered_vector.inc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="camera.inc" />
