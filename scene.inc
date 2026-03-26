@@ -12,13 +12,30 @@ IFNDEF SCENE_INC
 SCENE_INC EQU 1
 
 Scene STRUCT
-	numGameObjects DWORD ?
-	maxGameObjects DWORD ? ; // Maximum size of the game objects list
-	pGameObjects DWORD ? ; // List containing game objects
+	; // The list of GameObjects in this Scene instance.
+	pGameObjects		DWORD ?
+	numGameObjects		DWORD ?
+	maxGameObjects		DWORD ? ; // Maximum size of the game objects list. This array is dynamic and can be resized.
+	
+	; // The start queue is a list of GameObjects created by the add_gameobject method
+	pStartQueue			DWORD ?
+	numStartQueue		DWORD ?
+	maxStartQueue		DWORD ?
+
+	; // The free queue is a list of GameObjects to free at the end of the frame
+	pFreeQueue			DWORD ?
+	numFreeQueue		DWORD ?
+	maxFreeQueue		DWORD ?
+
+	; // The list of renderCommands that is built at the end of each frame
+	pRenderCommands		DWORD ?
+	numRenderCommands	DWORD ?
+	maxRenderCommands	DWORD ?
+
 Scene ENDS
 
-init_scene PROTO maxGameObjects : DWORD
-new_scene PROTO maxGameObjects : DWORD
+init_scene PROTO maxGameObjects		: DWORD
+new_scene PROTO maxGameObjects		: DWORD
 free_scene PROTO
 
 ENDIF
