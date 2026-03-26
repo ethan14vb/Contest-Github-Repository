@@ -87,18 +87,40 @@ scene_start ENDP
 ; // scene_update
 ; // Responsible for updating the game objects and simulations every frame.
 ; // ----------------------------------
-scene_update PROC
-	; // Take Input
+scene_update PROC, deltaTime: REAL4
+	; // Take Input and set input flags
 
-	; // Update Game Objects
+	; // Process start queue
+	; // for (GameObject o : *pStartQueue):
+	; //	pGameObjects.push_back(o)
+	; //	o.Start()
+
+	; // Update time sensitive components (such as timers and tweens)
+	; // for (Component c : *pTimeSensitiveComponents):
+	; //	if (c.pending_free == true)
+	; //		continue
+	; //
+	; //	c.Update(deltaTime)
+
+	; // Update Game Object logic
 	; // for (GameObject o : *pGameObjects):
-	; //	o.update()
+	; //	o.update(deltaTime)
 
-	; // Update components
+	; // Update animator components
+	; // for (AnimatorComponent a  : *pAnimationComponents)
+	; //	a.update(deltaTime)
+
+	; // Free any GameObjects that were queued to be freed by gameplay logic
+	; // for (GameObject o : *pQueueFreeGameObjects)
+	; //	o.free()
 
 	; // Build render list
+	; // renderCommands.clear()
+	; // for (RenderableComponent r : *pRenderableComponents):
+	; //	renderCommands.push_back(new RenderCommand(r))
 
 	; // Pass render list to renderer
+	; // renderer.renderFrame(renderCommands)
 	ret
 scene_update ENDP
 
