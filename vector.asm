@@ -17,7 +17,11 @@ init_vector PROC
 	ret
 init_vector ENDP
 
-new_vector PROC
+new_vector PROC USES ecx
+	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF Vector
+	mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
+	INVOKE init_vector
+
 	ret
 new_vector ENDP
 
