@@ -16,4 +16,13 @@ UnorderedVector STRUCT
 	capacity	DWORD ?
 UnorderedVector ENDS
 
+; // Constructors
+init_unordered_vector PROTO capacity : DWORD
+new_unordered_vector PROTO capacity: DWORD
+free_unordered_vector PROTO
+
+; // Instance methods
+push_back PROTO element: DWORD
+remove_element PROTO element: DWORD
+
 ENDIF

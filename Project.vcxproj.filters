@@ -105,10 +105,10 @@
     <MASM Include="component.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
-    <MASM Include="main.asm">
+    <MASM Include="unordered_vector.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
-    <MASM Include="unordered_vector.asm">
+    <MASM Include="main.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
   </ItemGroup>

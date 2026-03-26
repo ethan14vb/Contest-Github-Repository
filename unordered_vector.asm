@@ -23,7 +23,7 @@ INCLUDE unordered_vector.inc
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-init_unordered_vector PROC USES esi, capacity : DWORD
+init_unordered_vector PROC PUBLIC USES esi, capacity : DWORD
 	; // Allocate space for the data
 	mov eax, capacity
 	shl eax, 2 ; // multiply capacity by 4, SIZEOF DWORD
@@ -47,7 +47,7 @@ init_unordered_vector ENDP
 ; // new_unordered_vector
 ; // Reserves heap space for the Object with parameters calls the initializer method
 ; // ----------------------------------
-new_unordered_vector PROC USES ecx, capacity: DWORD
+new_unordered_vector PROC PUBLIC USES ecx, capacity: DWORD
 	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF UnorderedVector
 	mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
 	INVOKE init_unordered_vector, capacity
@@ -62,10 +62,12 @@ new_unordered_vector ENDP
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-free_unordered_vector PROC USES esi
+free_unordered_vector PROC PUBLIC USES esi
 	; // Free the data list
 	mov esi, (UnorderedVector PTR [ecx]).pData
+	push ecx
 	INVOKE HeapFree, hHeap, 0, esi
+	pop ecx
 
 	; // Free myself
 	INVOKE HeapFree, hHeap, 0, ecx
@@ -84,7 +86,7 @@ free_unordered_vector ENDP
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-push_back PROC USES eax ebx edx edi, element: DWORD
+push_back PROC PUBLIC USES eax ebx edx edi, element: DWORD
 	mov eax, (UnorderedVector PTR [ecx]).pData
 	mov ebx, (UnorderedVector PTR [ecx]).count
 	mov edx, (UnorderedVector PTR [ecx]).capacity
@@ -94,6 +96,7 @@ push_back PROC USES eax ebx edx edi, element: DWORD
 		; // Double the capacity
 		shl edx, 1 
 		mov (UnorderedVector PTR [ecx]).capacity, edx
+		shl edx, 2 ; // multiply edx by SIZEOF DWORD (multiply by 4)
 
 		; // ReAlloc the data
 		push ecx
@@ -125,7 +128,10 @@ push_back ENDP
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-remove_element PROC USES edi ebx, element: DWORD
+remove_element PROC PUBLIC USES edi ebx ecx edx, element: DWORD
+	local success
+	mov success, 1 ; // Failure return code
+
 	mov edi, ecx ; // Move the THIS pointer to edi
 
 	mov eax, (UnorderedVector PTR [edi]).pData
@@ -144,13 +150,14 @@ remove_element PROC USES edi ebx, element: DWORD
 
 			mov [eax + ecx * 4], edx ; // Swap the current position with the end position
 
-			mov eax, 0 ; // Return 0 = successful removal
-			ret
+			mov success, 0 ; // Success return code
+		.ELSE
+			inc ecx ; // Move to the next index if the element was not found
 		.ENDIF
-		inc ecx
 	.ENDW
 
-	mov eax, 1 ; // Return 1 = failed to find element
+	mov eax, success
+
 	ret
 remove_element ENDP
 

@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 16:51:07
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 18:30:53
 scene.asm						     Page 1 - 1
 
 
@@ -87,6 +87,15 @@ scene.asm						     Page 1 - 1
  00000004  00000000	      C 	count		DWORD ?
  00000008  00000000	      C 	capacity	DWORD ?
 			      C UnorderedVector ENDS
+			      C 
+			      C ; // Constructors
+			      C init_unordered_vector PROTO capacity : DWORD
+			      C new_unordered_vector PROTO capacity: DWORD
+			      C free_unordered_vector PROTO
+			      C 
+			      C ; // Instance methods
+			      C push_back PROTO element: DWORD
+			      C remove_element PROTO element: DWORD
 			      C 
 			      C ENDIF
 			      C 
@@ -263,7 +272,7 @@ scene.asm(115) : warning A6004:procedure argument or local not referenced : delt
  0000004B			scene_exit ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 16:51:07
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 18:30:53
 scene.asm						     Symbols 2 - 1
 
 
@@ -311,11 +320,16 @@ HeapAlloc  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_scene . . . . . . . . . . .	P Near	 00000033 _TEXT	Length= 0000000F Public STDCALL
+free_unordered_vector  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_scene . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000011 Public STDCALL
   maxGameObjects . . . . . . . .	DWord	 bp + 00000008
+init_unordered_vector  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_scene  . . . . . . . . . . .	P Near	 00000011 _TEXT	Length= 00000022 Public STDCALL
   maxGameObjects . . . . . . . .	DWord	 bp + 00000008
+new_unordered_vector . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+push_back  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+remove_element . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 scene_exit . . . . . . . . . . .	P Near	 0000004A _TEXT	Length= 00000001 Private STDCALL
 scene_start  . . . . . . . . . .	P Near	 00000042 _TEXT	Length= 00000001 Private STDCALL
 scene_update . . . . . . . . . .	P Near	 00000043 _TEXT	Length= 00000007 Private STDCALL
