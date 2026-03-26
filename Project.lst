@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 15:58:12
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 16:01:06
 vector.asm						     Page 1 - 1
 
 
@@ -15,6 +15,42 @@ vector.asm						     Page 1 - 1
 			      C option casemap : none
 			      C .stack 4096
 			      C OPTION PROC : PRIVATE
+			      C 
+				INCLUDE heap_functions.inc
+			      C ; // ==================================
+			      C ; // heap_functions.inc
+			      C ; // ----------------------------------
+			      C ; // Functions used for dynamic memory management. This file was
+			      C ; // added before we learned about heap memory management in class
+			      C ; // so we could have easy memory management. My resource for this 
+			      C ; // was the windows API reference and the class ch11 slides.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF HEAP_FUNCTIONS_INC
+ = 00000001		      C HEAP_FUNCTIONS_INC EQU 1
+			      C 
+			      C ; // Constants
+ = 00000008		      C HEAP_ZERO_MEMORY          equ 00000008h
+ = 00000004		      C HEAP_GENERATE_EXCEPTIONS  equ 00000004h
+ = 00000001		      C HEAP_NO_SERIALIZE         equ 00000001h
+			      C 
+ = 00000000		      C NULL   EQU 0
+			      C 
+			      C ; // Types
+			      C HANDLE TYPEDEF DWORD
+			      C 
+			      C ; // Protos
+			      C GetProcessHeap	PROTO
+			      C HeapAlloc		PROTO,	hHeap:DWORD, dwFlags:DWORD, dwBytes:DWORD
+			      C HeapFree		PROTO,	hHeap:DWORD, dwFlags:DWORD, lpMem:DWORD
+			      C HeapReAlloc		PROTO,	hHeap:DWORD, dwFlags:DWORD, lpMem:DWORD,	dwBytes:DWORD
+			      C 
+			      C initialize_heap PROTO ; // This function is from heap_functions.asm. It gets the handle to the process heap and stores in hHeap
+			      C 
+			      C ; // Data
+			      C EXTERNDEF hHeap:HANDLE ; // the heap handle is defined in heap_functions.asm
+			      C 
+			      C ENDIF
 			      C 
 				INCLUDE vector.inc
 			      C ; // ==================================
@@ -48,23 +84,40 @@ vector.asm						     Page 1 - 1
  00000001  C3				ret
  00000002			new_vector ENDP
 
- 00000002			free_vector PROC
- 00000002  C3				ret
- 00000003			free_vector ENDP
+ 00000002			free_vector PROC USES esi
+					; // Free the data list
+ 00000002  56		   *	    push   esi
+ 00000003  8B 31			mov esi, (Vector PTR [ecx]).pData
+					INVOKE HeapFree, hHeap, 0, esi
+ 00000005  56		   *	    push   esi
+ 00000006  6A 00	   *	    push   +000000000h
+ 00000008  FF 35 00000000 E *	    push   hHeap
+ 0000000E  E8 00000000 E   *	    call   HeapFree
+
+					; // Free myself
+					INVOKE HeapFree, hHeap, 0, ecx
+ 00000013  51		   *	    push   ecx
+ 00000014  6A 00	   *	    push   +000000000h
+ 00000016  FF 35 00000000 E *	    push   hHeap
+ 0000001C  E8 00000000 E   *	    call   HeapFree
+					ret
+ 00000021  5E		   *	    pop    esi
+ 00000022  C3		   *	    ret    00000h
+ 00000023			free_vector ENDP
 
 				; // ********************************************
 				; // Instance methods
 				; // ********************************************
- 00000003			push_back PROC
- 00000003  C3				ret
- 00000004			push_back ENDP
+ 00000023			push_back PROC
+ 00000023  C3				ret
+ 00000024			push_back ENDP
 
- 00000004			remove_element PROC
- 00000004  C3				ret
- 00000005			remove_element ENDP
+ 00000024			remove_element PROC
+ 00000024  C3				ret
+ 00000025			remove_element ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 15:58:12
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 16:01:06
 vector.asm						     Symbols 2 - 1
 
 
@@ -81,6 +134,13 @@ Vector . . . . . . . . . . . . .	 0000000C
   capacity . . . . . . . . . . .	 00000008	 DWord
 
 
+Types:
+
+                N a m e                  Size     Attr
+
+HANDLE . . . . . . . . . . . . .	 00000004     DWord
+
+
 Segments and Groups:
 
                 N a m e                 Size     Length   Align   Combine Class
@@ -88,18 +148,23 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000005 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000025 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
-free_vector  . . . . . . . . . .	P Near	 00000002 _TEXT	Length= 00000001 Private STDCALL
+GetProcessHeap . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+HeapAlloc  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+free_vector  . . . . . . . . . .	P Near	 00000002 _TEXT	Length= 00000021 Private STDCALL
 init_vector  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000001 Private STDCALL
+initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_vector . . . . . . . . . . .	P Near	 00000001 _TEXT	Length= 00000001 Private STDCALL
-push_back  . . . . . . . . . . .	P Near	 00000003 _TEXT	Length= 00000001 Private STDCALL
-remove_element . . . . . . . . .	P Near	 00000004 _TEXT	Length= 00000001 Private STDCALL
+push_back  . . . . . . . . . . .	P Near	 00000023 _TEXT	Length= 00000001 Private STDCALL
+remove_element . . . . . . . . .	P Near	 00000024 _TEXT	Length= 00000001 Private STDCALL
 
 
 Symbols:
@@ -115,7 +180,13 @@ Symbols:
 @fardata?  . . . . . . . . . . .	Text   	 FLAT
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
+HEAP_FUNCTIONS_INC . . . . . . .	Number	 00000001h   
+HEAP_GENERATE_EXCEPTIONS . . . .	Number	 00000004h   
+HEAP_NO_SERIALIZE  . . . . . . .	Number	 00000001h   
+HEAP_ZERO_MEMORY . . . . . . . .	Number	 00000008h   
+NULL . . . . . . . . . . . . . .	Number	 00000000h   
 VECTOR_INC . . . . . . . . . . .	Number	 00000001h   
+hHeap  . . . . . . . . . . . . .	DWord	 00000000 FLAT	External STDCALL
 
 	   0 Warnings
 	   0 Errors
