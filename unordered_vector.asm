@@ -15,6 +15,14 @@ INCLUDE unordered_vector.inc
 ; // ********************************************
 ; // Constructor Methods
 ; // ********************************************
+
+; // ----------------------------------
+; // init_unordered_vector
+; // Initializes memory with the contents of an UnorderedVector
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
 init_unordered_vector PROC USES esi, capacity : DWORD
 	; // Allocate space for the data
 	mov eax, capacity
@@ -35,6 +43,10 @@ init_unordered_vector PROC USES esi, capacity : DWORD
 	ret
 init_unordered_vector ENDP
 
+; // ----------------------------------
+; // new_unordered_vector
+; // Reserves heap space for the Object with parameters calls the initializer method
+; // ----------------------------------
 new_unordered_vector PROC USES ecx, capacity: DWORD
 	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF UnorderedVector
 	mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
@@ -43,6 +55,13 @@ new_unordered_vector PROC USES ecx, capacity: DWORD
 	ret
 new_unordered_vector ENDP
 
+; // ----------------------------------
+; // free_unordered_vector
+; // Convenient method for freeing an UnorderedVector
+; //
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
 free_unordered_vector PROC USES esi
 	; // Free the data list
 	mov esi, (UnorderedVector PTR [ecx]).pData
@@ -56,6 +75,15 @@ free_unordered_vector ENDP
 ; // ********************************************
 ; // Instance methods
 ; // ********************************************
+
+; // ----------------------------------
+; // push_back
+; // Adds an element to the end of the vector
+; // and resizes the vector if necessary.
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
 push_back PROC USES eax ebx edx edi, element: DWORD
 	mov eax, (UnorderedVector PTR [ecx]).pData
 	mov ebx, (UnorderedVector PTR [ecx]).count
@@ -87,6 +115,16 @@ push_back PROC USES eax ebx edx edi, element: DWORD
 	ret
 push_back ENDP
 
+; // ----------------------------------
+; // remove_element
+; // O(n) search for the element specified in the
+; // unordered_vector and then swaps it with the 
+; // element at the end of the vector and then 
+; // pops the element at the end.
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
 remove_element PROC USES edi ebx, element: DWORD
 	mov edi, ecx ; // Move the THIS pointer to edi
 
