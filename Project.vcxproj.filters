@@ -108,5 +108,8 @@
     <MASM Include="main.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
+    <MASM Include="vector.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
   </ItemGroup>
 </Project>
