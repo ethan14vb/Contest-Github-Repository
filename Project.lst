@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 18:43:40
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 18:49:23
 scene.asm						     Page 1 - 1
 
 
@@ -290,7 +290,7 @@ scene.asm(127) : warning A6004:procedure argument or local not referenced : delt
  00000070			scene_exit ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 18:43:40
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 18:49:23
 scene.asm						     Symbols 2 - 1
 
 

@@ -14,10 +14,10 @@
     <MASM Include="component.asm" />
     <MASM Include="game_object.asm" />
     <MASM Include="heap_functions.asm" />
-    <MASM Include="main.asm" />
     <MASM Include="rectangle_test_scene.asm" />
     <MASM Include="rect_component.asm" />
     <MASM Include="render_command.asm" />
+    <MASM Include="scene_test.asm" />
     <MASM Include="transform_component.asm" />
     <MASM Include="unordered_vector.asm" />
     <None Include="component.inc" />
