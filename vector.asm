@@ -1,3 +1,10 @@
+; // ==================================
+; // vector.asm
+; // ----------------------------------
+; // Vectors are dynamic arrays meant to mimic 
+; // C++'s std::vector lists. 
+; // ==================================
+
 INCLUDE default_header.inc
 INCLUDE vector.inc
 
