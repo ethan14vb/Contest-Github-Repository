@@ -25,8 +25,20 @@ INCLUDE scene.inc
 ; //	ecx - THIS pointer
 ; // ----------------------------------
 init_scene PROC PUBLIC USES esi, maxGameObjects : DWORD
-	INVOKE init_scene, maxGameObjects ; // placeholder code to avoid MASM assemble time bugs
+	mov esi, ecx ; // Save off my THIS pointer in esi
 
+	lea ecx, (Scene PTR [esi]).gameObjects
+	INVOKE init_unordered_vector, maxGameObjects
+
+	lea ecx, (Scene PTR [esi]).startQueue
+	INVOKE init_unordered_vector, maxGameObjects
+
+	lea ecx, (Scene PTR [esi]).freeQueue
+	INVOKE init_unordered_vector, maxGameObjects
+	
+	lea ecx, (Scene PTR [esi]).renderCommands
+	INVOKE init_unordered_vector, maxGameObjects
+		
 	ret
 init_scene ENDP
 
