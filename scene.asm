@@ -211,9 +211,15 @@ scene_free_game_objects ENDP
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-scene_render_frame PROC PRIVATE
+scene_render_frame PROC PRIVATE USES eax ebx edx esi edi
+	local pThis
+	mov pThis, ecx
+
+	; // First clear the render list
+	lea ecx, (Scene PTR [ecx]).renderCommands
+	mov (UnorderedVector PTR [ecx]).count, 0
+
 	; // Build render list
-	; // renderCommands.clear()
 	; // for (GameObject o : *pGameObjects):
 	; //	for (Component c : o->pComponents)
 	; //		if (c.componentType == SPRITE_COMPONENT_TYPE || c.componentType == RECT_COMPONENT_TYPE)
