@@ -229,7 +229,7 @@ scene_update PROC PUBLIC USES eax ebx edx esi edi, deltaTime: REAL4
 	; // Update all of the GameObject logic
 	INVOKE scene_update_game_objects, deltaTime
 
-	; // Update animator components
+	; // Update animator components NYI
 	; // for (GameObject o : *pGameObjects):
 	; //	for (Component c : o->pComponents)
 	; //		if (c.componentType == ANIMATOR_COMPONENT_TYPE)
