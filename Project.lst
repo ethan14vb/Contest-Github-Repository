@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 20:18:20
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 20:25:27
 scene.asm						     Page 1 - 1
 
 
@@ -321,54 +321,94 @@ scene.asm						     Page 1 - 1
  00000083			instantiate_game_object ENDP
 
 				; // ----------------------------------
-				; // scene_update
-				; // Responsible for updating the game objects and simulations every frame.
+				; // scene_process_start_queue
+				; // Moves the GameObjects from the startQueue to the gameObjects vector 
+				; // and then calls their start() methods.
+				; //
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000083			scene_update PROC, deltaTime: REAL4
+ 00000083			scene_process_start_queue PROC PRIVATE USES eax ebx edx esi edi
 					local pThis
  00000083  55		   *	    push   ebp
  00000084  8B EC	   *	    mov    ebp, esp
  00000086  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 00000089  89 4D FC			mov pThis, ecx ; // Save the THIS pointer just in case
+ 00000089  50		   *	    push   eax
+ 0000008A  53		   *	    push   ebx
+ 0000008B  52		   *	    push   edx
+ 0000008C  56		   *	    push   esi
+ 0000008D  57		   *	    push   edi
+ 0000008E  89 4D FC			mov pThis, ecx ; // Save the THIS pointer just in case
+
+ 00000091  8D 49 0C			lea ecx, (Scene PTR [ecx]).startQueue
+ 00000094  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
+ 00000097  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
+ 00000099  BA 00000000			mov edx, 0 ; // int i = 0
+					
+					; // Iterate through the Game Objects and add them to the gameObjects vector, then call their start methods
+					.WHILE edx < ebx
+ 0000009E  EB 15	   *	    jmp    @C0001
+ 000000A0		   *@C0002:
+						; // esi = startQueue[i]
+ 000000A0  8B 34 90				mov esi, [eax + edx * 4]
+						
+						; // push the game object startQueue[i] into GameObjects
+ 000000A3  8B 4D FC				mov ecx, pThis
+ 000000A6  8D 09				lea ecx, (Scene PTR [ECX]).gameObjects
+						INVOKE push_back, esi
+ 000000A8  56		   *	    push   esi
+ 000000A9  E8 00000000 E   *	    call   push_back
+					
+						; // call the start() method in the GameObject startQueue[i]
+ 000000AE  8B CE				mov ecx, esi
+						INVOKE game_object_start_virtual
+ 000000B0  E8 00000000 E   *	    call   game_object_start_virtual
+					.ENDW
+ 000000B5		   *@C0001:
+ 000000B5  3B D3	   *	    cmp    edx, ebx
+ 000000B7  72 E7	   *	    jb	@C0002
+
+					; // Set the length of startQueue to be 0, effectively clearing it
+ 000000B9  8B 4D FC			mov ecx, pThis
+ 000000BC  8D 49 0C			lea ecx, (Scene PTR [ecx]).startQueue
+ 000000BF  C7 41 04			mov (UnorderedVector PTR [ecx]).count, 0
+	   00000000
+
+ 000000C6  8B 4D FC			mov ecx, pThis
+					ret
+ 000000C9  5F		   *	    pop    edi
+ 000000CA  5E		   *	    pop    esi
+ 000000CB  5A		   *	    pop    edx
+ 000000CC  5B		   *	    pop    ebx
+ 000000CD  58		   *	    pop    eax
+ 000000CE  C9		   *	    leave  
+ 000000CF  C3		   *	    ret    00000h
+ 000000D0			scene_process_start_queue ENDP
+
+				; // ----------------------------------
+				; // scene_update
+				; // Responsible for updating the game objects and simulations every frame.
+				; //
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
+				; // ----------------------------------
+ 000000D0			scene_update PROC PUBLIC USES eax ebx edx esi edi, deltaTime: REAL4
+					local pThis
+ 000000D0  55		   *	    push   ebp
+ 000000D1  8B EC	   *	    mov    ebp, esp
+ 000000D3  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 000000D6  50		   *	    push   eax
+ 000000D7  53		   *	    push   ebx
+ 000000D8  52		   *	    push   edx
+ 000000D9  56		   *	    push   esi
+ 000000DA  57		   *	    push   edi
+ 000000DB  89 4D FC			mov pThis, ecx ; // Save the THIS pointer just in case
 
 					; // Take Input and set input flags
 
-					; // ********************************************
-					; // Process Start Queue
-					; // ********************************************
- 0000008C  8D 49 0C			lea ecx, (Scene PTR [ecx]).startQueue
- 0000008F  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
- 00000092  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
- 00000094  BA 00000000			mov edx, 0 ; // int i = 0
-					
-					; // while (i < startQueue.count)
-					.WHILE edx < ebx
- 00000099  EB 15	   *	    jmp    @C0001
- 0000009B		   *@C0002:
-						; // esi = startQueue[i]
- 0000009B  8B 34 90				mov esi, [eax + edx * 4]
-						
-						; // pGameObjects->push_back(startQueue[i])
- 0000009E  8B 4D FC				mov ecx, pThis
- 000000A1  8D 09				lea ecx, (Scene PTR [ECX]).gameObjects
-						INVOKE push_back, esi
- 000000A3  56		   *	    push   esi
- 000000A4  E8 00000000 E   *	    call   push_back
-					
-						; // starQueue[i].Start()
- 000000A9  8B CE				mov ecx, esi
-						INVOKE game_object_start_virtual
- 000000AB  E8 00000000 E   *	    call   game_object_start_virtual
-					.ENDW
- 000000B0		   *@C0001:
- 000000B0  3B D3	   *	    cmp    edx, ebx
- 000000B2  72 E7	   *	    jb	@C0002
-
-					; // startQueue.count = 0
- 000000B4  8B 4D FC			mov ecx, pThis
- 000000B7  8D 49 0C			lea ecx, (Scene PTR [ecx]).startQueue
- 000000BA  C7 41 04			mov (UnorderedVector PTR [ecx]).count, 0
-	   00000000
+					; // Process start queue
+					INVOKE scene_process_start_queue
+ 000000DE  E8 FFFFFFA0	   *	    call   scene_process_start_queue
 
 					; // Update time sensitive components (such as timers and tweens)
 					; // for (GameObject o : *pGameObjects):
@@ -400,13 +440,18 @@ scene.asm						     Page 1 - 1
 					; // Pass render list to renderer
 					; // renderer.renderFrame(renderCommands)
 					ret
- 000000C1  C9		   *	    leave  
- 000000C2  C2 0004	   *	    ret    00004h
- 000000C5			scene_update ENDP
-scene.asm(163) : warning A6004:procedure argument or local not referenced : deltaTime
+ 000000E3  5F		   *	    pop    edi
+ 000000E4  5E		   *	    pop    esi
+ 000000E5  5A		   *	    pop    edx
+ 000000E6  5B		   *	    pop    ebx
+ 000000E7  58		   *	    pop    eax
+ 000000E8  C9		   *	    leave  
+ 000000E9  C2 0004	   *	    ret    00004h
+ 000000EC			scene_update ENDP
+scene.asm(182) : warning A6004:procedure argument or local not referenced : deltaTime
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 20:18:20
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 20:25:27
 scene.asm						     Symbols 2 - 1
 
 
@@ -454,7 +499,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000000C5 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000EC DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -483,7 +528,9 @@ new_scene  . . . . . . . . . . .	P Near	 00000038 _TEXT	Length= 00000024 Public 
 new_unordered_vector . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 push_back  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 remove_element . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-scene_update . . . . . . . . . .	P Near	 00000083 _TEXT	Length= 00000042 Private STDCALL
+scene_process_start_queue  . . .	P Near	 00000083 _TEXT	Length= 0000004D Private STDCALL
+  pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
+scene_update . . . . . . . . . .	P Near	 000000D0 _TEXT	Length= 0000001C Public STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
 

@@ -93,42 +93,61 @@ instantiate_game_object PROC PUBLIC USES esi, pGameObject: DWORD
 instantiate_game_object ENDP
 
 ; // ----------------------------------
-; // scene_update
-; // Responsible for updating the game objects and simulations every frame.
+; // scene_process_start_queue
+; // Moves the GameObjects from the startQueue to the gameObjects vector 
+; // and then calls their start() methods.
+; //
+; // Register Parameters: 
+; //	ecx - THIS pointer
 ; // ----------------------------------
-scene_update PROC, deltaTime: REAL4
+scene_process_start_queue PROC PRIVATE USES eax ebx edx esi edi
 	local pThis
 	mov pThis, ecx ; // Save the THIS pointer just in case
 
-	; // Take Input and set input flags
-
-	; // ********************************************
-	; // Process Start Queue
-	; // ********************************************
 	lea ecx, (Scene PTR [ecx]).startQueue
 	mov ebx, (UnorderedVector PTR [ecx]).count
 	mov eax, (UnorderedVector PTR [ecx]).pData
 	mov edx, 0 ; // int i = 0
 	
-	; // while (i < startQueue.count)
+	; // Iterate through the Game Objects and add them to the gameObjects vector, then call their start methods
 	.WHILE edx < ebx
 		; // esi = startQueue[i]
 		mov esi, [eax + edx * 4]
 		
-		; // pGameObjects->push_back(startQueue[i])
+		; // push the game object startQueue[i] into GameObjects
 		mov ecx, pThis
 		lea ecx, (Scene PTR [ECX]).gameObjects
 		INVOKE push_back, esi
 	
-		; // starQueue[i].Start()
+		; // call the start() method in the GameObject startQueue[i]
 		mov ecx, esi
 		INVOKE game_object_start_virtual
 	.ENDW
 
-	; // startQueue.count = 0
+	; // Set the length of startQueue to be 0, effectively clearing it
 	mov ecx, pThis
 	lea ecx, (Scene PTR [ecx]).startQueue
 	mov (UnorderedVector PTR [ecx]).count, 0
+
+	mov ecx, pThis
+	ret
+scene_process_start_queue ENDP
+
+; // ----------------------------------
+; // scene_update
+; // Responsible for updating the game objects and simulations every frame.
+; //
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+scene_update PROC PUBLIC USES eax ebx edx esi edi, deltaTime: REAL4
+	local pThis
+	mov pThis, ecx ; // Save the THIS pointer just in case
+
+	; // Take Input and set input flags
+
+	; // Process start queue
+	INVOKE scene_process_start_queue
 
 	; // Update time sensitive components (such as timers and tweens)
 	; // for (GameObject o : *pGameObjects):
