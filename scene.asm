@@ -134,6 +134,37 @@ scene_process_start_queue PROC PRIVATE USES eax ebx edx esi edi
 scene_process_start_queue ENDP
 
 ; // ----------------------------------
+; // scene_update_game_objects
+; // Calls the update method of all of the GameObjects in gameObjects
+; //
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+scene_update_game_objects PROC PRIVATE USES eax ebx edx esi edi, deltaTime: REAL4
+	local pThis
+	mov pThis, ecx ; // Save the THIS pointer just in case
+
+	lea ecx, (Scene PTR [ecx]).gameObjects
+	mov ebx, (UnorderedVector PTR [ecx]).count
+	mov eax, (UnorderedVector PTR [ecx]).pData
+	mov edx, 0 ; // int i = 0
+	
+	; // Iterate through the Game Objects and call their update methods if they are still alive
+	.WHILE edx < ebx
+		; // esi = gameObjects[i]
+		mov esi, [eax + edx * 4]
+
+		; // call the update() method in the GameObject gameObjects[i]
+		mov ecx, esi
+		mov eax, deltaTime
+		; // INVOKE game_object_update_virtual, deltaTime
+	.ENDW
+
+	mov ecx, pThis
+	ret
+scene_update_game_objects ENDP
+
+; // ----------------------------------
 ; // scene_update
 ; // Responsible for updating the game objects and simulations every frame.
 ; //
@@ -149,15 +180,14 @@ scene_update PROC PUBLIC USES eax ebx edx esi edi, deltaTime: REAL4
 	; // Process start queue
 	INVOKE scene_process_start_queue
 
-	; // Update time sensitive components (such as timers and tweens)
+	; // Update time sensitive components (such as timers and tweens) NYI
 	; // for (GameObject o : *pGameObjects):
 	; //	for (Component c : o->pComponents)
 	; //		if (c.componentType == TIMER_COMPONENT_TYPE)
 	; //			c.Update(deltaTime)
 
-	; // Update Game Object logic
-	; // for (GameObject o : *pGameObjects):
-	; //	o.update(deltaTime)
+	; // Update all of the GameObject logic
+	INVOKE scene_update_game_objects, deltaTime
 
 	; // Update animator components
 	; // for (GameObject o : *pGameObjects):

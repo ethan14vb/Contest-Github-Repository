@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 20:25:27
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 23:18:29
 scene.asm						     Page 1 - 1
 
 
@@ -386,13 +386,13 @@ scene.asm						     Page 1 - 1
  000000D0			scene_process_start_queue ENDP
 
 				; // ----------------------------------
-				; // scene_update
-				; // Responsible for updating the game objects and simulations every frame.
+				; // scene_update_game_objects
+				; // Calls the update method of all of the GameObjects in gameObjects
 				; //
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 000000D0			scene_update PROC PUBLIC USES eax ebx edx esi edi, deltaTime: REAL4
+ 000000D0			scene_update_game_objects PROC PRIVATE USES eax ebx edx esi edi, deltaTime: REAL4
 					local pThis
  000000D0  55		   *	    push   ebp
  000000D1  8B EC	   *	    mov    ebp, esp
@@ -404,21 +404,73 @@ scene.asm						     Page 1 - 1
  000000DA  57		   *	    push   edi
  000000DB  89 4D FC			mov pThis, ecx ; // Save the THIS pointer just in case
 
+ 000000DE  8D 09			lea ecx, (Scene PTR [ecx]).gameObjects
+ 000000E0  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
+ 000000E3  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
+ 000000E5  BA 00000000			mov edx, 0 ; // int i = 0
+					
+					; // Iterate through the Game Objects and call their update methods if they are still alive
+					.WHILE edx < ebx
+ 000000EA  EB 08	   *	    jmp    @C0004
+ 000000EC		   *@C0005:
+						; // esi = gameObjects[i]
+ 000000EC  8B 34 90				mov esi, [eax + edx * 4]
+
+						; // call the update() method in the GameObject gameObjects[i]
+ 000000EF  8B CE				mov ecx, esi
+ 000000F1  8B 45 08				mov eax, deltaTime
+						; // INVOKE game_object_update_virtual, deltaTime
+					.ENDW
+ 000000F4		   *@C0004:
+ 000000F4  3B D3	   *	    cmp    edx, ebx
+ 000000F6  72 F4	   *	    jb	@C0005
+
+ 000000F8  8B 4D FC			mov ecx, pThis
+					ret
+ 000000FB  5F		   *	    pop    edi
+ 000000FC  5E		   *	    pop    esi
+ 000000FD  5A		   *	    pop    edx
+ 000000FE  5B		   *	    pop    ebx
+ 000000FF  58		   *	    pop    eax
+ 00000100  C9		   *	    leave  
+ 00000101  C2 0004	   *	    ret    00004h
+ 00000104			scene_update_game_objects ENDP
+
+				; // ----------------------------------
+				; // scene_update
+				; // Responsible for updating the game objects and simulations every frame.
+				; //
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
+				; // ----------------------------------
+ 00000104			scene_update PROC PUBLIC USES eax ebx edx esi edi, deltaTime: REAL4
+					local pThis
+ 00000104  55		   *	    push   ebp
+ 00000105  8B EC	   *	    mov    ebp, esp
+ 00000107  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 0000010A  50		   *	    push   eax
+ 0000010B  53		   *	    push   ebx
+ 0000010C  52		   *	    push   edx
+ 0000010D  56		   *	    push   esi
+ 0000010E  57		   *	    push   edi
+ 0000010F  89 4D FC			mov pThis, ecx ; // Save the THIS pointer just in case
+
 					; // Take Input and set input flags
 
 					; // Process start queue
 					INVOKE scene_process_start_queue
- 000000DE  E8 FFFFFFA0	   *	    call   scene_process_start_queue
+ 00000112  E8 FFFFFF6C	   *	    call   scene_process_start_queue
 
-					; // Update time sensitive components (such as timers and tweens)
+					; // Update time sensitive components (such as timers and tweens) NYI
 					; // for (GameObject o : *pGameObjects):
 					; //	for (Component c : o->pComponents)
 					; //		if (c.componentType == TIMER_COMPONENT_TYPE)
 					; //			c.Update(deltaTime)
 
-					; // Update Game Object logic
-					; // for (GameObject o : *pGameObjects):
-					; //	o.update(deltaTime)
+					; // Update all of the GameObject logic
+					INVOKE scene_update_game_objects, deltaTime
+ 00000117  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 0000011A  E8 FFFFFFB1	   *	    call   scene_update_game_objects
 
 					; // Update animator components
 					; // for (GameObject o : *pGameObjects):
@@ -440,18 +492,17 @@ scene.asm						     Page 1 - 1
 					; // Pass render list to renderer
 					; // renderer.renderFrame(renderCommands)
 					ret
- 000000E3  5F		   *	    pop    edi
- 000000E4  5E		   *	    pop    esi
- 000000E5  5A		   *	    pop    edx
- 000000E6  5B		   *	    pop    ebx
- 000000E7  58		   *	    pop    eax
- 000000E8  C9		   *	    leave  
- 000000E9  C2 0004	   *	    ret    00004h
- 000000EC			scene_update ENDP
-scene.asm(182) : warning A6004:procedure argument or local not referenced : deltaTime
+ 0000011F  5F		   *	    pop    edi
+ 00000120  5E		   *	    pop    esi
+ 00000121  5A		   *	    pop    edx
+ 00000122  5B		   *	    pop    ebx
+ 00000123  58		   *	    pop    eax
+ 00000124  C9		   *	    leave  
+ 00000125  C2 0004	   *	    ret    00004h
+ 00000128			scene_update ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 20:25:27
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 23:18:29
 scene.asm						     Symbols 2 - 1
 
 
@@ -499,7 +550,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000000EC DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000128 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -530,7 +581,10 @@ push_back  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 remove_element . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 scene_process_start_queue  . . .	P Near	 00000083 _TEXT	Length= 0000004D Private STDCALL
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
-scene_update . . . . . . . . . .	P Near	 000000D0 _TEXT	Length= 0000001C Public STDCALL
+scene_update_game_objects  . . .	P Near	 000000D0 _TEXT	Length= 00000034 Private STDCALL
+  deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
+  pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
+scene_update . . . . . . . . . .	P Near	 00000104 _TEXT	Length= 00000024 Public STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
 
@@ -560,5 +614,5 @@ SCENE_INC  . . . . . . . . . . .	Number	 00000001h
 UNORDERED_VECTOR_INC . . . . . .	Number	 00000001h   
 hHeap  . . . . . . . . . . . . .	DWord	 00000000 FLAT	External STDCALL
 
-	   1 Warnings
+	   0 Warnings
 	   0 Errors
