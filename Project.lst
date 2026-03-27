@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 19:54:20
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 20:18:20
 scene.asm						     Page 1 - 1
 
 
@@ -132,6 +132,76 @@ scene.asm						     Page 1 - 1
 			      C 
 			      C ENDIF
 			      C 
+				INCLUDE game_object.inc
+			      C ; // ==================================
+			      C ; // GameObject
+			      C ; // ----------------------------------
+			      C ; //	GameObjects are the core elements of a scene
+			      C ; // that contain gameplay logic and anything the player
+			      C ; // will see.
+			      C ; //	This STRUCT is intended to be 'subclassed' by 
+			      C ; // overriding the virtual function table.
+			      C ; //	GameObjects contain a list of components that
+			      C ; // define utility behavior such as sprites to render
+			      C ; // or animation states. These componenets are updated
+			      C ; // by the scene_update to keep their auxillary functionality
+			      C ; // separate from main game logic.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF GAME_OBJECT_INC
+ = 00000001		      C GAME_OBJECT_INC EQU 1
+			      C 
+			      C INCLUDE game_object_ids.inc
+			      C ; // ==================================
+			      C ; // game_object_ids.inc
+			      C ; // ----------------------------------
+			      C ; // A set of "enum" style macros that identify GameObject types 
+			      C ; // for the data definition and parsing of a scene's data.
+			      C ; //
+			      C ; // This is necessary because GameObjects are designed to be
+			      C ; // subclassed into new unique types of GameObjects defined
+			      C ; // by the user of this engine.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF GAME_OBJECT_IDS_INC
+ = 00000001		      C GAME_OBJECT_IDS_INC EQU 1
+			      C 
+			      C ; // List of GameObject identifiers
+ = 00000000		      C DEFAULT_GAME_OBJECT_ID = 0
+			      C 
+			      C ENDIF
+			      C 
+			      C 
+			      C ENUM_GAME_OBJECT_ID TYPEDEF DWORD
+			      C 
+ 00000010		      C GameObject_vtable STRUCT
+ 00000000  00000000	      C 	pStart DWORD ? ; For game logic that should run just after the GameObjec is initialized
+ 00000004  00000000	      C 	pUpdate DWORD ? ; For game logic that will run every frame update
+ 00000008  00000000	      C 	pExit DWORD ? ; For game logic that should run just before the GameObject is freed
+ 0000000C  00000000	      C 	pFree DWORD ? ; Destructor
+			      C GameObject_vtable ENDS
+			      C 
+ 00000014		      C GameObject STRUCT
+ 00000000  00000000	      C 	gameObjectType ENUM_GAME_OBJECT_ID ?
+ 00000004  00000000	      C 	numComponents DWORD ?
+ 00000008  00000000	      C 	maxComponents DWORD ?
+ 0000000C  00000000	      C 	pComponents DWORD ? ; Pointer to a table of components
+ 00000010  00000000	      C 	pVt DWORD ? ; Pointer to a virtual function table
+			      C GameObject ENDS
+			      C 
+			      C ; // Static methods
+			      C add_component PROTO pGameObject: DWORD, pComponent: DWORD
+			      C 
+			      C ; // Constructors
+			      C init_game_object PROTO maxComponents : DWORD
+			      C new_game_object PROTO maxComponents : DWORD
+			      C free_game_object PROTO
+			      C 
+			      C ; // Instance methods
+			      C game_object_start_virtual PROTO
+			      C 
+			      C ENDIF
+			      C 
 
  00000000			.code
 				; // ********************************************
@@ -255,14 +325,50 @@ scene.asm						     Page 1 - 1
 				; // Responsible for updating the game objects and simulations every frame.
 				; // ----------------------------------
  00000083			scene_update PROC, deltaTime: REAL4
+					local pThis
+ 00000083  55		   *	    push   ebp
+ 00000084  8B EC	   *	    mov    ebp, esp
+ 00000086  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 00000089  89 4D FC			mov pThis, ecx ; // Save the THIS pointer just in case
+
 					; // Take Input and set input flags
 
-					; // Process start queue
-					; // for (GameObject o : *pStartQueue):
-					; //	pGameObjects->push_back(o)
-					; //	o.Start()
-					; //
-					; // *pStartQueue->clear()
+					; // ********************************************
+					; // Process Start Queue
+					; // ********************************************
+ 0000008C  8D 49 0C			lea ecx, (Scene PTR [ecx]).startQueue
+ 0000008F  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
+ 00000092  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
+ 00000094  BA 00000000			mov edx, 0 ; // int i = 0
+					
+					; // while (i < startQueue.count)
+					.WHILE edx < ebx
+ 00000099  EB 15	   *	    jmp    @C0001
+ 0000009B		   *@C0002:
+						; // esi = startQueue[i]
+ 0000009B  8B 34 90				mov esi, [eax + edx * 4]
+						
+						; // pGameObjects->push_back(startQueue[i])
+ 0000009E  8B 4D FC				mov ecx, pThis
+ 000000A1  8D 09				lea ecx, (Scene PTR [ECX]).gameObjects
+						INVOKE push_back, esi
+ 000000A3  56		   *	    push   esi
+ 000000A4  E8 00000000 E   *	    call   push_back
+					
+						; // starQueue[i].Start()
+ 000000A9  8B CE				mov ecx, esi
+						INVOKE game_object_start_virtual
+ 000000AB  E8 00000000 E   *	    call   game_object_start_virtual
+					.ENDW
+ 000000B0		   *@C0001:
+ 000000B0  3B D3	   *	    cmp    edx, ebx
+ 000000B2  72 E7	   *	    jb	@C0002
+
+					; // startQueue.count = 0
+ 000000B4  8B 4D FC			mov ecx, pThis
+ 000000B7  8D 49 0C			lea ecx, (Scene PTR [ecx]).startQueue
+ 000000BA  C7 41 04			mov (UnorderedVector PTR [ecx]).count, 0
+	   00000000
 
 					; // Update time sensitive components (such as timers and tweens)
 					; // for (GameObject o : *pGameObjects):
@@ -293,16 +399,14 @@ scene.asm						     Page 1 - 1
 
 					; // Pass render list to renderer
 					; // renderer.renderFrame(renderCommands)
- 00000083  55		   *	    push   ebp
- 00000084  8B EC	   *	    mov    ebp, esp
 					ret
- 00000086  C9		   *	    leave  
- 00000087  C2 0004	   *	    ret    00004h
- 0000008A			scene_update ENDP
-scene.asm(138) : warning A6004:procedure argument or local not referenced : deltaTime
+ 000000C1  C9		   *	    leave  
+ 000000C2  C2 0004	   *	    ret    00004h
+ 000000C5			scene_update ENDP
+scene.asm(163) : warning A6004:procedure argument or local not referenced : deltaTime
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 19:54:20
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/26/26 20:18:20
 scene.asm						     Symbols 2 - 1
 
 
@@ -313,6 +417,17 @@ Structures and Unions:
                 N a m e                  Size
                                          Offset      Type
 
+GameObject_vtable  . . . . . . .	 00000010
+  pStart . . . . . . . . . . . .	 00000000	 DWord
+  pUpdate  . . . . . . . . . . .	 00000004	 DWord
+  pExit  . . . . . . . . . . . .	 00000008	 DWord
+  pFree  . . . . . . . . . . . .	 0000000C	 DWord
+GameObject . . . . . . . . . . .	 00000014
+  gameObjectType . . . . . . . .	 00000000	 DWord
+  numComponents  . . . . . . . .	 00000004	 DWord
+  maxComponents  . . . . . . . .	 00000008	 DWord
+  pComponents  . . . . . . . . .	 0000000C	 DWord
+  pVt  . . . . . . . . . . . . .	 00000010	 DWord
 Scene  . . . . . . . . . . . . .	 00000030
   gameObjects  . . . . . . . . .	 00000000	 
   startQueue . . . . . . . . . .	 0000000C	 
@@ -328,6 +443,7 @@ Types:
 
                 N a m e                  Size     Attr
 
+ENUM_GAME_OBJECT_ID  . . . . . .	 00000004     DWord
 HANDLE . . . . . . . . . . . . .	 00000004     DWord
 
 
@@ -338,7 +454,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000008A DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000C5 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -349,21 +465,27 @@ GetProcessHeap . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 HeapAlloc  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+add_component  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+free_game_object . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_scene . . . . . . . . . . .	P Near	 0000005C _TEXT	Length= 0000000F Public STDCALL
 free_unordered_vector  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+game_object_start_virtual  . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+init_game_object . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_scene . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000038 Public STDCALL
   maxGameObjects . . . . . . . .	DWord	 bp + 00000008
 init_unordered_vector  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 instantiate_game_object  . . . .	P Near	 0000006B _TEXT	Length= 00000018 Public STDCALL
   pGameObject  . . . . . . . . .	DWord	 bp + 00000008
+new_game_object  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_scene  . . . . . . . . . . .	P Near	 00000038 _TEXT	Length= 00000024 Public STDCALL
   maxGameObjects . . . . . . . .	DWord	 bp + 00000008
 new_unordered_vector . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 push_back  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 remove_element . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-scene_update . . . . . . . . . .	P Near	 00000083 _TEXT	Length= 00000007 Private STDCALL
+scene_update . . . . . . . . . .	P Near	 00000083 _TEXT	Length= 00000042 Private STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
+  pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
 
 
 Symbols:
@@ -379,6 +501,9 @@ Symbols:
 @fardata?  . . . . . . . . . . .	Text   	 FLAT
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
+DEFAULT_GAME_OBJECT_ID . . . . .	Number	 00000000h   
+GAME_OBJECT_IDS_INC  . . . . . .	Number	 00000001h   
+GAME_OBJECT_INC  . . . . . . . .	Number	 00000001h   
 HEAP_FUNCTIONS_INC . . . . . . .	Number	 00000001h   
 HEAP_GENERATE_EXCEPTIONS . . . .	Number	 00000004h   
 HEAP_NO_SERIALIZE  . . . . . . .	Number	 00000001h   

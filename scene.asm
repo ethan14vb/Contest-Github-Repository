@@ -11,6 +11,7 @@
 INCLUDE default_header.inc
 INCLUDE heap_functions.inc
 INCLUDE scene.inc
+INCLUDE game_object.inc
 
 .code
 ; // ********************************************
@@ -96,14 +97,38 @@ instantiate_game_object ENDP
 ; // Responsible for updating the game objects and simulations every frame.
 ; // ----------------------------------
 scene_update PROC, deltaTime: REAL4
+	local pThis
+	mov pThis, ecx ; // Save the THIS pointer just in case
+
 	; // Take Input and set input flags
 
-	; // Process start queue
-	; // for (GameObject o : *pStartQueue):
-	; //	pGameObjects->push_back(o)
-	; //	o.Start()
-	; //
-	; // *pStartQueue->clear()
+	; // ********************************************
+	; // Process Start Queue
+	; // ********************************************
+	lea ecx, (Scene PTR [ecx]).startQueue
+	mov ebx, (UnorderedVector PTR [ecx]).count
+	mov eax, (UnorderedVector PTR [ecx]).pData
+	mov edx, 0 ; // int i = 0
+	
+	; // while (i < startQueue.count)
+	.WHILE edx < ebx
+		; // esi = startQueue[i]
+		mov esi, [eax + edx * 4]
+		
+		; // pGameObjects->push_back(startQueue[i])
+		mov ecx, pThis
+		lea ecx, (Scene PTR [ECX]).gameObjects
+		INVOKE push_back, esi
+	
+		; // starQueue[i].Start()
+		mov ecx, esi
+		INVOKE game_object_start_virtual
+	.ENDW
+
+	; // startQueue.count = 0
+	mov ecx, pThis
+	lea ecx, (Scene PTR [ecx]).startQueue
+	mov (UnorderedVector PTR [ecx]).count, 0
 
 	; // Update time sensitive components (such as timers and tweens)
 	; // for (GameObject o : *pGameObjects):
