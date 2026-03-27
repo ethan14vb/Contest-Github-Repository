@@ -164,6 +164,47 @@ scene_update_game_objects PROC PRIVATE USES eax ebx edx esi edi, deltaTime: REAL
 scene_update_game_objects ENDP
 
 ; // ----------------------------------
+; // scene_free_game_objects
+; // Frees the game objects in the freeQueue and removes them from the gameObjects vector
+; //
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+scene_free_game_objects PROC PRIVATE USES eax ebx edx esi edi
+	local pThis
+	mov pThis, ecx ; // Save the THIS pointer just in case
+
+	lea ecx, (Scene PTR [ecx]).freeQueue
+	mov ebx, (UnorderedVector PTR [ecx]).count
+	mov eax, (UnorderedVector PTR [ecx]).pData
+	mov edx, 0 ; // int i = 0
+	
+	; // Iterate through the freeQueue vector
+	; // Remove the element from gameObjects and free it
+	.WHILE edx < ebx
+		; // esi = freeQueue[i]
+		mov esi, [eax + edx * 4]
+
+		; // Remove the element pointer from gameObjects
+		mov ecx, pThis
+		lea ecx, (Scene PTR [ecx]).gameObjects
+		INVOKE remove_element, esi
+
+		; // call the free() method on the GameObject
+		mov ecx, esi
+		INVOKE free_game_object
+	.ENDW
+
+	; // Set the length of freeQueue to be 0, effectively clearing it
+	mov ecx, pThis
+	lea ecx, (Scene PTR [ecx]).freeQueue
+	mov (UnorderedVector PTR [ecx]).count, 0
+
+	mov ecx, pThis
+	ret
+scene_free_game_objects ENDP
+
+; // ----------------------------------
 ; // scene_update
 ; // Responsible for updating the game objects and simulations every frame.
 ; //
@@ -195,8 +236,7 @@ scene_update PROC PUBLIC USES eax ebx edx esi edi, deltaTime: REAL4
 	; //			c.Update(deltaTime)
 
 	; // Free any GameObjects that were queued to be freed by gameplay logic
-	; // for (GameObject o : *pQueueFreeGameObjects)
-	; //	o.free()
+	INVOKE scene_free_game_objects
 
 	; // Build render list
 	; // renderCommands.clear()
