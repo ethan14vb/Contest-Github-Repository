@@ -156,8 +156,7 @@ scene_update_game_objects PROC PRIVATE USES eax ebx edx esi edi, deltaTime: REAL
 
 		; // call the update() method in the GameObject gameObjects[i]
 		mov ecx, esi
-		mov eax, deltaTime
-		; // INVOKE game_object_update_virtual, deltaTime
+		INVOKE game_object_update_virtual, deltaTime
 	.ENDW
 
 	mov ecx, pThis

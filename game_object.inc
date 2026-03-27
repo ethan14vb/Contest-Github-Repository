@@ -45,5 +45,6 @@ free_game_object PROTO
 
 ; // Instance methods
 game_object_start_virtual PROTO
+game_object_update_virtual PROTO deltaTime : REAL4
 
 ENDIF

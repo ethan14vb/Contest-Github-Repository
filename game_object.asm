@@ -162,7 +162,7 @@ free_game_object ENDP
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-game_object_start PROC
+game_object_start PROC stdcall
 	ret
 game_object_start ENDP
 
@@ -181,6 +181,21 @@ game_object_start_virtual PROC PUBLIC USES ebx
 game_object_start_virtual ENDP
 
 ; // ----------------------------------
+; // game_object_update_virtual
+; // Calls the GameObject's virtual update method
+; //
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+game_object_update_virtual PROC stdcall PUBLIC USES ebx, deltaTime: REAL4
+	mov ebx, (GameObject PTR [ecx]).pVt
+	mov ebx, (GameObject_vtable PTR [ebx]).pUpdate
+	push deltaTime
+	call ebx
+	ret
+game_object_update_virtual ENDP
+
+; // ----------------------------------
 ; // game_object_update
 ; // Default blank update method for a GameObject
 ; // Can be left blank, or overriden by the virtual function table
@@ -188,7 +203,8 @@ game_object_start_virtual ENDP
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-game_object_update PROC
+game_object_update PROC stdcall, deltaTime: REAL4
+	mov eax, deltaTime
 	ret
 game_object_update ENDP
 
