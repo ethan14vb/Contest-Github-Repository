@@ -205,6 +205,26 @@ scene_free_game_objects PROC PRIVATE USES eax ebx edx esi edi
 scene_free_game_objects ENDP
 
 ; // ----------------------------------
+; // scene_render_frame
+; // Build the RenderCommand list and pass it to the renderer
+; //
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+scene_render_frame PROC PRIVATE
+	; // Build render list
+	; // renderCommands.clear()
+	; // for (GameObject o : *pGameObjects):
+	; //	for (Component c : o->pComponents)
+	; //		if (c.componentType == SPRITE_COMPONENT_TYPE || c.componentType == RECT_COMPONENT_TYPE)
+	; //			renderCommands.push_back(new RenderCommand(r))
+
+	; // Pass render list to renderer
+	; // renderer.renderFrame(renderCommands)
+	ret
+scene_render_frame ENDP
+
+; // ----------------------------------
 ; // scene_update
 ; // Responsible for updating the game objects and simulations every frame.
 ; //
@@ -238,15 +258,9 @@ scene_update PROC PUBLIC USES eax ebx edx esi edi, deltaTime: REAL4
 	; // Free any GameObjects that were queued to be freed by gameplay logic
 	INVOKE scene_free_game_objects
 
-	; // Build render list
-	; // renderCommands.clear()
-	; // for (GameObject o : *pGameObjects):
-	; //	for (Component c : o->pComponents)
-	; //		if (c.componentType == SPRITE_COMPONENT_TYPE || c.componentType == RECT_COMPONENT_TYPE)
-	; //			renderCommands.push_back(new RenderCommand(r))
-
-	; // Pass render list to renderer
-	; // renderer.renderFrame(renderCommands)
+	; // Render the scene
+	INVOKE scene_render_frame
+	
 	ret
 scene_update ENDP
 
