@@ -33,35 +33,10 @@ GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_objec
 ; // ----------------------------------
 add_component PROC PUBLIC USES eax ebx esi edi, pGameObject: DWORD, pComponent: DWORD
 	mov esi, pGameObject
-	mov eax, (GameObject PTR [esi]).numComponents
-	mov ebx, (GameObject PTR [esi]).maxComponents
-
-	; // if (pGameObject->numComponents >= pGameObject->maxComponents) 
-	.IF (eax >= ebx)
-		; // Double the size of the list
-		shl (GameObject PTR [esi]).maxComponents, 1
-
-		mov eax, (GameObject PTR[esi]).maxComponents
-		shl eax, 2 ; // maxComponents * 4 where 4 is SIZEOF DWORD 
-		INVOKE HeapReAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, (GameObject PTR[esi]).pComponents, eax
-		mov (GameObject PTR [esi]).pComponents, eax
-
-		; // Append the pointer to the end of the list
-		mov eax, (GameObject PTR [esi]).numComponents
-		mov edi, (GameObject PTR [esi]).pComponents
-		mov ebx, pComponent
-
-		mov [edi + eax * 4], ebx 
-		inc (GameObject PTR [esi]).numComponents
-	.ELSE
-		; // Append the pointer to the end of the list
-		mov eax, (GameObject PTR [esi]).numComponents
-		mov edi, (GameObject PTR [esi]).pComponents
-		mov ebx, pComponent
-
-		mov [edi + eax * 4], ebx 
-		inc (GameObject PTR [esi]).numComponents
-	.ENDIF
+	lea ecx, (GameObject PTR [esi]).components
+	
+	mov eax, pComponent
+	INVOKE push_back, eax
 
 	ret
 add_component ENDP
@@ -80,23 +55,12 @@ add_component ENDP
 init_game_object PROC PUBLIC USES esi ebx edx, maxComponents : DWORD
 	mov (GameObject PTR [ecx]).gameObjectType, DEFAULT_GAME_OBJECT_ID
 
-	; // Set up class members
-	mov esi, maxComponents
-	mov (GameObject PTR [ecx]).maxComponents, esi
-	mov (GameObject PTR [ecx]).numComponents, 0 ; // Initially, GameObjects have no components
-
 	; // Set up vTable
 	mov (GameObject PTR [ecx]).pVt, OFFSET GAMEOBJECT_VTABLE
 
 	; // Now set up the component pointer table
-	mov eax, maxComponents
-	mov edx, SIZEOF DWORD
-	mul edx
-
-	push ecx
-	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, eax
-	pop ecx
-	mov (GameObject PTR[ecx]).pComponents, eax
+	lea ecx, (GameObject PTR [esi]).components
+	INVOKE init_unordered_vector, maxComponents
 
 	mov eax, ecx ; // Return the this pointer
 
@@ -125,8 +89,10 @@ new_game_object ENDP
 free_game_object PROC PUBLIC USES eax esi ebx
 	; // Destruct the components
 	mov esi, ecx ; // Move the this pointer to esi
-	mov eax, (GameObject PTR [esi]).pComponents
-	mov ebx, (GameObject PTR [esi]).numComponents
+	lea ecx, (GameObject PTR [ecx]).components
+
+	mov eax, (UnorderedVector PTR [ecx]).pData
+	mov ebx, (UnorderedVector PTR [ecx]).count
 
 	mov ecx, 0 ; // Loop counter (int i = 0)
 	.WHILE ecx < ebx
@@ -142,11 +108,14 @@ free_game_object PROC PUBLIC USES eax esi ebx
 
 		inc ecx ; // i++
 	.ENDW
-
-	INVOKE HeapFree, hHeap, 0, eax ; // Free the Components pointer list
 	
+	mov ecx, esi
+	lea ecx, (GameObject PTR [ecx]).components
+	INVOKE free_unordered_vector
+
 	mov ecx, esi ; // Restore the THIS pointer to ecx
-	INVOKE HeapFree, hHeap, 0, ecx
+
+	INVOKE HeapFree, hHeap, 0, ecx ; // Free myself
 	ret
 free_game_object ENDP
 

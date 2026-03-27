@@ -17,6 +17,7 @@ IFNDEF GAME_OBJECT_INC
 GAME_OBJECT_INC EQU 1
 
 INCLUDE game_object_ids.inc
+INCLUDE unordered_vector.inc
 
 ENUM_GAME_OBJECT_ID TYPEDEF DWORD
 
@@ -29,9 +30,7 @@ GameObject_vtable ENDS
 
 GameObject STRUCT
 	gameObjectType ENUM_GAME_OBJECT_ID ?
-	numComponents DWORD ?
-	maxComponents DWORD ?
-	pComponents DWORD ? ; Pointer to a table of components
+	components UnorderedVector <>
 	pVt DWORD ? ; Pointer to a virtual function table
 GameObject ENDS
 
