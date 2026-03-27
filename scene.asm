@@ -220,10 +220,19 @@ scene_render_frame PROC PRIVATE USES eax ebx edx esi edi
 	mov (UnorderedVector PTR [ecx]).count, 0
 
 	; // Build render list
-	; // for (GameObject o : *pGameObjects):
-	; //	for (Component c : o->pComponents)
-	; //		if (c.componentType == SPRITE_COMPONENT_TYPE || c.componentType == RECT_COMPONENT_TYPE)
-	; //			renderCommands.push_back(new RenderCommand(r))
+	lea ecx, (Scene PTR [ecx]).gameObjects
+	mov ebx, (UnorderedVector PTR [ecx]).count
+	mov eax, (UnorderedVector PTR [ecx]).pData
+	mov edx, 0 ; // int i = 0
+	
+	; // Iterate through the Game Objects
+	.WHILE edx < ebx
+		; // esi = gameObjects[i]
+		mov esi, [eax + edx * 4]
+
+		; // If it has a SpriteComponent or a RectComponent, add the render command.
+		; // TODO
+	.ENDW
 
 	; // Pass render list to renderer
 	; // renderer.renderFrame(renderCommands)
