@@ -13,6 +13,7 @@ INCLUDE heap_functions.inc
 INCLUDE scene.inc
 INCLUDE game_object.inc
 INCLUDE game_object_ids.inc
+INCLUDE render_command.inc
 
 .code
 ; // ********************************************
@@ -231,14 +232,55 @@ scene_render_frame PROC PRIVATE USES eax ebx edx esi edi
 		; // esi = gameObjects[i]
 		mov esi, [eax + edx * 4]
 
-		; // If the object is pending free, skip it.
+		; // If the object is pending free, skip it
 		mov ecx, (GameObject PTR [esi]).awaitingFree
 		.IF ecx != 0
 			.CONTINUE
 		.ENDIF
 
-		; // If it has a SpriteComponent or a RectComponent, add the render command.
-		; // TODO
+		push eax
+		; // If it has a SpriteComponent or a RectComponent, add the render command
+		; // ----------------------------------------------------------------------
+		; // First check if there's a RectComponent
+		mov ecx, esi
+		INVOKE get_first_component_which_is_a, RECT_COMPONENT_ID
+		
+		.IF eax != 0
+			; // Create the new RenderCommand
+			mov ecx, esi
+			INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID ; // Get the transform pointer from the GameObject
+			INVOKE new_render_command, RC_RECT, eax, esi
+
+			; // Add the render command to the RenderCommands list
+			mov ecx, pThis
+			lea ecx, (Scene PTR [ecx]).renderCommands
+			INVOKE push_back, eax 
+
+			jmp scene_render_frame_loop_exit
+		.ENDIF
+
+		; // Now check if there's a SpriteComponent
+		mov ecx, esi
+		INVOKE get_first_component_which_is_a, SPRITE_COMPONENT_ID
+		
+		.IF eax != 0
+			; // Create the new RenderCommand
+			mov ecx, esi
+			INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID ; // Get the transform pointer from the GameObject
+			INVOKE new_render_command, RC_SPRITE, eax, esi
+
+			; // Add the render command to the RenderCommands list
+			mov ecx, pThis
+			lea ecx, (Scene PTR [ecx]).renderCommands
+			INVOKE push_back, eax 
+
+			jmp scene_render_frame_loop_exit
+		.ENDIF
+
+		scene_render_frame_loop_exit:
+		; // Restore the pointer to pData and continue
+		pop eax
+		inc edx ; // i++
 	.ENDW
 
 	; // Pass render list to renderer
