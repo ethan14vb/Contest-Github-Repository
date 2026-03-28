@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/28/26 16:09:25
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/28/26 16:30:06
 scene.asm						     Page 1 - 1
 
 
@@ -1038,7 +1038,7 @@ scene.asm						     Page 1 - 1
  0000023D			scene_update ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/28/26 16:09:25
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/28/26 16:30:06
 scene.asm						     Symbols 2 - 1
 
 
