@@ -17,6 +17,7 @@ INCLUDE default_header.inc
 INCLUDE game_object.inc
 INCLUDE game_object_ids.inc
 INCLUDE component.inc
+INCLUDE component_ids.inc
 INCLUDE heap_functions.inc
 
 .data
@@ -123,6 +124,19 @@ free_game_object ENDP
 ; // ********************************************
 ; // Instance methods
 ; // ********************************************
+
+; // ----------------------------------
+; // get_first_component_which_is_a
+; // Returns the first component of the GameObject that is
+; // the type specified, or NULL if it doesn't exist.
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+get_first_component_which_is_a PROC PUBLIC, componentType: ENUM_COMPONENT_ID
+	mov ecx, componentType
+	ret
+get_first_component_which_is_a ENDP
 
 ; // ----------------------------------
 ; // game_object_start

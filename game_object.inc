@@ -18,6 +18,7 @@ GAME_OBJECT_INC EQU 1
 
 INCLUDE game_object_ids.inc
 INCLUDE unordered_vector.inc
+INCLUDE component_ids.inc
 
 ENUM_GAME_OBJECT_ID TYPEDEF DWORD
 
@@ -46,7 +47,8 @@ new_game_object PROTO maxComponents : DWORD
 free_game_object PROTO
 
 ; // Instance methods
-game_object_start_virtual PROTO
-game_object_update_virtual PROTO deltaTime : REAL4
+get_first_component_which_is_a	PROTO componentType : ENUM_COMPONENT_ID
+game_object_start_virtual		PROTO
+game_object_update_virtual		PROTO deltaTime : REAL4
 
 ENDIF
