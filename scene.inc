@@ -12,8 +12,11 @@ IFNDEF SCENE_INC
 SCENE_INC EQU 1
 
 INCLUDE unordered_vector.inc
+INCLUDE camera.inc 
 
 Scene STRUCT
+	camera Camera<>
+
 	; // The list of GameObjects in this Scene instance.
 	gameObjects UnorderedVector<>
 	

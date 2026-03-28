@@ -431,7 +431,9 @@ drawSprite ENDP
 ; // clears the RGB buffer to black, then draws every
 ; // sprite (and rect) to create the frame.
 ; // ----------------------------------
-renderCommands PROC PUBLIC USES esi ecx edx, pRenderCommands:DWORD, numCommands:DWORD, pCamera:DWORD, pBuffer:DWORD
+renderCommands PROC PUBLIC USES esi ecx edx, pRenderCommands:DWORD, numCommands:DWORD, pCamera:DWORD
+	local pBuffer: DWORD
+	mov pBuffer, OFFSET screenBuffer
 	; // clear buffer to black (r=0,g=0,b=0,a=255)
 	mov ecx, SCREEN_WIDTH * SCREEN_HEIGHT
 	mov edi, pBuffer

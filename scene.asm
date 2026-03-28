@@ -13,6 +13,7 @@ INCLUDE heap_functions.inc
 INCLUDE scene.inc
 INCLUDE game_object.inc
 INCLUDE game_object_ids.inc
+INCLUDE renderer.inc
 INCLUDE render_command.inc
 
 .code
@@ -283,8 +284,15 @@ scene_render_frame PROC PRIVATE USES eax ebx edx esi edi
 		inc edx ; // i++
 	.ENDW
 
+	mov ecx, pThis
+	lea esi, (Scene PTR [ecx]).camera
+	lea ecx, (Scene PTR [ecx]).gameObjects
+	mov ebx, (UnorderedVector PTR [ecx]).count
+	mov eax, (UnorderedVector PTR [ecx]).pData
+	mov edx, 0 ; // int i = 0
+
 	; // Pass render list to renderer
-	; // renderer.renderFrame(renderCommands)
+	INVOKE renderCommands, eax, ebx, esi
 	ret
 scene_render_frame ENDP
 
