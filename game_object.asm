@@ -127,14 +127,36 @@ free_game_object ENDP
 
 ; // ----------------------------------
 ; // get_first_component_which_is_a
-; // Returns the first component of the GameObject that is
+; // Returns a pointer to the first component of the GameObject that is
 ; // the type specified, or NULL if it doesn't exist.
 ; // 
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
 get_first_component_which_is_a PROC PUBLIC, componentType: ENUM_COMPONENT_ID
-	mov ecx, componentType
+	local pThis
+	mov pThis, ecx
+
+	lea ecx, (GameObject PTR [ecx]).components
+	mov ebx, (UnorderedVector PTR [ecx]).count
+	mov eax, (UnorderedVector PTR [ecx]).pData
+	mov edx, 0 ; // int i = 0
+
+	; // Iterate through the Components
+	.WHILE edx < ebx
+		; // esi = components[i]
+		mov esi, [eax + edx * 4]
+
+		mov ecx, (Component PTR [esi]).componentType
+		.IF ecx == componentType
+			mov eax, esi ; // return the pointer to the component
+			jmp exit_get_first_component_which_is_a
+		.ENDIF
+
+	.ENDW
+
+	mov eax, 0 ; // Return NULL if nothing was found
+	exit_get_first_component_which_is_a:
 	ret
 get_first_component_which_is_a ENDP
 
