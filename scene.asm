@@ -12,6 +12,7 @@ INCLUDE default_header.inc
 INCLUDE heap_functions.inc
 INCLUDE scene.inc
 INCLUDE game_object.inc
+INCLUDE game_object_ids.inc
 
 .code
 ; // ********************************************
@@ -229,6 +230,12 @@ scene_render_frame PROC PRIVATE USES eax ebx edx esi edi
 	.WHILE edx < ebx
 		; // esi = gameObjects[i]
 		mov esi, [eax + edx * 4]
+
+		; // If the object is pending free, skip it.
+		mov ecx, (GameObject PTR [esi]).awaitingFree
+		.IF ecx != 0
+			.CONTINUE
+		.ENDIF
 
 		; // If it has a SpriteComponent or a RectComponent, add the render command.
 		; // TODO

@@ -32,6 +32,9 @@ GameObject STRUCT
 	gameObjectType ENUM_GAME_OBJECT_ID ?
 	components UnorderedVector <>
 	pVt DWORD ? ; Pointer to a virtual function table
+
+	; // Flags
+	awaitingFree DWORD ? ; // Whether the object is awaiting removal from the scene. Zero if FALSE, nonzero if TRUE
 GameObject ENDS
 
 ; // Static methods
