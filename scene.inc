@@ -37,5 +37,6 @@ free_scene PROTO
 
 ; // Instance methods
 instantiate_game_object PROTO pGameObject: DWORD
+scene_update PROTO deltaTime: REAL4
 
 ENDIF
