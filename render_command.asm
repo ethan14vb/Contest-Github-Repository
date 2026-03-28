@@ -29,7 +29,7 @@ init_render_command PROC PUBLIC USES esi, rcType: RC_ENUM, pTransform : DWORD, p
 	ret
 init_render_command ENDP
 
-new_render_command PROC PUBLIC USES ecx, rcType: RC_ENUM, pTransform: DWORD, pRenderable: DWORD
+new_render_command PROC PUBLIC USES ecx edx, rcType: RC_ENUM, pTransform: DWORD, pRenderable: DWORD
 	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF RenderCommand
 	mov ecx, eax ; // Move the memory address to eax so it can function as a "this" pointer
 	INVOKE init_render_command, rcType, pTransform, pRenderable

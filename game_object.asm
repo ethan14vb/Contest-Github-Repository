@@ -32,7 +32,7 @@ GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_objec
 ; // add_component
 ; // Initializes memory with the contents of a GameObject
 ; // ----------------------------------
-add_component PROC PUBLIC USES eax ebx esi edi, pGameObject: DWORD, pComponent: DWORD
+add_component PROC PUBLIC USES eax ebx ecx esi edi, pGameObject: DWORD, pComponent: DWORD
 	mov esi, pGameObject
 	lea ecx, (GameObject PTR [esi]).components
 	
@@ -54,6 +54,8 @@ add_component ENDP
 ; //	ecx - THIS pointer
 ; // ----------------------------------
 init_game_object PROC PUBLIC USES esi ebx edx, maxComponents : DWORD
+	local pThis: DWORD
+	mov pThis, ecx
 	mov (GameObject PTR [ecx]).gameObjectType, DEFAULT_GAME_OBJECT_ID
 	mov (GameObject PTR [ecx]).awaitingFree, 0 ; // Set awaiting free to false (0)
 
@@ -61,9 +63,10 @@ init_game_object PROC PUBLIC USES esi ebx edx, maxComponents : DWORD
 	mov (GameObject PTR [ecx]).pVt, OFFSET GAMEOBJECT_VTABLE
 
 	; // Now set up the component pointer table
-	lea ecx, (GameObject PTR [esi]).components
+	lea ecx, (GameObject PTR [ecx]).components
 	INVOKE init_unordered_vector, maxComponents
 
+	mov ecx, pThis
 	mov eax, ecx ; // Return the this pointer
 
 	ret
@@ -133,7 +136,7 @@ free_game_object ENDP
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-get_first_component_which_is_a PROC PUBLIC, componentType: ENUM_COMPONENT_ID
+get_first_component_which_is_a PROC PUBLIC USES ecx ebx edx esi, componentType: ENUM_COMPONENT_ID
 	local pThis
 	mov pThis, ecx
 
@@ -153,6 +156,7 @@ get_first_component_which_is_a PROC PUBLIC, componentType: ENUM_COMPONENT_ID
 			jmp exit_get_first_component_which_is_a
 		.ENDIF
 
+		inc edx
 	.ENDW
 
 	mov eax, 0 ; // Return NULL if nothing was found

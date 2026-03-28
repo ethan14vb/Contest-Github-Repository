@@ -431,7 +431,7 @@ drawSprite ENDP
 ; // clears the RGB buffer to black, then draws every
 ; // sprite (and rect) to create the frame.
 ; // ----------------------------------
-renderCommands PROC PUBLIC USES esi ecx edx, pRenderCommands:DWORD, numCommands:DWORD, pCamera:DWORD
+renderCommands PROC PUBLIC USES esi ecx edi ebx, pRenderCommands:DWORD, numCommands:DWORD, pCamera:DWORD
 	local pBuffer: DWORD
 	mov pBuffer, OFFSET screenBuffer
 	; // clear buffer to black (r=0,g=0,b=0,a=255)
@@ -442,18 +442,22 @@ renderCommands PROC PUBLIC USES esi ecx edx, pRenderCommands:DWORD, numCommands:
 
 	; // process each command
 	mov esi, pRenderCommands
-	mov ecx, numCommands
+	mov ebx, numCommands
 cmd_loop:
-	cmp ecx, 0
+	cmp ebx, 0
 	je render_done
-	dec ecx
-	mov edx, (RenderCommand PTR [esi]).rcType
+	dec ebx
+
+	mov eax, [esi]
+	mov edx, (RenderCommand PTR [eax]).rcType
+
 	.IF edx == RC_RECT
-		INVOKE drawRect, (RenderCommand PTR [esi]).pTransform, (RenderCommand PTR [esi]).pRenderable, pCamera, pBuffer
+		INVOKE drawRect, (RenderCommand PTR [eax]).pTransform, (RenderCommand PTR [eax]).pRenderable, pCamera, pBuffer
 	.ELSEIF edx == RC_SPRITE
-		INVOKE drawSprite, (RenderCommand PTR [esi]).pTransform, (RenderCommand PTR [esi]).pRenderable, pCamera, pBuffer
+		INVOKE drawSprite, (RenderCommand PTR [eax]).pTransform, (RenderCommand PTR [eax]).pRenderable, pCamera, pBuffer
 	.ENDIF
-	add esi, SIZEOF RenderCommand
+
+	add esi, TYPE DWORD
 	jmp cmd_loop
 render_done:
 	ret

@@ -103,7 +103,7 @@ instantiate_game_object ENDP
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-scene_process_start_queue PROC PRIVATE USES eax ebx edx esi edi
+scene_process_start_queue PROC PRIVATE USES eax ebx ecx edx esi edi
 	local pThis
 	mov pThis, ecx ; // Save the THIS pointer just in case
 
@@ -125,6 +125,7 @@ scene_process_start_queue PROC PRIVATE USES eax ebx edx esi edi
 		; // call the start() method in the GameObject startQueue[i]
 		mov ecx, esi
 		INVOKE game_object_start_virtual
+		inc edx
 	.ENDW
 
 	; // Set the length of startQueue to be 0, effectively clearing it
@@ -143,7 +144,7 @@ scene_process_start_queue ENDP
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-scene_update_game_objects PROC PRIVATE USES eax ebx edx esi edi, deltaTime: REAL4
+scene_update_game_objects PROC PRIVATE USES eax ebx ecx edx esi edi, deltaTime: REAL4
 	local pThis
 	mov pThis, ecx ; // Save the THIS pointer just in case
 
@@ -158,8 +159,13 @@ scene_update_game_objects PROC PRIVATE USES eax ebx edx esi edi, deltaTime: REAL
 		mov esi, [eax + edx * 4]
 
 		; // call the update() method in the GameObject gameObjects[i]
+		push eax
+
 		mov ecx, esi
 		INVOKE game_object_update_virtual, deltaTime
+
+		pop eax
+		inc edx
 	.ENDW
 
 	mov ecx, pThis
@@ -173,7 +179,7 @@ scene_update_game_objects ENDP
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-scene_free_game_objects PROC PRIVATE USES eax ebx edx esi edi
+scene_free_game_objects PROC PRIVATE USES eax ebx ecx edx esi edi
 	local pThis
 	mov pThis, ecx ; // Save the THIS pointer just in case
 
@@ -196,6 +202,7 @@ scene_free_game_objects PROC PRIVATE USES eax ebx edx esi edi
 		; // call the free() method on the GameObject
 		mov ecx, esi
 		INVOKE free_game_object
+		inc edx
 	.ENDW
 
 	; // Set the length of freeQueue to be 0, effectively clearing it
@@ -223,6 +230,7 @@ scene_render_frame PROC PRIVATE USES eax ebx edx esi edi
 	mov (UnorderedVector PTR [ecx]).count, 0
 
 	; // Build render list
+	mov ecx, pThis
 	lea ecx, (Scene PTR [ecx]).gameObjects
 	mov ebx, (UnorderedVector PTR [ecx]).count
 	mov eax, (UnorderedVector PTR [ecx]).pData
@@ -248,9 +256,14 @@ scene_render_frame PROC PRIVATE USES eax ebx edx esi edi
 		
 		.IF eax != 0
 			; // Create the new RenderCommand
+			push ebx
+			mov ebx, eax
+
 			mov ecx, esi
 			INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID ; // Get the transform pointer from the GameObject
-			INVOKE new_render_command, RC_RECT, eax, esi
+			INVOKE new_render_command, RC_RECT, eax, ebx
+
+			pop ebx
 
 			; // Add the render command to the RenderCommands list
 			mov ecx, pThis
@@ -266,9 +279,14 @@ scene_render_frame PROC PRIVATE USES eax ebx edx esi edi
 		
 		.IF eax != 0
 			; // Create the new RenderCommand
+			push ebx
 			mov ecx, esi
+
+			mov ebx, eax
 			INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID ; // Get the transform pointer from the GameObject
-			INVOKE new_render_command, RC_SPRITE, eax, esi
+			INVOKE new_render_command, RC_SPRITE, eax, eax
+
+			pop ebx
 
 			; // Add the render command to the RenderCommands list
 			mov ecx, pThis
