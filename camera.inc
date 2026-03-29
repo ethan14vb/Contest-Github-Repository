@@ -1,5 +1,5 @@
 ; // ==================================
-; // Camera
+; // camera.inc
 ; // ----------------------------------
 ; // A camera defines where spatially a scene should
 ; // render its GameObjects.

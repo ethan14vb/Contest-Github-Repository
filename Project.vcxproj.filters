@@ -111,5 +111,8 @@
     <MASM Include="rectangle_test_scene_test.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
+    <MASM Include="camera.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
   </ItemGroup>
 </Project>
