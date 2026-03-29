@@ -281,7 +281,6 @@ initializeRenderer ENDP
 ; // drawRect
 ; // Private helper. Draws a filled rectangle to the buffer.
 ; // Position is relative to camera (unless ignoreCamera set).
-; // No clipping.
 ; // ----------------------------------
 drawRect PROC PRIVATE USES esi edi ebx ecx edx, pTrans:DWORD, pRect:DWORD, pCamera:DWORD, pBuffer:DWORD
 	local sx:DWORD, sy:DWORD, rw:DWORD, rh:DWORD, color:DWORD
@@ -302,6 +301,20 @@ drawRect PROC PRIVATE USES esi edi ebx ecx edx, pTrans:DWORD, pRect:DWORD, pCame
 	cmp eax, 0
 	jle drawRect_done
 	mov rh, eax
+
+	; // clipping logic (set bounds)
+
+	; // check that left edge isn't past the left of the screen
+	; //	if it is, clamp it to 0
+
+	; // check that right edge isn't past the right of the screen
+	; //	if it is, clamp it to SCREEN_WIDTH
+
+	; // check that top edge isn't past the top of the screen
+	; //	if it is, clamp it to 0
+
+	; // check that bottom edge isn't past the bottom of the screen
+	; //	if it is, clamp it to SCREEN_HEIGHT
 
 	; // screen position
 	mov ebx, pTrans
