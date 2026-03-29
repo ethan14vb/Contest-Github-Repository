@@ -308,7 +308,7 @@ scene_render_frame PROC PRIVATE USES eax ebx edx esi edi
 
 	mov ecx, pThis
 	lea esi, (Scene PTR [ecx]).camera
-	lea ecx, (Scene PTR [ecx]).gameObjects
+	lea ecx, (Scene PTR [ecx]).renderCommands
 	mov ebx, (UnorderedVector PTR [ecx]).count
 	mov eax, (UnorderedVector PTR [ecx]).pData
 	mov edx, 0 ; // int i = 0

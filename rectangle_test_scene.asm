@@ -26,7 +26,7 @@ populate_rectangle_test_scene PROC PUBLIC USES eax ebx edx esi edi, pScene: DWOR
 	INVOKE new_transform_component, 10, 10, 0
 	INVOKE add_component, ecx, eax
 
-	INVOKE new_rect_component, 5, 6, 255, 0, 0, 255
+	INVOKE new_rect_component, 5, 6, 230, 170, 128, 255
 	INVOKE add_component, ecx, eax
 
 	mov esi, ecx
@@ -40,7 +40,7 @@ populate_rectangle_test_scene PROC PUBLIC USES eax ebx edx esi edi, pScene: DWOR
 	INVOKE new_transform_component, 30, 10, 0
 	INVOKE add_component, ecx, eax
 
-	INVOKE new_rect_component, 6, 5, 0, 0, 255, 255
+	INVOKE new_rect_component, 6, 5, 5, 0, 255, 255
 	INVOKE add_component, ecx, eax
 
 	mov esi, ecx

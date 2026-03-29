@@ -28,6 +28,8 @@ GetStdHandle       PROTO STDCALL : DWORD
 WriteConsoleA      PROTO STDCALL : DWORD, : DWORD, : DWORD, : DWORD, : DWORD
 
 .data
+rendererInitialized DWORD 0; // True / False whether the renderer has been initialized where 0 = False
+
 ; // Windows function data
 STD_OUTPUT_HANDLE = -11
 ENABLE_VIRTUAL_TERMINAL_PROCESSING = 4
@@ -285,9 +287,21 @@ drawRect PROC PRIVATE USES esi edi ebx ecx edx, pTrans:DWORD, pRect:DWORD, pCame
 	local sx:DWORD, sy:DWORD, rw:DWORD, rh:DWORD, color:DWORD
 
 	; // skip if not visible
-	mov eax, (RectComponent PTR [pRect]).visible
+	mov edi, pRect
+	mov eax, (RectComponent PTR [edi]).visible
 	test eax, eax
 	jz drawRect_done
+
+	; // check w > 0 and h > 0
+	mov eax, (RectComponent PTR [edi]).w
+	cmp eax, 0
+	jle drawRect_done
+	mov rw, eax
+
+	mov eax, (RectComponent PTR [edi]).h
+	cmp eax, 0
+	jle drawRect_done
+	mov rh, eax
 
 	; // screen position
 	mov ebx, pTrans
@@ -296,28 +310,23 @@ drawRect PROC PRIVATE USES esi edi ebx ecx edx, pTrans:DWORD, pRect:DWORD, pCame
 
 	mov ebx, pTrans
 	.IF [ebx].TransformComponent.ignoreCamera == 0
-		sub eax, (Camera PTR [pCamera]).x
-		sub edx, (Camera PTR [pCamera]).y
+		mov esi, pCamera
+		sub eax, (Camera PTR [esi]).x
+		sub edx, (Camera PTR [esi]).y
 	.ENDIF
 
 	mov sx, eax
 	mov sy, edx
 
-	; // size
-	mov eax, (RectComponent PTR [pRect]).w
-	mov rw, eax
-	mov eax, (RectComponent PTR [pRect]).h
-	mov rh, eax
-
 	; // build pixel dword (r g b a)
-	movzx eax, (RectComponent PTR [pRect]).r
-	movzx ebx, (RectComponent PTR [pRect]).g
+	movzx eax, (RectComponent PTR [edi]).r
+	movzx ebx, (RectComponent PTR [edi]).g
 	shl ebx, 8
 	or eax, ebx
-	movzx ebx, (RectComponent PTR [pRect]).b
+	movzx ebx, (RectComponent PTR [edi]).b
 	shl ebx, 16
 	or eax, ebx
-	movzx ebx, (RectComponent PTR [pRect]).a
+	movzx ebx, (RectComponent PTR [edi]).a
 	shl ebx, 24
 	or eax, ebx
 	mov color, eax
@@ -460,6 +469,12 @@ cmd_loop:
 	add esi, TYPE DWORD
 	jmp cmd_loop
 render_done:
+	.IF rendererInitialized == 0 
+		INVOKE initializeRenderer
+		mov rendererInitialized, 0FFFFFFFFh
+	.ENDIF
+
+	INVOKE displayBuffer, pBuffer
 	ret
 renderCommands ENDP
 
