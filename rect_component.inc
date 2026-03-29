@@ -1,5 +1,5 @@
 ; // ==================================
-; // RectComponent
+; // rect_component.inc
 ; // ----------------------------------
 ; // Defines how a GameObject should appear using a rectangle.
 ; // Should be used with a transform for proper functionality.
