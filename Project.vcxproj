@@ -15,6 +15,7 @@
     <MASM Include="component.asm" />
     <MASM Include="game_object.asm" />
     <MASM Include="heap_functions.asm" />
+    <MASM Include="input_manager.asm" />
     <MASM Include="rectangle_test_scene.asm" />
     <MASM Include="rectangle_test_scene_test.asm" />
     <MASM Include="rect_component.asm" />

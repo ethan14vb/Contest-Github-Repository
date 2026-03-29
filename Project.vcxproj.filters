@@ -114,5 +114,8 @@
     <MASM Include="camera.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
+    <MASM Include="input_manager.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
   </ItemGroup>
 </Project>
