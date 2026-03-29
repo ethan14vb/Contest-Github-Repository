@@ -64,4 +64,14 @@ exitIsKeyPressed:
 	ret
 isKeyPressed ENDP
 
+; // ----------------------------------
+; // isKeyJustPressed
+; // Returns 1 if a key is just pressed this frame and 0 if the key
+; // was not just pressed this frame.
+; // ----------------------------------
+isKeyJustPressed PROC, vkCode: DWORD
+	mov al, [curInputBuffer + vkCode]
+	ret
+isKeyJustPressed ENDP
+
 END

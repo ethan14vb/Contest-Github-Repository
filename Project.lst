@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/28/26 23:43:47
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/28/26 23:44:53
 input_manager.asm					     Page 1 - 1
 
 
@@ -84,8 +84,22 @@ input_manager.asm					     Page 1 - 1
  00000037  C2 0004	   *	    ret    00004h
  0000003A			isKeyPressed ENDP
 
+				; // ----------------------------------
+				; // isKeyJustPressed
+				; // Returns 1 if a key is just pressed this frame and 0 if the key
+				; // was not just pressed this frame.
+				; // ----------------------------------
+ 0000003A			isKeyJustPressed PROC, vkCode: DWORD
+ 0000003A  55		   *	    push   ebp
+ 0000003B  8B EC	   *	    mov    ebp, esp
+ 0000003D  8A 85 00000008 R		mov al, [curInputBuffer + vkCode]
+					ret
+ 00000043  C9		   *	    leave  
+ 00000044  C2 0004	   *	    ret    00004h
+ 00000047			isKeyJustPressed ENDP
+
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/28/26 23:43:47
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/28/26 23:44:53
 input_manager.asm					     Symbols 2 - 1
 
 
@@ -98,7 +112,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000200 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000003A DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000047 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -106,6 +120,8 @@ Procedures, parameters, and locals:
                 N a m e                 Type     Value    Attr
 
 GetKeyboardState . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+isKeyJustPressed . . . . . . . .	P Near	 0000003A _TEXT	Length= 0000000D Private STDCALL
+  vkCode . . . . . . . . . . . .	DWord	 bp + 00000008
 isKeyPressed . . . . . . . . . .	P Near	 0000001D _TEXT	Length= 0000001D Private STDCALL
   vkCode . . . . . . . . . . . .	DWord	 bp + 00000008
   keyNotPressed  . . . . . . . .	L Near	 00000031 _TEXT	
