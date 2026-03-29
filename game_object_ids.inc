@@ -12,7 +12,15 @@
 IFNDEF GAME_OBJECT_IDS_INC
 GAME_OBJECT_IDS_INC EQU 1
 
+; // A helper function to make defining a bunch of enums smoother
+enumId = 0
+DEF_ENUM MACRO enum_name
+	enum_name = enumId
+	enumId = enumId + 1
+ENDM
+
 ; // List of GameObject identifiers
-DEFAULT_GAME_OBJECT_ID = 0
+DEF_ENUM DEFAULT_GAME_OBJECT_ID
+DEF_ENUM CAMERA_MOVER_GAME_OBJECT_ID
 
 ENDIF

@@ -120,5 +120,8 @@
     <MASM Include="input_manager.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
+    <MASM Include="camera_mover_game_object.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
   </ItemGroup>
 </Project>
