@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/29/26 00:06:58
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/29/26 00:07:31
 camera_mover_game_object.asm				     Page 1 - 1
 
 
@@ -290,17 +290,49 @@ camera_mover_game_object.asm				     Page 1 - 1
  00000006  C3		   *	    ret    00000h
  00000007			init_camera_mover_game_object ENDP
 
- 00000007			camera_mover_update PROC stdcall, deltaTime: REAL4
- 00000007  55		   *	    push   ebp
- 00000008  8B EC	   *	    mov    ebp, esp
- 0000000A  8B 45 08			mov eax, deltaTime
+				; // ----------------------------------
+				; // new_game_object
+				; // Reserves heap space for the Object with parameters calls the initializer method
+				; // ----------------------------------
+ 00000007			new_camera_mover_game_object PROC PUBLIC USES ecx
+ 00000007  51		   *	    push   ecx
+					INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF GameObject
+ 00000008  6A 18	   *	    push   +000000018h
+ 0000000A  6A 04	   *	    push   +000000004h
+ 0000000C  FF 35 00000000 E *	    push   hHeap
+ 00000012  E8 00000000 E   *	    call   HeapAlloc
+ 00000017  8B C8			mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
+					INVOKE init_camera_mover_game_object
+ 00000019  E8 FFFFFFE2	   *	    call   init_camera_mover_game_object
+
+					ret ; // Return with the address of the memory block in HeapAlloc
+ 0000001E  59		   *	    pop    ecx
+ 0000001F  C3		   *	    ret    00000h
+ 00000020			new_camera_mover_game_object ENDP
+
+				; // ********************************************
+				; // Instance methods
+				; // ********************************************
+
+				; // ----------------------------------
+				; // camera_mover_update
+				; // Default blank update method for a GameObject
+				; // Can be left blank, or overriden by the virtual function table
+				; // 
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
+				; // ----------------------------------
+ 00000020			camera_mover_update PROC stdcall, deltaTime: REAL4
+ 00000020  55		   *	    push   ebp
+ 00000021  8B EC	   *	    mov    ebp, esp
+ 00000023  8B 45 08			mov eax, deltaTime
 					ret
- 0000000D  C9		   *	    leave  
- 0000000E  C2 0004	   *	    ret    00004h
- 00000011			camera_mover_update ENDP
+ 00000026  C9		   *	    leave  
+ 00000027  C2 0004	   *	    ret    00004h
+ 0000002A			camera_mover_update ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/29/26 00:06:58
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/29/26 00:07:31
 camera_mover_game_object.asm				     Symbols 2 - 1
 
 
@@ -355,7 +387,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000011 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000002A DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -367,7 +399,7 @@ HeapAlloc  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 add_component  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-camera_mover_update  . . . . . .	P Near	 00000007 _TEXT	Length= 0000000A Private STDCALL
+camera_mover_update  . . . . . .	P Near	 00000020 _TEXT	Length= 0000000A Private STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
 free_component_virtual . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_component . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -381,6 +413,7 @@ init_component . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 init_game_object . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_unordered_vector  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+new_camera_mover_game_object . .	P Near	 00000007 _TEXT	Length= 00000019 Public STDCALL
 new_component  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_game_object  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_unordered_vector . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
