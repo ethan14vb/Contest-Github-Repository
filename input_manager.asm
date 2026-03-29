@@ -69,8 +69,24 @@ isKeyPressed ENDP
 ; // Returns 1 if a key is just pressed this frame and 0 if the key
 ; // was not just pressed this frame.
 ; // ----------------------------------
-isKeyJustPressed PROC, vkCode: DWORD
+isKeyJustPressed PROC USES ebx, vkCode: DWORD
 	mov al, [curInputBuffer + vkCode]
+	mov bl, [prevInputBuffer + vkCode]
+
+	test al, 80h ; // Test the high bit
+	jz keyNotJustPressed
+	
+	; // Test if the key was also pressed last frame
+	test bl, 80h
+	jnz keyNotJustPressed
+
+	; // Key was just pressed, return 1
+	mov eax, 1
+	jmp exitIsKeyJustPressed
+		
+keyNotJustPressed:
+	mov eax, 0
+exitIsKeyJustPressed:
 	ret
 isKeyJustPressed ENDP
 
