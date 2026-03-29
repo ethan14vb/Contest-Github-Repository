@@ -325,7 +325,7 @@ scene_render_frame ENDP
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-scene_update PROC PUBLIC USES eax ebx edx esi edi, deltaTime: REAL4
+scene_update PROC PUBLIC USES eax ebx ecx edx esi edi, deltaTime: REAL4
 	local pThis
 	mov pThis, ecx ; // Save the THIS pointer just in case
 
