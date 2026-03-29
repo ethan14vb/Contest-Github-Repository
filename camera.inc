@@ -13,6 +13,8 @@ Camera STRUCT
 	; // replaced by a TransformComponent.
 	x DWORD ?
 	y DWORD ?
+
+	; // These are out of scope for the project and are unused
 	h DWORD ? ; // Viewport Height
 	w DWORD ? ; // Viewport Width
 Camera ENDS
