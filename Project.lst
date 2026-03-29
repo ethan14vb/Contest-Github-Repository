@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/28/26 23:22:32
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/28/26 23:27:37
 input_manager.asm					     Page 1 - 1
 
 
@@ -20,8 +20,9 @@ input_manager.asm					     Page 1 - 1
 			      C OPTION PROC : PRIVATE
 			      C 
 
- 00000000			.data
+				GetKeyboardState PROTO pBuffer : DWORD
 
+ 00000000			.data
 				; // Holds the data for all 256 virtual keys and whether they are currently pressed
  00000000  00000100 [		curInputBuffer BYTE 256 DUP(0)
 	    00
@@ -33,6 +34,11 @@ input_manager.asm					     Page 1 - 1
 	   ]
 
  00000000			.code
+				; // ----------------------------------
+				; // updateInput
+				; // This should be called every frame by Scene. Updates the 
+				; // current and previous buffers.
+				; // ----------------------------------
  00000000			updateInput PROC
 					; // Copy the current buffer to the previous
  00000000  FC				cld
@@ -40,11 +46,21 @@ input_manager.asm					     Page 1 - 1
  00000006  BF 00000100 R	    mov edi, OFFSET prevInputBuffer
  0000000B  B9 00000100		    mov ecx, 256
  00000010  F3/ A4		    rep movsb
- 00000012  C3				ret
- 00000013			updateInput ENDP
+
+					; // Get the current input state
+					; // This is a Win32 API function that was added to the program before we learned about it
+					; // during class. This function was used because it provided the greatest flexibility
+					; // compared to the Irvine32 libraries for this engine.
+					; // Documentation used: learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getkeyboardstate
+					INVOKE GetKeyboardState, OFFSET curInputBuffer
+ 00000012  68 00000000 R   *	    push   dword  ptr OFFSET FLAT: curInputBuffer
+ 00000017  E8 00000000 E   *	    call   GetKeyboardState
+
+ 0000001C  C3				ret
+ 0000001D			updateInput ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/28/26 23:22:32
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/28/26 23:27:37
 input_manager.asm					     Symbols 2 - 1
 
 
@@ -57,14 +73,15 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000200 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000013 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000001D DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
-updateInput  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000013 Private STDCALL
+GetKeyboardState . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+updateInput  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000001D Private STDCALL
 
 
 Symbols:

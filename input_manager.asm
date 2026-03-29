@@ -10,8 +10,9 @@
 
 INCLUDE default_header.inc
 
-.data
+GetKeyboardState PROTO pBuffer : DWORD
 
+.data
 ; // Holds the data for all 256 virtual keys and whether they are currently pressed
 curInputBuffer BYTE 256 DUP(0)
 
@@ -19,6 +20,11 @@ curInputBuffer BYTE 256 DUP(0)
 prevInputBuffer BYTE 256 DUP(0)
 
 .code
+; // ----------------------------------
+; // updateInput
+; // This should be called every frame by Scene. Updates the 
+; // current and previous buffers.
+; // ----------------------------------
 updateInput PROC
 	; // Copy the current buffer to the previous
 	cld
@@ -26,6 +32,14 @@ updateInput PROC
     mov edi, OFFSET prevInputBuffer
     mov ecx, 256
     rep movsb
+
+	; // Get the current input state
+	; // This is a Win32 API function that was added to the program before we learned about it
+	; // during class. This function was used because it provided the greatest flexibility
+	; // compared to the Irvine32 libraries for this engine.
+	; // Documentation used: learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getkeyboardstate
+	INVOKE GetKeyboardState, OFFSET curInputBuffer
+
 	ret
 updateInput ENDP
 
