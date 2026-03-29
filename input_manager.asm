@@ -26,7 +26,7 @@ prevInputBuffer BYTE 256 DUP(0)
 ; // This should be called every frame by Scene. Updates the 
 ; // current and previous buffers.
 ; // ----------------------------------
-updateInput PROC PUBLIC
+updateInput PROC PUBLIC USES ebx ecx edx esi edi
 	; // Copy the current buffer to the previous
 	cld
     mov esi, OFFSET curInputBuffer

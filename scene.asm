@@ -16,6 +16,7 @@ INCLUDE game_object_ids.inc
 INCLUDE renderer.inc
 INCLUDE render_command.inc
 INCLUDE camera.inc
+INCLUDE input_manager.inc
 
 .code
 ; // ********************************************
@@ -329,7 +330,8 @@ scene_update PROC PUBLIC USES eax ebx ecx edx esi edi, deltaTime: REAL4
 	local pThis
 	mov pThis, ecx ; // Save the THIS pointer just in case
 
-	; // Take Input and set input flags
+	; // Take Input
+	INVOKE updateInput
 
 	; // Process start queue
 	INVOKE scene_process_start_queue
