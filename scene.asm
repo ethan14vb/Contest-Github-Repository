@@ -15,6 +15,7 @@ INCLUDE game_object.inc
 INCLUDE game_object_ids.inc
 INCLUDE renderer.inc
 INCLUDE render_command.inc
+INCLUDE camera.inc
 
 .code
 ; // ********************************************
@@ -30,6 +31,9 @@ INCLUDE render_command.inc
 ; // ----------------------------------
 init_scene PROC PUBLIC USES esi, maxGameObjects : DWORD
 	mov esi, ecx ; // Save off my THIS pointer in esi
+
+	lea ecx, (Scene PTR [esi]).camera
+	INVOKE init_camera, 0, 0
 
 	lea ecx, (Scene PTR [esi]).gameObjects
 	INVOKE init_unordered_vector, maxGameObjects
