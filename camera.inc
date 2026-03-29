@@ -19,4 +19,8 @@ Camera STRUCT
 	w DWORD ? ; // Viewport Width
 Camera ENDS
 
+init_camera PROTO x: DWORD, y: DWORD
+new_camera PROTO x: DWORD, y: DWORD
+free_camera PROTO 
+
 ENDIF
