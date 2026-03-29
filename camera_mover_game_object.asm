@@ -9,6 +9,9 @@ INCLUDE default_header.inc
 INCLUDE camera_mover_game_object.inc
 INCLUDE heap_functions.inc
 
+.data
+CAMERA_MOVER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET camera_mover_update, OFFSET game_object_exit>
+
 .code
 ; // ********************************************
 ; // Constructor Methods
@@ -22,6 +25,13 @@ INCLUDE heap_functions.inc
 ; //	ecx - THIS pointer
 ; // ----------------------------------
 init_camera_mover_game_object PROC PUBLIC USES esi ebx edx
+	; // Parent constructor
+	INVOKE init_game_object, 0
+	mov (GameObject PTR [ecx]).gameObjectType, CAMERA_MOVER_GAME_OBJECT_ID
+	mov (GameObject PTR [ecx]).pVt, OFFSET CAMERA_MOVER_GAMEOBJECT_VTABLE
+
+	mov (CameraMoverGameObject PTR [ecx]).moveSpeed, 1
+		
 	ret
 init_camera_mover_game_object ENDP
 

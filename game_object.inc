@@ -50,5 +50,7 @@ free_game_object PROTO
 get_first_component_which_is_a	PROTO componentType : ENUM_COMPONENT_ID
 game_object_start_virtual		PROTO
 game_object_update_virtual		PROTO deltaTime : REAL4
+game_object_exit				PROTO
+game_object_start				PROTO
 
 ENDIF

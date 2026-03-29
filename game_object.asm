@@ -172,7 +172,7 @@ get_first_component_which_is_a ENDP
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-game_object_start PROC stdcall
+game_object_start PROC stdcall PUBLIC
 	ret
 game_object_start ENDP
 
@@ -226,7 +226,7 @@ game_object_update ENDP
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-game_object_exit PROC
+game_object_exit PROC stdcall PUBLIC
 	ret
 game_object_exit ENDP
 
