@@ -9,6 +9,7 @@
 ; // ==================================
 
 INCLUDE default_header.inc
+INCLUDE input_manager.inc
 
 GetKeyboardState PROTO pBuffer : DWORD
 
@@ -25,7 +26,7 @@ prevInputBuffer BYTE 256 DUP(0)
 ; // This should be called every frame by Scene. Updates the 
 ; // current and previous buffers.
 ; // ----------------------------------
-updateInput PROC
+updateInput PROC PUBLIC
 	; // Copy the current buffer to the previous
 	cld
     mov esi, OFFSET curInputBuffer
@@ -48,7 +49,7 @@ updateInput ENDP
 ; // Returns 1 if a key is currently pressed and 0 if a key
 ; // is not currently pressed this frame.
 ; // ----------------------------------
-isKeyPressed PROC, vkCode: DWORD
+isKeyPressed PROC PUBLIC, vkCode: DWORD
 	mov al, [curInputBuffer + vkCode]
 	test al, 80h ; // Test the high bit
 	jz keyNotPressed
@@ -69,7 +70,7 @@ isKeyPressed ENDP
 ; // Returns 1 if a key is just pressed this frame and 0 if the key
 ; // was not just pressed this frame.
 ; // ----------------------------------
-isKeyJustPressed PROC USES ebx, vkCode: DWORD
+isKeyJustPressed PROC PUBLIC USES ebx, vkCode: DWORD
 	mov al, [curInputBuffer + vkCode]
 	mov bl, [prevInputBuffer + vkCode]
 

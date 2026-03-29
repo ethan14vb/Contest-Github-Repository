@@ -31,6 +31,7 @@
     <MASM Include="scene.asm" />
     <None Include="game_object_ids.inc" />
     <None Include="heap_functions.inc" />
+    <None Include="input_manager.inc" />
     <None Include="rectangle_test_scene.inc" />
     <None Include="sprite_component.inc">
       <FileType>Document</FileType>
