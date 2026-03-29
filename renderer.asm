@@ -302,20 +302,6 @@ drawRect PROC PRIVATE USES esi edi ebx ecx edx, pTrans:DWORD, pRect:DWORD, pCame
 	jle drawRect_done
 	mov rh, eax
 
-	; // clipping logic (set bounds)
-
-	; // check that left edge isn't past the left of the screen
-	; //	if it is, clamp it to 0
-
-	; // check that right edge isn't past the right of the screen
-	; //	if it is, clamp it to SCREEN_WIDTH
-
-	; // check that top edge isn't past the top of the screen
-	; //	if it is, clamp it to 0
-
-	; // check that bottom edge isn't past the bottom of the screen
-	; //	if it is, clamp it to SCREEN_HEIGHT
-
 	; // screen position
 	mov ebx, pTrans
 	mov eax, (TransformComponent PTR [ebx]).x
@@ -330,6 +316,42 @@ drawRect PROC PRIVATE USES esi edi ebx ecx edx, pTrans:DWORD, pRect:DWORD, pCame
 
 	mov sx, eax
 	mov sy, edx
+
+	; // clipping logic (set bounds)
+
+	; // check that left edge isn't past the left of the screen
+	; //	if it is, clamp it to 0
+	mov eax, sx
+	mov ecx, sx
+	add ecx, rw
+
+	cmp eax, 0
+	jge check_x_end
+	mov eax, 0
+
+	; // check that right edge isn't past the right of the screen
+	; //	if it is, clamp it to SCREEN_WIDTH
+check_x_end:
+	cmp ecx, SCREEN_WIDTH
+	jle set_x_bounds
+	mov ecx, SCREEN_WIDTH
+
+	; // Check if the left is offscreen
+	; //	if it is, don't draw the Rect
+set_x_bounds:
+	cmp eax, ecx
+	jge drawRect_done
+
+	; // Calculate new clamped width
+	sub ecx, eax
+	mov sx, eax
+	mov rw, ecx
+
+	; // check that top edge isn't past the top of the screen
+	; //	if it is, clamp it to 0
+
+	; // check that bottom edge isn't past the bottom of the screen
+	; //	if it is, clamp it to SCREEN_HEIGHT
 
 	; // build pixel dword (r g b a)
 	movzx eax, (RectComponent PTR [edi]).r
