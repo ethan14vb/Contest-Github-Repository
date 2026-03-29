@@ -114,9 +114,6 @@
     <MASM Include="unordered_vector.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
-    <MASM Include="rectangle_test_scene_test.asm">
-      <Filter>Source\Engine</Filter>
-    </MASM>
     <MASM Include="camera.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
@@ -124,6 +121,9 @@
       <Filter>Source\Engine</Filter>
     </MASM>
     <MASM Include="camera_mover_game_object.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
+    <MASM Include="main.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
   </ItemGroup>
