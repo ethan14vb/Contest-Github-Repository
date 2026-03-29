@@ -6,10 +6,7 @@
 ; // ==================================
 
 INCLUDE default_header.inc
-INCLUDE game_object.inc
-INCLUDE game_object_ids.inc
-INCLUDE component.inc
-INCLUDE component_ids.inc
+INCLUDE camera_mover_game_object.inc
 INCLUDE heap_functions.inc
 
 .code
@@ -29,11 +26,11 @@ init_camera_mover_game_object PROC PUBLIC USES esi ebx edx
 init_camera_mover_game_object ENDP
 
 ; // ----------------------------------
-; // new_game_object
+; // init_camera_mover_game_object
 ; // Reserves heap space for the Object with parameters calls the initializer method
 ; // ----------------------------------
 new_camera_mover_game_object PROC PUBLIC USES ecx
-	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF GameObject
+	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF CameraMoverGameObject
 	mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
 	INVOKE init_camera_mover_game_object
 
