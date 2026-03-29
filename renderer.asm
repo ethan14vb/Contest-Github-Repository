@@ -26,6 +26,7 @@ SetConsoleMode     PROTO STDCALL : DWORD, : DWORD
 ; //	support for things like virtual terminal processing and greater flexibility.
 GetStdHandle       PROTO STDCALL : DWORD
 WriteConsoleA      PROTO STDCALL : DWORD, : DWORD, : DWORD, : DWORD, : DWORD
+SetConsoleCursorPosition PROTO STDCALL : DWORD, : DWORD
 
 .data
 rendererInitialized DWORD 0; // True / False whether the renderer has been initialized where 0 = False
@@ -107,6 +108,8 @@ writeByteInDecimal ENDP
 ; // ----------------------------------
 displayBuffer PROC PUBLIC USES esi edi ecx ebx, pBuffer:DWORD
 	mov edi, OFFSET outputTextBuffer ; // move destination text buffer to edi
+
+	INVOKE SetConsoleCursorPosition, hConsoleOutput, 0
 
 	xor ebx, ebx ; // y_index = 0
 
