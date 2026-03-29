@@ -336,20 +336,12 @@ scene_update PROC PUBLIC USES eax ebx ecx edx esi edi, deltaTime: REAL4
 	; // Process start queue
 	INVOKE scene_process_start_queue
 
-	; // Update time sensitive components (such as timers and tweens) NYI
-	; // for (GameObject o : *pGameObjects):
-	; //	for (Component c : o->pComponents)
-	; //		if (c.componentType == TIMER_COMPONENT_TYPE)
-	; //			c.Update(deltaTime)
+	; // NYI Update time sensitive components such as timers and tweens 
 
 	; // Update all of the GameObject logic
 	INVOKE scene_update_game_objects, deltaTime
 
-	; // Update animator components NYI
-	; // for (GameObject o : *pGameObjects):
-	; //	for (Component c : o->pComponents)
-	; //		if (c.componentType == ANIMATOR_COMPONENT_TYPE)
-	; //			c.Update(deltaTime)
+	; // NYI Update animator components 
 
 	; // Free any GameObjects that were queued to be freed by gameplay logic
 	INVOKE scene_free_game_objects
