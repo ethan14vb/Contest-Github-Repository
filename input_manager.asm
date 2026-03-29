@@ -43,4 +43,25 @@ updateInput PROC
 	ret
 updateInput ENDP
 
+; // ----------------------------------
+; // isKeyPressed
+; // Returns 1 if a key is currently pressed and 0 if a key
+; // is not currently pressed this frame.
+; // ----------------------------------
+isKeyPressed PROC, vkCode: DWORD
+	mov al, [curInputBuffer + vkCode]
+	test al, 80h ; // Test the high bit
+	jz keyNotPressed
+
+	; // Key is pressed, return 1
+	mov eax, 1
+	jmp exitIsKeyPressed
+
+keyNotPressed:
+	mov eax, 0
+
+exitIsKeyPressed:
+	ret
+isKeyPressed ENDP
+
 END

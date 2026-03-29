@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/28/26 23:27:37
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/28/26 23:43:47
 input_manager.asm					     Page 1 - 1
 
 
@@ -59,8 +59,33 @@ input_manager.asm					     Page 1 - 1
  0000001C  C3				ret
  0000001D			updateInput ENDP
 
+				; // ----------------------------------
+				; // isKeyPressed
+				; // Returns 1 if a key is currently pressed and 0 if a key
+				; // is not currently pressed this frame.
+				; // ----------------------------------
+ 0000001D			isKeyPressed PROC, vkCode: DWORD
+ 0000001D  55		   *	    push   ebp
+ 0000001E  8B EC	   *	    mov    ebp, esp
+ 00000020  8A 85 00000008 R		mov al, [curInputBuffer + vkCode]
+ 00000026  A8 80			test al, 80h ; // Test the high bit
+ 00000028  74 07			jz keyNotPressed
+
+					; // Key is pressed, return 1
+ 0000002A  B8 00000001			mov eax, 1
+ 0000002F  EB 05			jmp exitIsKeyPressed
+
+ 00000031			keyNotPressed:
+ 00000031  B8 00000000			mov eax, 0
+
+ 00000036			exitIsKeyPressed:
+					ret
+ 00000036  C9		   *	    leave  
+ 00000037  C2 0004	   *	    ret    00004h
+ 0000003A			isKeyPressed ENDP
+
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/28/26 23:27:37
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/28/26 23:43:47
 input_manager.asm					     Symbols 2 - 1
 
 
@@ -73,7 +98,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000200 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000001D DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000003A DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -81,6 +106,10 @@ Procedures, parameters, and locals:
                 N a m e                 Type     Value    Attr
 
 GetKeyboardState . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+isKeyPressed . . . . . . . . . .	P Near	 0000001D _TEXT	Length= 0000001D Private STDCALL
+  vkCode . . . . . . . . . . . .	DWord	 bp + 00000008
+  keyNotPressed  . . . . . . . .	L Near	 00000031 _TEXT	
+  exitIsKeyPressed . . . . . . .	L Near	 00000036 _TEXT	
 updateInput  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000001D Private STDCALL
 
 
