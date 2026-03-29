@@ -342,16 +342,38 @@ set_x_bounds:
 	cmp eax, ecx
 	jge drawRect_done
 
-	; // Calculate new clamped width
+	; // Clamp X bounds
 	sub ecx, eax
 	mov sx, eax
 	mov rw, ecx
 
-	; // check that top edge isn't past the top of the screen
+	; // check that top edge isn't before the bottom of the screen
 	; //	if it is, clamp it to 0
+	mov esi, sy
+	mov edx, sy
+	add edx, rh
+
+	cmp esi, 0
+	jge check_y_end
+	mov esi, 0
 
 	; // check that bottom edge isn't past the bottom of the screen
 	; //	if it is, clamp it to SCREEN_HEIGHT
+check_y_end:
+	cmp edx, SCREEN_HEIGHT
+	jle set_y_bounds
+	mov edx, SCREEN_HEIGHT
+
+	; // Check if the top is offscreen
+	; //	if it is, don't draw the Rect
+set_y_bounds:
+	cmp esi, edx
+	jge drawRect_done
+	
+	; // Clamp Y bounds
+	sub edx, esi
+	mov sy, esi
+	mov rh, edx
 
 	; // build pixel dword (r g b a)
 	movzx eax, (RectComponent PTR [edi]).r

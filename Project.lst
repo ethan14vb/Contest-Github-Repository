@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/28/26 22:45:13
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/28/26 22:56:39
 rectangle_test_scene.asm				     Page 1 - 1
 
 
@@ -417,9 +417,9 @@ rectangle_test_scene.asm				     Page 1 - 1
  0000000A  E8 00000000 E   *	    call   new_game_object
  0000000F  8B C8			mov ecx, eax
 
-					INVOKE new_transform_component, -5, 10, 0
+					INVOKE new_transform_component, -5, -9, 0
  00000011  6A 00	   *	    push   +000000000h
- 00000013  6A 0A	   *	    push   +00000000Ah
+ 00000013  6A F7	   *	    push    -000000009h
  00000015  6A FB	   *	    push    -000000005h
  00000017  E8 00000000 E   *	    call   new_transform_component
 					INVOKE add_component, ecx, eax
@@ -452,9 +452,9 @@ rectangle_test_scene.asm				     Page 1 - 1
  00000051  E8 00000000 E   *	    call   new_game_object
  00000056  8B C8			mov ecx, eax
 
-					INVOKE new_transform_component, 50, 10, 0
+					INVOKE new_transform_component, 50, 48, 0
  00000058  6A 00	   *	    push   +000000000h
- 0000005A  6A 0A	   *	    push   +00000000Ah
+ 0000005A  6A 30	   *	    push   +000000030h
  0000005C  6A 32	   *	    push   +000000032h
  0000005E  E8 00000000 E   *	    call   new_transform_component
 					INVOKE add_component, ecx, eax
@@ -492,7 +492,7 @@ rectangle_test_scene.asm				     Page 1 - 1
  0000009F			populate_rectangle_test_scene ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/28/26 22:45:13
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/28/26 22:56:39
 rectangle_test_scene.asm				     Symbols 2 - 1
 
 
