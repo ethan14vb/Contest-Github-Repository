@@ -34,6 +34,8 @@ GameObject STRUCT
 	components UnorderedVector <>
 	pVt DWORD ? ; Pointer to a virtual function table
 
+	pParentScene DWORD ?
+
 	; // Flags
 	awaitingFree DWORD ? ; // Whether the object is awaiting removal from the scene. Zero if FALSE, nonzero if TRUE
 GameObject ENDS

@@ -58,6 +58,7 @@ init_game_object PROC PUBLIC USES esi ebx edx, maxComponents : DWORD
 	mov pThis, ecx
 	mov (GameObject PTR [ecx]).gameObjectType, DEFAULT_GAME_OBJECT_ID
 	mov (GameObject PTR [ecx]).awaitingFree, 0 ; // Set awaiting free to false (0)
+	mov (GameObject PTR [ecx]).pParentScene, 0 ; // Set parent to a NULL pointer
 
 	; // Set up vTable
 	mov (GameObject PTR [ecx]).pVt, OFFSET GAMEOBJECT_VTABLE

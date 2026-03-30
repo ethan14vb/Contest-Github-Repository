@@ -95,8 +95,12 @@ instantiate_game_object PROC PUBLIC USES esi, pGameObject: DWORD
 
 	lea ecx, (Scene PTR[ecx]).startQueue
 	INVOKE push_back, pGameObject
-
+	
+	mov ecx, pGameObject
+	mov (GameObject PTR [ecx]).pParentScene, esi ; // Set the parent of the GameObject to THIS Scene
+		
 	mov ecx, esi ; // Restore the THIS pointer
+
 	ret
 instantiate_game_object ENDP
 

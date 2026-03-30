@@ -1,13 +1,15 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/29/26 21:15:40
-renderer.asm						     Page 1 - 1
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/29/26 21:24:29
+scene.asm						     Page 1 - 1
 
 
 				; // ==================================
-				; // renderer.asm
+				; // scene.asm
 				; // ----------------------------------
-				; // Responsible for determining how graphics should be displayed
-				; // and then displaying them to the terminal or other interface
-				; // that supports pixelated images.
+				; // Scenes are classes that hold a single section of a game. A scene contains a
+				; // pointer to a list of GameObjects that is updated by the scene_update function.
+				; // The scene also updates simulations and any game logic that isn't handled directly
+				; // by GameObjects or their components. At the end of every update, the scene will
+				; // call the renderer module to render its contents.
 				; // ==================================
 
 				INCLUDE default_header.inc
@@ -17,43 +19,87 @@ renderer.asm						     Page 1 - 1
 			      C .stack 4096
 			      C OPTION PROC : PRIVATE
 			      C 
-				INCLUDE engine_types.inc
+				INCLUDE heap_functions.inc
 			      C ; // ==================================
-			      C ; // engine_types.inc
+			      C ; // heap_functions.inc
 			      C ; // ----------------------------------
-			      C ; // Misc types used throughout the engine. This file is old and
-			      C ; // nonspecific and will be replaced by more specific header
-			      C ; // files in the future. 
+			      C ; // Functions used for dynamic memory management. This file was
+			      C ; // added before we learned about heap memory management in class
+			      C ; // so we could have easy memory management. My resource for this 
+			      C ; // was the windows API reference and the class ch11 slides.
 			      C ; // ==================================
 			      C 
-			      C IFNDEF ENGINE_TYPES_INC
- = 00000001		      C ENGINE_TYPES_INC EQU 1
+			      C IFNDEF HEAP_FUNCTIONS_INC
+ = 00000001		      C HEAP_FUNCTIONS_INC EQU 1
 			      C 
- = 00000050		      C SCREEN_WIDTH = 80
- = 00000032		      C SCREEN_HEIGHT = 50
+			      C ; // Constants
+ = 00000008		      C HEAP_ZERO_MEMORY          equ 00000008h
+ = 00000004		      C HEAP_GENERATE_EXCEPTIONS  equ 00000004h
+ = 00000001		      C HEAP_NO_SERIALIZE         equ 00000001h
 			      C 
- 00000004		      C Pixel STRUCT
- 00000000  00		      C     r BYTE ?
- 00000001  00		      C     g BYTE ?
- 00000002  00		      C     b BYTE ?
- 00000003  00		      C     a BYTE ?
-			      C Pixel ENDS
+ = 00000000		      C NULL   EQU 0
+			      C 
+			      C ; // Types
+			      C HANDLE TYPEDEF DWORD
+			      C 
+			      C ; // Protos
+			      C GetProcessHeap	PROTO
+			      C HeapAlloc		PROTO,	hHeap:DWORD, dwFlags:DWORD, dwBytes:DWORD
+			      C HeapFree		PROTO,	hHeap:DWORD, dwFlags:DWORD, lpMem:DWORD
+			      C HeapReAlloc		PROTO,	hHeap:DWORD, dwFlags:DWORD, lpMem:DWORD,	dwBytes:DWORD
+			      C 
+			      C initialize_heap PROTO ; // This function is from heap_functions.asm. It gets the handle to the process heap and stores in hHeap
+			      C 
+			      C ; // Data
+			      C EXTERNDEF hHeap:HANDLE ; // the heap handle is defined in heap_functions.asm
 			      C 
 			      C ENDIF
 			      C 
-				INCLUDE renderer.inc
-			      C ; // Contains external declarations for all of the public functions in renderer.asm
+				INCLUDE scene.inc
+			      C ; // ==================================
+			      C ; // Scene
+			      C ; // ----------------------------------
+			      C ; // Scenes are classes that hold a single section of a game. A scene contains a
+			      C ; // pointer to a list of GameObjects that is updated by the scene_update function.
+			      C ; // The scene also updates simulations and any game logic that isn't handled directly
+			      C ; // by GameObjects or their components. At the end of every update, the scene will
+			      C ; // call the renderer module to render its contents.
+			      C ; // ==================================
 			      C 
-			      C IFNDEF RENDERER_INC
- = 00000001		      C RENDERER_INC EQU 1
+			      C IFNDEF SCENE_INC
+ = 00000001		      C SCENE_INC EQU 1
 			      C 
-			      C displayBuffer PROTO pBuffer:DWORD
-			      C initializeRenderer PROTO
-			      C renderCommands PROTO pRenderCommands:DWORD, numCommands:DWORD, pCamera:DWORD
+			      C INCLUDE unordered_vector.inc
+			      C ; // ==================================
+			      C ; // unordered_vector.inc
+			      C ; // ----------------------------------
+			      C ; // unordered_vector are dynamic arrays of DWORDs
+			      C ; // whose contents are not guaranteed to be in the same
+			      C ; // order after a removal. They are typically used for 
+			      C ; // pools of GameObject pointers whose order doesn't matter.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF UNORDERED_VECTOR_INC
+ = 00000001		      C UNORDERED_VECTOR_INC EQU 1
+			      C 
+ 0000000C		      C UnorderedVector STRUCT
+ 00000000  00000000	      C 	pData		DWORD ?
+ 00000004  00000000	      C 	count		DWORD ?
+ 00000008  00000000	      C 	capacity	DWORD ?
+			      C UnorderedVector ENDS
+			      C 
+			      C ; // Constructors
+			      C init_unordered_vector PROTO capacity : DWORD
+			      C new_unordered_vector PROTO capacity: DWORD
+			      C free_unordered_vector PROTO
+			      C 
+			      C ; // Instance methods
+			      C push_back PROTO element: DWORD
+			      C remove_element PROTO element: DWORD
 			      C 
 			      C ENDIF
 			      C 
-				INCLUDE camera.inc
+			      C INCLUDE camera.inc 
 			      C ; // ==================================
 			      C ; // camera.inc
 			      C ; // ----------------------------------
@@ -78,6 +124,200 @@ renderer.asm						     Page 1 - 1
 			      C init_camera PROTO x: DWORD, y: DWORD
 			      C new_camera PROTO x: DWORD, y: DWORD
 			      C free_camera PROTO 
+			      C 
+			      C ENDIF
+			      C 
+			      C 
+ 00000040		      C Scene STRUCT
+ 00000000  00000000	      C 	camera Camera<>
+	   00000000
+	   00000000
+	   00000000
+			      C 
+			      C 	; // The list of GameObjects in this Scene instance.
+ 00000010  00000000	      C 	gameObjects UnorderedVector<>
+	   00000000
+	   00000000
+			      C 	
+			      C 	; // The start queue is a list of GameObjects created by the add_gameobject method
+ 0000001C  00000000	      C 	startQueue UnorderedVector<>
+	   00000000
+	   00000000
+			      C 
+			      C 	; // The free queue is a list of GameObjects to free at the end of the frame
+ 00000028  00000000	      C 	freeQueue UnorderedVector<>
+	   00000000
+	   00000000
+			      C 
+			      C 	; // The list of renderCommands that is built at the end of each frame
+ 00000034  00000000	      C 	renderCommands UnorderedVector<>
+	   00000000
+	   00000000
+			      C Scene ENDS
+			      C 
+			      C ; // Constructors
+			      C init_scene PROTO maxGameObjects		: DWORD
+			      C new_scene PROTO maxGameObjects		: DWORD
+			      C free_scene PROTO
+			      C 
+			      C ; // Instance methods
+			      C instantiate_game_object PROTO pGameObject: DWORD
+			      C scene_update PROTO deltaTime: REAL4
+			      C 
+			      C ENDIF
+			      C 
+				INCLUDE game_object.inc
+			      C ; // ==================================
+			      C ; // GameObject
+			      C ; // ----------------------------------
+			      C ; //	GameObjects are the core elements of a scene
+			      C ; // that contain gameplay logic and anything the player
+			      C ; // will see.
+			      C ; //	This STRUCT is intended to be 'subclassed' by 
+			      C ; // overriding the virtual function table.
+			      C ; //	GameObjects contain a list of components that
+			      C ; // define utility behavior such as sprites to render
+			      C ; // or animation states. These componenets are updated
+			      C ; // by the scene_update to keep their auxillary functionality
+			      C ; // separate from main game logic.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF GAME_OBJECT_INC
+ = 00000001		      C GAME_OBJECT_INC EQU 1
+			      C 
+			      C INCLUDE game_object_ids.inc
+			      C ; // ==================================
+			      C ; // game_object_ids.inc
+			      C ; // ----------------------------------
+			      C ; // A set of "enum" style macros that identify GameObject types 
+			      C ; // for the data definition and parsing of a scene's data.
+			      C ; //
+			      C ; // This is necessary because GameObjects are designed to be
+			      C ; // subclassed into new unique types of GameObjects defined
+			      C ; // by the user of this engine.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF GAME_OBJECT_IDS_INC
+ = 00000001		      C GAME_OBJECT_IDS_INC EQU 1
+			      C 
+			      C ; // A helper function to make defining a bunch of enums smoother
+ = 00000000		      C enumId = 0
+			      C DEF_ENUM MACRO enum_name
+			      C 	enum_name = enumId
+			      C 	enumId = enumId + 1
+			      C ENDM
+			      C 
+			      C ; // List of GameObject identifiers
+			      C DEF_ENUM DEFAULT_GAME_OBJECT_ID
+			      C DEF_ENUM CAMERA_MOVER_GAME_OBJECT_ID
+			      C 
+			      C ENDIF
+			      C 
+			      C INCLUDE unordered_vector.inc
+			      C ; // ==================================
+			      C ; // unordered_vector.inc
+			      C ; // ----------------------------------
+			      C ; // unordered_vector are dynamic arrays of DWORDs
+			      C ; // whose contents are not guaranteed to be in the same
+			      C ; // order after a removal. They are typically used for 
+			      C ; // pools of GameObject pointers whose order doesn't matter.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF UNORDERED_VECTOR_INC
+			      C ENDIF
+			      C 
+			      C INCLUDE component_ids.inc
+			      C ; // ==================================
+			      C ; // component_ids.inc
+			      C ; // ----------------------------------
+			      C ; // A set of "enum" style macros that identify component types 
+			      C ; // for the data definition and parsing of a scene's data.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF COMPONENT_IDS_INC
+ = 00000001		      C COMPONENT_IDS_INC EQU 1
+			      C 
+			      C ; // A helper function to make defining a bunch of enums smoother
+ = 00000000		      C enumId = 0
+			      C DEF_ENUM MACRO enum_name
+			      C 	enum_name = enumId
+			      C 	enumId = enumId + 1
+			      C ENDM
+			      C 
+			      C ENUM_COMPONENT_ID TYPEDEF DWORD
+			      C 
+			      C ; // List of component identifiers
+			      C DEF_ENUM DEFAULT_COMPONENT_ID
+			      C DEF_ENUM RECT_COMPONENT_ID
+			      C DEF_ENUM SPRITE_COMPONENT_ID
+			      C DEF_ENUM TRANSFORM_COMPONENT_ID
+			      C 
+			      C ENDIF
+			      C 
+			      C 
+			      C ENUM_GAME_OBJECT_ID TYPEDEF DWORD
+			      C 
+ 00000010		      C GameObject_vtable STRUCT
+ 00000000  00000000	      C 	pStart DWORD ? ; For game logic that should run just after the GameObjec is initialized
+ 00000004  00000000	      C 	pUpdate DWORD ? ; For game logic that will run every frame update
+ 00000008  00000000	      C 	pExit DWORD ? ; For game logic that should run just before the GameObject is freed
+ 0000000C  00000000	      C 	pFree DWORD ? ; Destructor
+			      C GameObject_vtable ENDS
+			      C 
+ 0000001C		      C GameObject STRUCT
+ 00000000  00000000	      C 	gameObjectType ENUM_GAME_OBJECT_ID ?
+ 00000004  00000000	      C 	components UnorderedVector <>
+	   00000000
+	   00000000
+ 00000010  00000000	      C 	pVt DWORD ? ; Pointer to a virtual function table
+			      C 
+ 00000014  00000000	      C 	pParentScene DWORD ?
+			      C 
+			      C 	; // Flags
+ 00000018  00000000	      C 	awaitingFree DWORD ? ; // Whether the object is awaiting removal from the scene. Zero if FALSE, nonzero if TRUE
+			      C GameObject ENDS
+			      C 
+			      C ; // Static methods
+			      C add_component PROTO pGameObject: DWORD, pComponent: DWORD
+			      C 
+			      C ; // Constructors
+			      C init_game_object PROTO maxComponents : DWORD
+			      C new_game_object PROTO maxComponents : DWORD
+			      C free_game_object PROTO
+			      C 
+			      C ; // Instance methods
+			      C get_first_component_which_is_a	PROTO componentType : ENUM_COMPONENT_ID
+			      C game_object_start_virtual		PROTO
+			      C game_object_update_virtual		PROTO deltaTime : REAL4
+			      C game_object_exit				PROTO
+			      C game_object_start				PROTO
+			      C 
+			      C ENDIF
+			      C 
+				INCLUDE game_object_ids.inc
+			      C ; // ==================================
+			      C ; // game_object_ids.inc
+			      C ; // ----------------------------------
+			      C ; // A set of "enum" style macros that identify GameObject types 
+			      C ; // for the data definition and parsing of a scene's data.
+			      C ; //
+			      C ; // This is necessary because GameObjects are designed to be
+			      C ; // subclassed into new unique types of GameObjects defined
+			      C ; // by the user of this engine.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF GAME_OBJECT_IDS_INC
+			      C ENDIF
+			      C 
+				INCLUDE renderer.inc
+			      C ; // Contains external declarations for all of the public functions in renderer.asm
+			      C 
+			      C IFNDEF RENDERER_INC
+ = 00000001		      C RENDERER_INC EQU 1
+			      C 
+			      C displayBuffer PROTO pBuffer:DWORD
+			      C initializeRenderer PROTO
+			      C renderCommands PROTO pRenderCommands:DWORD, numCommands:DWORD, pCamera:DWORD
 			      C 
 			      C ENDIF
 			      C 
@@ -132,23 +372,6 @@ renderer.asm						     Page 1 - 1
 			      C ; // ==================================
 			      C 
 			      C IFNDEF COMPONENT_IDS_INC
- = 00000001		      C COMPONENT_IDS_INC EQU 1
-			      C 
-			      C ; // A helper function to make defining a bunch of enums smoother
- = 00000000		      C enumId = 0
-			      C DEF_ENUM MACRO enum_name
-			      C 	enum_name = enumId
-			      C 	enumId = enumId + 1
-			      C ENDM
-			      C 
-			      C ENUM_COMPONENT_ID TYPEDEF DWORD
-			      C 
-			      C ; // List of component identifiers
-			      C DEF_ENUM DEFAULT_COMPONENT_ID
-			      C DEF_ENUM RECT_COMPONENT_ID
-			      C DEF_ENUM SPRITE_COMPONENT_ID
-			      C DEF_ENUM TRANSFORM_COMPONENT_ID
-			      C 
 			      C ENDIF
 			      C 
 			      C 
@@ -329,679 +552,574 @@ renderer.asm						     Page 1 - 1
 			      C 
 			      C ENDIF
 			      C 
-
-				; // ********************************************
-				; // Windows function prototypes
-				; // ********************************************
-				SetConsoleOutputCP PROTO STDCALL : DWORD ; // Used to change the output format to UTF-8
-
-				; // Used to enable virtual terminal processing for full RGB support
-				GetConsoleMode     PROTO STDCALL : DWORD, : DWORD
-				SetConsoleMode     PROTO STDCALL : DWORD, : DWORD
-
-				; // ConsoleCursorInfo STRUCT used by the GetConsoleCursorInfo and SetConsoleCursorInfo functions
- 00000008			CONSOLE_CURSOR_INFO STRUCT
- 00000000  00000000			dwSize      DWORD ?
- 00000004  00000000			bVisible    DWORD ?
-				CONSOLE_CURSOR_INFO ENDS
-
-				; // Used to disable the blinking cursor
-				GetConsoleCursorInfo PROTO STDCALL : DWORD, : DWORD
-				SetConsoleCursorInfo PROTO STDCALL : DWORD, : DWORD
-
-				; // Windows functions for displaying the text buffer of RGB data.
-				; //	WriteConsoleA was chosen instead of the Irvine library functions because of its
-				; //	support for things like virtual terminal processing and greater flexibility.
-				GetStdHandle       PROTO STDCALL : DWORD
-				WriteConsoleA      PROTO STDCALL : DWORD, : DWORD, : DWORD, : DWORD, : DWORD
-				SetConsoleCursorPosition PROTO STDCALL : DWORD, : DWORD
-
- 00000000			.data
- 00000000 00000000		rendererInitialized DWORD 0; // True / False whether the renderer has been initialized where 0 = False
-
-				; // Windows function data
- =-0000000B			STD_OUTPUT_HANDLE = -11
- = 00000004			ENABLE_VIRTUAL_TERMINAL_PROCESSING = 4
-
- 00000004 00000000		ConsoleMode DD ?
- 00000008 00000000		hConsoleOutput DD ?
- 0000000C 00000000		bytesWritten DD 0
-
- 00000010 00000000		consoleCursorInfo CONSOLE_CURSOR_INFO <>
-	   00000000
-
-				; // Constants
- = 0000000D			CR = 13 ; // Carriage return
- = 0000000A			LF = 10 ; // Line feed
- = 0000001B			ESCP = 1Bh ; // ESC character
-
-				; // Renderer buffers
- 00000018  00000FA0 [		screenBuffer Pixel SCREEN_WIDTH * SCREEN_HEIGHT DUP(<0, 0, 0, 255>)
-	    00 00 00 FF
-	   ]
- 00003E98  000186A0 [		outputTextBuffer DB 100000 DUP(0); // Used for the displayBuffer PROC
-	    00
-	   ]
+				INCLUDE camera.inc
+			      C ; // ==================================
+			      C ; // camera.inc
+			      C ; // ----------------------------------
+			      C ; // A camera defines where spatially a scene should
+			      C ; // render its GameObjects.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF CAMERA_INC
+			      C ENDIF
+			      C 
+				INCLUDE input_manager.inc
+			      C ; // ==================================
+			      C ; // input_manager.inc
+			      C ; // ----------------------------------
+			      C ; // The input manager is responsible for determining
+			      C ; // which keys are currently pressed and providing
+			      C ; // a convenient method for other files to determine
+			      C ; // the currently pressed keys. This should be
+			      C ; // updated on a by-frame basis by a scene.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF INPUT_MANAGER_INC
+ = 00000001		      C INPUT_MANAGER_INC EQU 1
+			      C 
+			      C updateInput PROTO
+			      C isKeyPressed PROTO vkCode: DWORD
+			      C isKeyJustPressed PROTO vkCode: DWORD
+			      C 
+			      C ENDIF
+			      C 
 
  00000000			.code
+				; // ********************************************
+				; // Constructor Methods
+				; // ********************************************
+
 				; // ----------------------------------
-				; // writeByteInDecimal
-				; // Writes a single byte's decimal representation using ASCII characters into a buffer. 
+				; // init_scene
+				; // Initializes memory with the contents of a Scene
 				; // 
-				; // Parameters: 
-				; //	AL - byte to print
-				; //    EDI - pointer to the buffer to write text to
-				; //
-				; // Registers changed:
-				; //	EDI - will be adjusted after prints. Does not add null terminator.
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000000			writeByteInDecimal PROC USES ebx
-					; // divide by 100
- 00000000  53		   *	    push   ebx
- 00000001  32 E4			xor ah, ah
- 00000003  B3 64			mov bl, 100
- 00000005  F6 F3			div bl
+ 00000000			init_scene PROC PUBLIC USES esi, maxGameObjects : DWORD
+ 00000000  55		   *	    push   ebp
+ 00000001  8B EC	   *	    mov    ebp, esp
+ 00000003  56		   *	    push   esi
+ 00000004  8B F1			mov esi, ecx ; // Save off my THIS pointer in esi
 
- 00000007  3C 00			cmp al, 0
- 00000009  74 05			je print_tens
+ 00000006  8D 0E			lea ecx, (Scene PTR [esi]).camera
+					INVOKE init_camera, 0, 0
+ 00000008  6A 00	   *	    push   +000000000h
+ 0000000A  6A 00	   *	    push   +000000000h
+ 0000000C  E8 00000000 E   *	    call   init_camera
 
-					; // print result (100s place)
- 0000000B  04 30			add al, '0' ; // Add 0x30 to display correct ASCII number representation
- 0000000D  88 07			mov [edi], al
- 0000000F  47				inc edi
+ 00000011  8D 4E 10			lea ecx, (Scene PTR [esi]).gameObjects
+					INVOKE init_unordered_vector, maxGameObjects
+ 00000014  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000017  E8 00000000 E   *	    call   init_unordered_vector
 
- 00000010			print_tens:
- 00000010  8A C4			mov al, ah
- 00000012  32 E4			xor ah, ah
+ 0000001C  8D 4E 1C			lea ecx, (Scene PTR [esi]).startQueue
+					INVOKE init_unordered_vector, maxGameObjects
+ 0000001F  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000022  E8 00000000 E   *	    call   init_unordered_vector
 
- 00000014  B3 0A			mov bl, 10
- 00000016  F6 F3			div bl
-
- 00000018  3C 00			cmp al, 0
- 0000001A  74 05			je print_ones
-
-					; // print result (10s place)
- 0000001C  04 30			add al, '0'
- 0000001E  88 07			mov [edi], al
- 00000020  47				inc edi
-
- 00000021			print_ones:
-					; // print remainder (1s place)
- 00000021  80 C4 30			add ah, '0'
- 00000024  88 27			mov[edi], ah	
- 00000026  47				inc edi
-					ret
- 00000027  5B		   *	    pop    ebx
- 00000028  C3		   *	    ret    00000h
- 00000029			writeByteInDecimal ENDP
-
-				; // ----------------------------------
-				; // displayBuffer
-				; // Renders an RGBA buffer to the screen using ASCII characters.
-				; // Intended to be used for frame by frame animation. 
-				; // 
-				; // Parameters: 
-				; //	pBuffer DWORD - pointer to the new frame buffer to render. MUST BE SCREEN_WIDTH * SCREEN_HEIGHT!!!
-				; //
-				; // ----------------------------------
- 00000029			displayBuffer PROC PUBLIC USES esi edi ecx ebx, pBuffer:DWORD
- 00000029  55		   *	    push   ebp
- 0000002A  8B EC	   *	    mov    ebp, esp
- 0000002C  56		   *	    push   esi
- 0000002D  57		   *	    push   edi
- 0000002E  51		   *	    push   ecx
- 0000002F  53		   *	    push   ebx
- 00000030  BF 00003E98 R		mov edi, OFFSET outputTextBuffer ; // move destination text buffer to edi
-
-					INVOKE SetConsoleCursorPosition, hConsoleOutput, 0
- 00000035  6A 00	   *	    push   +000000000h
- 00000037  FF 35 00000008 R *	    push   hConsoleOutput
- 0000003D  E8 00000000 E   *	    call   SetConsoleCursorPosition
-
- 00000042  33 DB			xor ebx, ebx ; // y_index = 0
-
- 00000044			y_loop:
- 00000044  83 FB 32			cmp ebx, SCREEN_HEIGHT
- 00000047  0F 8D 000000D2		jge done
-
- 0000004D  33 C9			xor ecx, ecx ; // x_index = 0
- 0000004F			x_loop:
- 0000004F  83 F9 50			cmp ecx, SCREEN_WIDTH
- 00000052  0F 8D 000000B7		jge row_end
-
-					; // Get top pixel
-					; // ((y_index * SCREENWIDTH) + x_index) * 2
- 00000058  8B C3			mov eax, ebx
- 0000005A  6B C0 50			imul eax, SCREEN_WIDTH
- 0000005D  03 C1			add eax, ecx 
- 0000005F  C1 E0 02			shl eax, 2
- 00000062  8B 55 08			mov edx, pBuffer
- 00000065  03 D0			add edx, eax ; // edx is now the top pixel
-
- 00000067  52				push edx
-
-					; // Get bottom pixel
-					; // (((y_index + 1) * SCREENWIDTH) + x_index) * 2
- 00000068  8B C3			mov eax, ebx
- 0000006A  40				inc eax 
- 0000006B  6B C0 50			imul eax, SCREEN_WIDTH
- 0000006E  03 C1			add eax, ecx
- 00000070  C1 E0 02			shl eax, 2
- 00000073  8B 55 08			mov edx, pBuffer
- 00000076  03 D0			add edx, eax 
-
- 00000078  8B C2			mov eax, edx ; // eax is now the bottom pixel
-
- 0000007A  5A				pop edx ; // restore the top pixel
-
-					; // Write foreground ANSI prefix (ESC[38;2;RRR;GGG;BBB;m)
- 0000007B  C6 07 1B			mov BYTE PTR[edi], ESCP
- 0000007E  47				inc edi
- 0000007F  C6 07 5B			mov BYTE PTR[edi], '['
- 00000082  47				inc edi
- 00000083  C6 07 33			mov BYTE PTR[edi], '3'
- 00000086  47				inc edi
- 00000087  C6 07 38			mov BYTE PTR[edi], '8'
- 0000008A  47				inc edi
- 0000008B  C6 07 3B			mov BYTE PTR[edi], ';'
- 0000008E  47				inc edi
- 0000008F  C6 07 32			mov BYTE PTR[edi], '2'
- 00000092  47				inc edi
- 00000093  C6 07 3B			mov BYTE PTR[edi], ';'
- 00000096  47				inc edi
-
- 00000097  52				push edx ; // push edx so we can use it
- 00000098  8B D0			mov edx, eax
-
- 0000009A  8A 02			mov al, [edx]
- 0000009C  E8 FFFFFF5F			call writeByteInDecimal ; // Bottom RRR
- 000000A1  C6 07 3B			mov BYTE PTR[edi], ';'
- 000000A4  47				inc edi
- 000000A5  8A 42 01			mov al, [edx + 1]
- 000000A8  E8 FFFFFF53			call writeByteInDecimal ; // Bottom GGG
- 000000AD  C6 07 3B			mov BYTE PTR[edi], ';'
- 000000B0  47				inc edi
- 000000B1  8A 42 02			mov al, [edx + 2]
- 000000B4  E8 FFFFFF47			call writeByteInDecimal ; // Bottom BBB
- 000000B9  C6 07 6D			mov BYTE PTR[edi], 'm'
- 000000BC  47				inc edi
-
- 000000BD  5A				pop edx ; // restore edx
-
-					; // Write background ANSI prefix (ESC[48;2;RRR;GGG;BBB;m)
- 000000BE  C6 07 1B			mov BYTE PTR[edi], ESCP
- 000000C1  47				inc edi
- 000000C2  C6 07 5B			mov BYTE PTR[edi], '['
- 000000C5  47				inc edi
- 000000C6  C6 07 34			mov BYTE PTR[edi], '4'
- 000000C9  47				inc edi
- 000000CA  C6 07 38			mov BYTE PTR[edi], '8'
- 000000CD  47				inc edi
- 000000CE  C6 07 3B			mov BYTE PTR[edi], ';'
- 000000D1  47				inc edi
- 000000D2  C6 07 32			mov BYTE PTR[edi], '2'
- 000000D5  47				inc edi
- 000000D6  C6 07 3B			mov BYTE PTR[edi], ';'
- 000000D9  47				inc edi
- 000000DA  8A 02			mov al, [edx]
- 000000DC  E8 FFFFFF1F			call writeByteInDecimal; // Top RRR
- 000000E1  C6 07 3B			mov BYTE PTR[edi], ';'
- 000000E4  47				inc edi
- 000000E5  8A 42 01			mov al, [edx + 1]
- 000000E8  E8 FFFFFF13			call writeByteInDecimal; // Top GGG
- 000000ED  C6 07 3B			mov BYTE PTR[edi], ';'
- 000000F0  47				inc edi
- 000000F1  8A 42 02			mov al, [edx + 2]
- 000000F4  E8 FFFFFF07			call writeByteInDecimal; // Top BBB
- 000000F9  C6 07 6D			mov BYTE PTR[edi], 'm'
- 000000FC  47				inc edi
-
-					; // Write half block
- 000000FD  C6 07 E2			mov BYTE PTR[edi], 0E2h
- 00000100  47				inc edi
- 00000101  C6 07 96			mov BYTE PTR[edi], 096h
- 00000104  47				inc edi
- 00000105  C6 07 84			mov BYTE PTR[edi], 084h
- 00000108  47				inc edi
-
- 00000109  41				inc ecx
- 0000010A  E9 FFFFFF40			jmp x_loop
-
- 0000010F			row_end:
-					; // Add newline
- 0000010F  C6 07 0D			mov BYTE PTR[edi], CR
- 00000112  47				inc edi
- 00000113  C6 07 0A			mov BYTE PTR[edi], LF
- 00000116  47				inc edi
-
- 00000117  83 C3 02			add ebx, 2 ; // y += 2
-
- 0000011A  E9 FFFFFF25			jmp y_loop
-
-
- 0000011F			done: 
-					; // Clear RGB formatting
- 0000011F  C6 07 1B			mov BYTE PTR[edi], ESCP
- 00000122  47				inc edi
- 00000123  C6 07 5B			mov BYTE PTR[edi], '['
- 00000126  47				inc edi
- 00000127  C6 07 30			mov BYTE PTR[edi], '0'
- 0000012A  47				inc edi
- 0000012B  C6 07 6D			mov BYTE PTR[edi], 'm'
- 0000012E  47				inc edi
-
-					; // Call WriteConsoleA to display the frame here
- 0000012F  8B DF			mov ebx, edi
- 00000131  81 EB 00003E98 R		sub ebx, OFFSET outputTextBuffer
-
-					INVOKE WriteConsoleA,
-						hConsoleOutput,
-						OFFSET outputTextBuffer,
-						ebx, ; // msgLen
-						OFFSET bytesWritten,
-						0
- 00000137  6A 00	   *	    push   +000000000h
- 00000139  68 0000000C R   *	    push   dword  ptr OFFSET FLAT: bytesWritten
- 0000013E  53		   *	    push   ebx
- 0000013F  68 00003E98 R   *	    push   dword  ptr OFFSET FLAT: outputTextBuffer
- 00000144  FF 35 00000008 R *	    push   hConsoleOutput
- 0000014A  E8 00000000 E   *	    call   WriteConsoleA
-
-					ret
- 0000014F  5B		   *	    pop    ebx
- 00000150  59		   *	    pop    ecx
- 00000151  5F		   *	    pop    edi
- 00000152  5E		   *	    pop    esi
- 00000153  C9		   *	    leave  
- 00000154  C2 0004	   *	    ret    00004h
-
- 00000157			displayBuffer ENDP
-
-				; // ----------------------------------
-				; // initializeRenderer
-				; // Initializes the console for rendering by switching to UTF-8 format and 
-				; // enabling virtual terminal processing for full RGB support.
-				; // 
-				; // ----------------------------------
- 00000157			initializeRenderer PROC PUBLIC USES eax
-					; // Force output to be UTF-8
- 00000157  50		   *	    push   eax
-					INVOKE SetConsoleOutputCP, 65001
- 00000158  68 0000FDE9	   *	    push   +00000FDE9h
- 0000015D  E8 00000000 E   *	    call   SetConsoleOutputCP
-
-					; // Enable virutal terminal processing (Required for RGB functionality)
-					INVOKE GetStdHandle, STD_OUTPUT_HANDLE
- 00000162  6A F5	   *	    push    -00000000Bh
- 00000164  E8 00000000 E   *	    call   GetStdHandle
- 00000169  A3 00000008 R		mov hConsoleOutput, eax
-
-					; // Get the current terminal mode and OR it with ENABLE_VIRTUAL_TERMINAL_PROCESSING
-					INVOKE GetConsoleMode, hConsoleOutput, OFFSET ConsoleMode
- 0000016E  68 00000004 R   *	    push   dword  ptr OFFSET FLAT: ConsoleMode
- 00000173  FF 35 00000008 R *	    push   hConsoleOutput
- 00000179  E8 00000000 E   *	    call   GetConsoleMode
- 0000017E  83 0D 00000004 R		or ConsoleMode, ENABLE_VIRTUAL_TERMINAL_PROCESSING
-	   04
-					INVOKE SetConsoleMode, hConsoleOutput, ConsoleMode
- 00000185  FF 35 00000004 R *	    push   ConsoleMode
- 0000018B  FF 35 00000008 R *	    push   hConsoleOutput
- 00000191  E8 00000000 E   *	    call   SetConsoleMode
-
-					; // Disable the blinking cursor
-					INVOKE GetConsoleCursorInfo, hConsoleOutput, OFFSET consoleCursorInfo
- 00000196  68 00000010 R   *	    push   dword  ptr OFFSET FLAT: consoleCursorInfo
- 0000019B  FF 35 00000008 R *	    push   hConsoleOutput
- 000001A1  E8 00000000 E   *	    call   GetConsoleCursorInfo
- 000001A6  C7 05 00000014 R		mov consoleCursorInfo.bVisible, 0
-	   00000000
-					INVOKE SetConsoleCursorInfo, hConsoleOutput, OFFSET consoleCursorInfo
- 000001B0  68 00000010 R   *	    push   dword  ptr OFFSET FLAT: consoleCursorInfo
- 000001B5  FF 35 00000008 R *	    push   hConsoleOutput
- 000001BB  E8 00000000 E   *	    call   SetConsoleCursorInfo
-
-					ret
- 000001C0  58		   *	    pop    eax
- 000001C1  C3		   *	    ret    00000h
- 000001C2			initializeRenderer ENDP
-
-				; // ----------------------------------
-				; // drawRect
-				; // Private helper. Draws a filled rectangle to the buffer.
-				; // Position is relative to camera (unless ignoreCamera set).
-				; // ----------------------------------
- 000001C2			drawRect PROC PRIVATE USES esi edi ebx ecx edx, pTrans:DWORD, pRect:DWORD, pCamera:DWORD, pBuffer:DWORD
-					local sx:DWORD, sy:DWORD, rw:DWORD, rh:DWORD, color:DWORD
-
-					; // skip if not visible
- 000001C2  55		   *	    push   ebp
- 000001C3  8B EC	   *	    mov    ebp, esp
- 000001C5  83 C4 EC	   *	    add    esp, 0FFFFFFECh
- 000001C8  56		   *	    push   esi
- 000001C9  57		   *	    push   edi
- 000001CA  53		   *	    push   ebx
- 000001CB  51		   *	    push   ecx
- 000001CC  52		   *	    push   edx
- 000001CD  8B 7D 0C			mov edi, pRect
- 000001D0  8B 47 14			mov eax, (RectComponent PTR [edi]).visible
- 000001D3  85 C0			test eax, eax
- 000001D5  0F 84 000000E4		jz drawRect_done
-
-					; // check w > 0 and h > 0
- 000001DB  8B 47 0C			mov eax, (RectComponent PTR [edi]).w
- 000001DE  83 F8 00			cmp eax, 0
- 000001E1  0F 8E 000000D8		jle drawRect_done
- 000001E7  89 45 F4			mov rw, eax
-				
- 000001EA  8B 47 08			mov eax, (RectComponent PTR [edi]).h
- 000001ED  83 F8 00			cmp eax, 0
- 000001F0  0F 8E 000000C9		jle drawRect_done
- 000001F6  89 45 F0			mov rh, eax
-
-					; // screen position
- 000001F9  8B 5D 08			mov ebx, pTrans
- 000001FC  8B 43 08			mov eax, (TransformComponent PTR [ebx]).x
- 000001FF  8B 53 0C			mov edx, (TransformComponent PTR [ebx]).y
-
- 00000202  8B 5D 08			mov ebx, pTrans
-					.IF [ebx].TransformComponent.ignoreCamera == 0
- 00000205  83 7B 10 00	   *	    cmp    [ebx] . TransformComponent . ignoreCamera, 000h
- 00000209  75 08	   *	    jne    @C0001
- 0000020B  8B 75 10				mov esi, pCamera
- 0000020E  2B 06				sub eax, (Camera PTR [esi]).x
- 00000210  2B 56 04				sub edx, (Camera PTR [esi]).y
-					.ENDIF
- 00000213		   *@C0001:
-
- 00000213  89 45 FC			mov sx, eax
- 00000216  89 55 F8			mov sy, edx
-
-					; // clipping logic (set bounds)
-
-					; // check that left edge isn't past the left of the screen
-					; //	if it is, clamp it to 0
- 00000219  8B 45 FC			mov eax, sx
- 0000021C  8B 4D FC			mov ecx, sx
- 0000021F  03 4D F4			add ecx, rw
-				
- 00000222  83 F8 00			cmp eax, 0
- 00000225  7D 05			jge check_x_end
- 00000227  B8 00000000			mov eax, 0
-
-					; // check that right edge isn't past the right of the screen
-					; //	if it is, clamp it to SCREEN_WIDTH
- 0000022C			check_x_end:
- 0000022C  83 F9 50			cmp ecx, SCREEN_WIDTH
- 0000022F  7E 05			jle set_x_bounds
- 00000231  B9 00000050			mov ecx, SCREEN_WIDTH
-
-					; // Check if the left is offscreen
-					; //	if it is, don't draw the Rect
- 00000236			set_x_bounds:
- 00000236  3B C1			cmp eax, ecx
- 00000238  0F 8D 00000081		jge drawRect_done
-
-					; // Clamp X bounds
- 0000023E  2B C8			sub ecx, eax
- 00000240  89 45 FC			mov sx, eax
- 00000243  89 4D F4			mov rw, ecx
-
-					; // check that top edge isn't before the bottom of the screen
-					; //	if it is, clamp it to 0
- 00000246  8B 75 F8			mov esi, sy
- 00000249  8B 55 F8			mov edx, sy
- 0000024C  03 55 F0			add edx, rh
-				
- 0000024F  83 FE 00			cmp esi, 0
- 00000252  7D 05			jge check_y_end
- 00000254  BE 00000000			mov esi, 0
-
-					; // check that bottom edge isn't past the bottom of the screen
-					; //	if it is, clamp it to SCREEN_HEIGHT
- 00000259			check_y_end:
- 00000259  83 FA 32			cmp edx, SCREEN_HEIGHT
- 0000025C  7E 05			jle set_y_bounds
- 0000025E  BA 00000032			mov edx, SCREEN_HEIGHT
-
-					; // Check if the top is offscreen
-					; //	if it is, don't draw the Rect
- 00000263			set_y_bounds:
- 00000263  3B F2			cmp esi, edx
- 00000265  7D 58			jge drawRect_done
+ 00000027  8D 4E 28			lea ecx, (Scene PTR [esi]).freeQueue
+					INVOKE init_unordered_vector, maxGameObjects
+ 0000002A  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 0000002D  E8 00000000 E   *	    call   init_unordered_vector
 					
-					; // Clamp Y bounds
- 00000267  2B D6			sub edx, esi
- 00000269  89 75 F8			mov sy, esi
- 0000026C  89 55 F0			mov rh, edx
+ 00000032  8D 4E 34			lea ecx, (Scene PTR [esi]).renderCommands
+					INVOKE init_unordered_vector, maxGameObjects
+ 00000035  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000038  E8 00000000 E   *	    call   init_unordered_vector
 
-					; // build pixel dword (r g b a)
- 0000026F  0F B6 47 10			movzx eax, (RectComponent PTR [edi]).r
- 00000273  0F B6 5F 11			movzx ebx, (RectComponent PTR [edi]).g
- 00000277  C1 E3 08			shl ebx, 8
- 0000027A  0B C3			or eax, ebx
- 0000027C  0F B6 5F 12			movzx ebx, (RectComponent PTR [edi]).b
- 00000280  C1 E3 10			shl ebx, 16
- 00000283  0B C3			or eax, ebx
- 00000285  0F B6 5F 13			movzx ebx, (RectComponent PTR [edi]).a
- 00000289  C1 E3 18			shl ebx, 24
- 0000028C  0B C3			or eax, ebx
- 0000028E  89 45 EC			mov color, eax
-
-					; // draw loops
- 00000291  8B 75 F8			mov esi, sy
- 00000294  8B 55 F8			mov edx, sy
- 00000297  03 55 F0			add edx, rh
- 0000029A			yloop_rect:
- 0000029A  3B F2			cmp esi, edx
- 0000029C  7D 21			jge drawRect_done
- 0000029E  8B C6			mov eax, esi
- 000002A0  6B C0 50			imul eax, SCREEN_WIDTH
- 000002A3  03 45 FC			add eax, sx
- 000002A6  C1 E0 02			shl eax, 2
- 000002A9  03 45 14			add eax, pBuffer
- 000002AC  8B F8			mov edi, eax
- 000002AE  8B 4D F4			mov ecx, rw
- 000002B1			xloop_rect:
- 000002B1  8B 45 EC			mov eax, color
- 000002B4  89 07			mov [edi], eax
- 000002B6  83 C7 04			add edi, 4
- 000002B9  49				dec ecx
- 000002BA  75 F5			jnz xloop_rect
- 000002BC  46				inc esi
- 000002BD  EB DB			jmp yloop_rect
-
- 000002BF			drawRect_done:
+ 0000003D  8B CE			mov ecx, esi ; // Restore my THIS pointer
+						
 					ret
- 000002BF  5A		   *	    pop    edx
- 000002C0  59		   *	    pop    ecx
- 000002C1  5B		   *	    pop    ebx
- 000002C2  5F		   *	    pop    edi
- 000002C3  5E		   *	    pop    esi
- 000002C4  C9		   *	    leave  
- 000002C5  C2 0010	   *	    ret    00010h
- 000002C8			drawRect ENDP
+ 0000003F  5E		   *	    pop    esi
+ 00000040  C9		   *	    leave  
+ 00000041  C2 0004	   *	    ret    00004h
+ 00000044			init_scene ENDP
 
 				; // ----------------------------------
-				; // drawSprite
-				; // Private helper. Blits sprite to the buffer.
-				; // Position is relative to camera (unless ignoreCamera set).
-				; // Anchor point (originX/originY) is placed at transform position.
-				; // pTexture must point to a cellW*cellH Pixel buffer.
-				; // No flipping, no spritesheet stride, no clipping.
+				; // new_scene
+				; // Reserves heap space for the scene with parameters and calls the initializer method
 				; // ----------------------------------
- 000002C8			drawSprite PROC PRIVATE USES esi edi ebx ecx edx, pTrans:DWORD, pSprite:DWORD, pCamera:DWORD, pBuffer:DWORD
-					local sx:DWORD, sy:DWORD, sw:DWORD, sh:DWORD, pTex:DWORD
+ 00000044			new_scene PROC PUBLIC USES ecx, maxGameObjects : DWORD
+ 00000044  55		   *	    push   ebp
+ 00000045  8B EC	   *	    mov    ebp, esp
+ 00000047  51		   *	    push   ecx
+					INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF Scene
+ 00000048  6A 40	   *	    push   +000000040h
+ 0000004A  6A 04	   *	    push   +000000004h
+ 0000004C  FF 35 00000000 E *	    push   hHeap
+ 00000052  E8 00000000 E   *	    call   HeapAlloc
+ 00000057  8B C8			mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
+					INVOKE init_scene, maxGameObjects
+ 00000059  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 0000005C  E8 FFFFFF9F	   *	    call   init_scene
+ 00000061  8B C1			mov eax, ecx ; // Now return the THIS pointer
 
-					; // skip if not visible
- 000002C8  55		   *	    push   ebp
- 000002C9  8B EC	   *	    mov    ebp, esp
- 000002CB  83 C4 EC	   *	    add    esp, 0FFFFFFECh
- 000002CE  56		   *	    push   esi
- 000002CF  57		   *	    push   edi
- 000002D0  53		   *	    push   ebx
- 000002D1  51		   *	    push   ecx
- 000002D2  52		   *	    push   edx
- 000002D3  8B 45 38			mov eax, (SpriteComponent PTR [pSprite]).visible
- 000002D6  85 C0			test eax, eax
- 000002D8  74 74			jz drawSprite_done
+					ret ; // Return with the address of the memory block in HeapAlloc
+ 00000063  59		   *	    pop    ecx
+ 00000064  C9		   *	    leave  
+ 00000065  C2 0004	   *	    ret    00004h
+ 00000068			new_scene ENDP
 
-					; // screen position
- 000002DA  8B 5D 08			mov ebx, pTrans
- 000002DD  8B 43 08			mov eax, (TransformComponent PTR [ebx]).x
- 000002E0  8B 53 0C			mov edx, (TransformComponent PTR [ebx]).y
+				; // ----------------------------------
+				; // free_scene
+				; // Convenient method for freeing a Scene
+				; //
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
+				; // ----------------------------------
+ 00000068			free_scene PROC PUBLIC
+					INVOKE HeapFree, hHeap, 0, ecx
+ 00000068  51		   *	    push   ecx
+ 00000069  6A 00	   *	    push   +000000000h
+ 0000006B  FF 35 00000000 E *	    push   hHeap
+ 00000071  E8 00000000 E   *	    call   HeapFree
+ 00000076  C3				ret
+ 00000077			free_scene ENDP
 
-					.IF [ebx].TransformComponent.ignoreCamera == 0
- 000002E3  83 7B 10 00	   *	    cmp    [ebx] . TransformComponent . ignoreCamera, 000h
- 000002E7  75 06	   *	    jne    @C0003
- 000002E9  2B 45 10				sub eax, (Camera PTR [pCamera]).x
- 000002EC  2B 55 14				sub edx, (Camera PTR [pCamera]).y
-					.ENDIF
- 000002EF		   *@C0003:
-					; // anchor at transform
- 000002EF  2B 45 14			sub eax, (SpriteComponent PTR [pSprite]).originX
- 000002F2  2B 55 18			sub edx, (SpriteComponent PTR [pSprite]).originY
- 000002F5  89 45 FC			mov sx, eax
- 000002F8  89 55 F8			mov sy, edx
 
-					; // cell size
- 000002FB  8B 45 28			mov eax, (SpriteComponent PTR [pSprite]).cellW
- 000002FE  89 45 F4			mov sw, eax
- 00000301  8B 45 2C			mov eax, (SpriteComponent PTR [pSprite]).cellH
- 00000304  89 45 F0			mov sh, eax
+				; // ********************************************
+				; // Class methods
+				; // ********************************************
 
-					; // texture pointer
- 00000307  8B 45 1C			mov eax, (SpriteComponent PTR [pSprite]).pTexture
- 0000030A  89 45 EC			mov pTex, eax
+				; // ----------------------------------
+				; // add_game_object
+				; // Adds a game object to the scene's start queue
+				; //
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
+				; // ----------------------------------
+ 00000077			instantiate_game_object PROC PUBLIC USES esi, pGameObject: DWORD
+ 00000077  55		   *	    push   ebp
+ 00000078  8B EC	   *	    mov    ebp, esp
+ 0000007A  56		   *	    push   esi
+ 0000007B  8B F1			mov esi, ecx ; // Store the THIS pointer in ecx
 
-					; // draw loops
- 0000030D  8B 75 F8			mov esi, sy
- 00000310  8B 55 F8			mov edx, sy
- 00000313  03 55 F0			add edx, sh
- 00000316			yloop_sprite:
- 00000316  3B F2			cmp esi, edx
- 00000318  7D 34			jge drawSprite_done
- 0000031A  8B C6			mov eax, esi
- 0000031C  6B C0 50			imul eax, SCREEN_WIDTH
- 0000031F  03 45 FC			add eax, sx
- 00000322  C1 E0 02			shl eax, 2
- 00000325  03 45 14			add eax, pBuffer
- 00000328  8B F8			mov edi, eax
-					; // source row in texture
- 0000032A  8B DE			mov ebx, esi
- 0000032C  2B 5D F8			sub ebx, sy
- 0000032F  8B 45 F4			mov eax, sw
- 00000332  0F AF D8			imul ebx, eax
- 00000335  C1 E3 02			shl ebx, 2
- 00000338  03 5D EC			add ebx, pTex
- 0000033B  8B 4D F4			mov ecx, sw
- 0000033E			xloop_sprite:
- 0000033E  8B 03			mov eax, [ebx]
- 00000340  89 07			mov [edi], eax
- 00000342  83 C3 04			add ebx, 4
- 00000345  83 C7 04			add edi, 4
- 00000348  49				dec ecx
- 00000349  75 F3			jnz xloop_sprite
- 0000034B  46				inc esi
- 0000034C  EB C8			jmp yloop_sprite
+ 0000007D  8D 49 1C			lea ecx, (Scene PTR[ecx]).startQueue
+					INVOKE push_back, pGameObject
+ 00000080  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000083  E8 00000000 E   *	    call   push_back
+					
+ 00000088  8B 4D 08			mov ecx, pGameObject
+ 0000008B  89 71 14			mov (GameObject PTR [ecx]).pParentScene, esi ; // Set the parent of the GameObject to THIS Scene
+						
+ 0000008E  8B CE			mov ecx, esi ; // Restore the THIS pointer
 
- 0000034E			drawSprite_done:
 					ret
- 0000034E  5A		   *	    pop    edx
- 0000034F  59		   *	    pop    ecx
- 00000350  5B		   *	    pop    ebx
- 00000351  5F		   *	    pop    edi
- 00000352  5E		   *	    pop    esi
- 00000353  C9		   *	    leave  
- 00000354  C2 0010	   *	    ret    00010h
- 00000357			drawSprite ENDP
+ 00000090  5E		   *	    pop    esi
+ 00000091  C9		   *	    leave  
+ 00000092  C2 0004	   *	    ret    00004h
+ 00000095			instantiate_game_object ENDP
 
 				; // ----------------------------------
-				; // renderCommands
-				; // Takes the render commands list and camera position,
-				; // clears the RGB buffer to black, then draws every
-				; // sprite (and rect) to create the frame.
+				; // scene_process_start_queue
+				; // Moves the GameObjects from the startQueue to the gameObjects vector 
+				; // and then calls their start() methods.
+				; //
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000357			renderCommands PROC PUBLIC USES esi ecx edi ebx, pRenderCommands:DWORD, numCommands:DWORD, pCamera:DWORD
-					local pBuffer: DWORD
- 00000357  55		   *	    push   ebp
- 00000358  8B EC	   *	    mov    ebp, esp
- 0000035A  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 0000035D  56		   *	    push   esi
- 0000035E  51		   *	    push   ecx
- 0000035F  57		   *	    push   edi
- 00000360  53		   *	    push   ebx
- 00000361  C7 45 FC			mov pBuffer, OFFSET screenBuffer
-	   00000018 R
-					; // clear buffer to black (r=0,g=0,b=0,a=255)
- 00000368  B9 00000FA0			mov ecx, SCREEN_WIDTH * SCREEN_HEIGHT
- 0000036D  8B 7D FC			mov edi, pBuffer
- 00000370  B8 FF000000			mov eax, 0FF000000h
- 00000375  F3/ AB			rep stosd
+ 00000095			scene_process_start_queue PROC PRIVATE USES eax ebx ecx edx esi edi
+					local pThis
+ 00000095  55		   *	    push   ebp
+ 00000096  8B EC	   *	    mov    ebp, esp
+ 00000098  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 0000009B  50		   *	    push   eax
+ 0000009C  53		   *	    push   ebx
+ 0000009D  51		   *	    push   ecx
+ 0000009E  52		   *	    push   edx
+ 0000009F  56		   *	    push   esi
+ 000000A0  57		   *	    push   edi
+ 000000A1  89 4D FC			mov pThis, ecx ; // Save the THIS pointer just in case
 
-					; // process each command
- 00000377  8B 75 08			mov esi, pRenderCommands
- 0000037A  8B 5D 0C			mov ebx, numCommands
- 0000037D			cmd_loop:
- 0000037D  83 FB 00			cmp ebx, 0
- 00000380  74 37			je render_done
- 00000382  4B				dec ebx
+ 000000A4  8D 49 1C			lea ecx, (Scene PTR [ecx]).startQueue
+ 000000A7  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
+ 000000AA  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
+ 000000AC  BA 00000000			mov edx, 0 ; // int i = 0
+					
+					; // Iterate through the Game Objects and add them to the gameObjects vector, then call their start methods
+					.WHILE edx < ebx
+ 000000B1  EB 17	   *	    jmp    @C0001
+ 000000B3		   *@C0002:
+						; // esi = startQueue[i]
+ 000000B3  8B 34 90				mov esi, [eax + edx * 4]
+						
+						; // push the game object startQueue[i] into GameObjects
+ 000000B6  8B 4D FC				mov ecx, pThis
+ 000000B9  8D 49 10				lea ecx, (Scene PTR [ECX]).gameObjects
+						INVOKE push_back, esi
+ 000000BC  56		   *	    push   esi
+ 000000BD  E8 00000000 E   *	    call   push_back
+					
+						; // call the start() method in the GameObject startQueue[i]
+ 000000C2  8B CE				mov ecx, esi
+						INVOKE game_object_start_virtual
+ 000000C4  E8 00000000 E   *	    call   game_object_start_virtual
+ 000000C9  42					inc edx
+					.ENDW
+ 000000CA		   *@C0001:
+ 000000CA  3B D3	   *	    cmp    edx, ebx
+ 000000CC  72 E5	   *	    jb	@C0002
 
- 00000383  8B 06			mov eax, [esi]
- 00000385  8B 10			mov edx, (RenderCommand PTR [eax]).rcType
+					; // Set the length of startQueue to be 0, effectively clearing it
+ 000000CE  8B 4D FC			mov ecx, pThis
+ 000000D1  8D 49 1C			lea ecx, (Scene PTR [ecx]).startQueue
+ 000000D4  C7 41 04			mov (UnorderedVector PTR [ecx]).count, 0
+	   00000000
 
-					.IF edx == RC_RECT
- 00000387  0B D2	   *	    or	edx, edx
- 00000389  75 13	   *	    jne    @C0005
-						INVOKE drawRect, (RenderCommand PTR [eax]).pTransform, (RenderCommand PTR [eax]).pRenderable, pCamera, pBuffer
- 0000038B  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
- 0000038E  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
- 00000391  FF 70 08	   *	    push   dword  ptr [eax]+000000008h
- 00000394  FF 70 04	   *	    push   dword  ptr [eax]+000000004h
- 00000397  E8 FFFFFE26	   *	    call   drawRect
-					.ELSEIF edx == RC_SPRITE
- 0000039C  EB 16	   *	    jmp    @C0007
- 0000039E		   *@C0005:
- 0000039E  83 FA 01	   *	    cmp    edx, RC_SPRITE
- 000003A1  75 11	   *	    jne    @C0008
-						INVOKE drawSprite, (RenderCommand PTR [eax]).pTransform, (RenderCommand PTR [eax]).pRenderable, pCamera, pBuffer
- 000003A3  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
- 000003A6  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
- 000003A9  FF 70 08	   *	    push   dword  ptr [eax]+000000008h
- 000003AC  FF 70 04	   *	    push   dword  ptr [eax]+000000004h
- 000003AF  E8 FFFFFF14	   *	    call   drawSprite
-					.ENDIF
- 000003B4		   *@C0008:
- 000003B4		   *@C0007:
-
- 000003B4  83 C6 04			add esi, TYPE DWORD
- 000003B7  EB C4			jmp cmd_loop
- 000003B9			render_done:
-					.IF rendererInitialized == 0 
- 000003B9  83 3D 00000000 R
-	   00		   *	    cmp    rendererInitialized, 000h
- 000003C0  75 0F	   *	    jne    @C000A
-						INVOKE initializeRenderer
- 000003C2  E8 FFFFFD90	   *	    call   initializeRenderer
- 000003C7  C7 05 00000000 R			mov rendererInitialized, 0FFFFFFFFh
-	   FFFFFFFF
-					.ENDIF
- 000003D1		   *@C000A:
-
-					INVOKE displayBuffer, pBuffer
- 000003D1  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
- 000003D4  E8 FFFFFC50	   *	    call   displayBuffer
+ 000000DB  8B 4D FC			mov ecx, pThis
 					ret
- 000003D9  5B		   *	    pop    ebx
- 000003DA  5F		   *	    pop    edi
- 000003DB  59		   *	    pop    ecx
- 000003DC  5E		   *	    pop    esi
- 000003DD  C9		   *	    leave  
- 000003DE  C2 000C	   *	    ret    0000Ch
- 000003E1			renderCommands ENDP
+ 000000DE  5F		   *	    pop    edi
+ 000000DF  5E		   *	    pop    esi
+ 000000E0  5A		   *	    pop    edx
+ 000000E1  59		   *	    pop    ecx
+ 000000E2  5B		   *	    pop    ebx
+ 000000E3  58		   *	    pop    eax
+ 000000E4  C9		   *	    leave  
+ 000000E5  C3		   *	    ret    00000h
+ 000000E6			scene_process_start_queue ENDP
+
+				; // ----------------------------------
+				; // scene_update_game_objects
+				; // Calls the update method of all of the GameObjects in gameObjects
+				; //
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
+				; // ----------------------------------
+ 000000E6			scene_update_game_objects PROC PRIVATE USES eax ebx ecx edx esi edi, deltaTime: REAL4
+					local pThis
+ 000000E6  55		   *	    push   ebp
+ 000000E7  8B EC	   *	    mov    ebp, esp
+ 000000E9  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 000000EC  50		   *	    push   eax
+ 000000ED  53		   *	    push   ebx
+ 000000EE  51		   *	    push   ecx
+ 000000EF  52		   *	    push   edx
+ 000000F0  56		   *	    push   esi
+ 000000F1  57		   *	    push   edi
+ 000000F2  89 4D FC			mov pThis, ecx ; // Save the THIS pointer just in case
+
+ 000000F5  8D 49 10			lea ecx, (Scene PTR [ecx]).gameObjects
+ 000000F8  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
+ 000000FB  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
+ 000000FD  BA 00000000			mov edx, 0 ; // int i = 0
+					
+					; // Iterate through the Game Objects and call their update methods if they are still alive
+					.WHILE edx < ebx
+ 00000102  EB 10	   *	    jmp    @C0004
+ 00000104		   *@C0005:
+						; // esi = gameObjects[i]
+ 00000104  8B 34 90				mov esi, [eax + edx * 4]
+
+						; // call the update() method in the GameObject gameObjects[i]
+ 00000107  50					push eax
+
+ 00000108  8B CE				mov ecx, esi
+						INVOKE game_object_update_virtual, deltaTime
+ 0000010A  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 0000010D  E8 00000000 E   *	    call   game_object_update_virtual
+
+ 00000112  58					pop eax
+ 00000113  42					inc edx
+					.ENDW
+ 00000114		   *@C0004:
+ 00000114  3B D3	   *	    cmp    edx, ebx
+ 00000116  72 EC	   *	    jb	@C0005
+
+ 00000118  8B 4D FC			mov ecx, pThis
+					ret
+ 0000011B  5F		   *	    pop    edi
+ 0000011C  5E		   *	    pop    esi
+ 0000011D  5A		   *	    pop    edx
+ 0000011E  59		   *	    pop    ecx
+ 0000011F  5B		   *	    pop    ebx
+ 00000120  58		   *	    pop    eax
+ 00000121  C9		   *	    leave  
+ 00000122  C2 0004	   *	    ret    00004h
+ 00000125			scene_update_game_objects ENDP
+
+				; // ----------------------------------
+				; // scene_free_game_objects
+				; // Frees the game objects in the freeQueue and removes them from the gameObjects vector
+				; //
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
+				; // ----------------------------------
+ 00000125			scene_free_game_objects PROC PRIVATE USES eax ebx ecx edx esi edi
+					local pThis
+ 00000125  55		   *	    push   ebp
+ 00000126  8B EC	   *	    mov    ebp, esp
+ 00000128  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 0000012B  50		   *	    push   eax
+ 0000012C  53		   *	    push   ebx
+ 0000012D  51		   *	    push   ecx
+ 0000012E  52		   *	    push   edx
+ 0000012F  56		   *	    push   esi
+ 00000130  57		   *	    push   edi
+ 00000131  89 4D FC			mov pThis, ecx ; // Save the THIS pointer just in case
+
+ 00000134  8D 49 28			lea ecx, (Scene PTR [ecx]).freeQueue
+ 00000137  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
+ 0000013A  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
+ 0000013C  BA 00000000			mov edx, 0 ; // int i = 0
+					
+					; // Iterate through the freeQueue vector
+					; // Remove the element from gameObjects and free it
+					.WHILE edx < ebx
+ 00000141  EB 17	   *	    jmp    @C0007
+ 00000143		   *@C0008:
+						; // esi = freeQueue[i]
+ 00000143  8B 34 90				mov esi, [eax + edx * 4]
+
+						; // Remove the element pointer from gameObjects
+ 00000146  8B 4D FC				mov ecx, pThis
+ 00000149  8D 49 10				lea ecx, (Scene PTR [ecx]).gameObjects
+						INVOKE remove_element, esi
+ 0000014C  56		   *	    push   esi
+ 0000014D  E8 00000000 E   *	    call   remove_element
+
+						; // call the free() method on the GameObject
+ 00000152  8B CE				mov ecx, esi
+						INVOKE free_game_object
+ 00000154  E8 00000000 E   *	    call   free_game_object
+ 00000159  42					inc edx
+					.ENDW
+ 0000015A		   *@C0007:
+ 0000015A  3B D3	   *	    cmp    edx, ebx
+ 0000015C  72 E5	   *	    jb	@C0008
+
+					; // Set the length of freeQueue to be 0, effectively clearing it
+ 0000015E  8B 4D FC			mov ecx, pThis
+ 00000161  8D 49 28			lea ecx, (Scene PTR [ecx]).freeQueue
+ 00000164  C7 41 04			mov (UnorderedVector PTR [ecx]).count, 0
+	   00000000
+
+ 0000016B  8B 4D FC			mov ecx, pThis
+					ret
+ 0000016E  5F		   *	    pop    edi
+ 0000016F  5E		   *	    pop    esi
+ 00000170  5A		   *	    pop    edx
+ 00000171  59		   *	    pop    ecx
+ 00000172  5B		   *	    pop    ebx
+ 00000173  58		   *	    pop    eax
+ 00000174  C9		   *	    leave  
+ 00000175  C3		   *	    ret    00000h
+ 00000176			scene_free_game_objects ENDP
+
+				; // ----------------------------------
+				; // scene_render_frame
+				; // Build the RenderCommand list and pass it to the renderer
+				; //
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
+				; // ----------------------------------
+ 00000176			scene_render_frame PROC PRIVATE USES eax ebx edx esi edi
+					local pThis
+ 00000176  55		   *	    push   ebp
+ 00000177  8B EC	   *	    mov    ebp, esp
+ 00000179  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 0000017C  50		   *	    push   eax
+ 0000017D  53		   *	    push   ebx
+ 0000017E  52		   *	    push   edx
+ 0000017F  56		   *	    push   esi
+ 00000180  57		   *	    push   edi
+ 00000181  89 4D FC			mov pThis, ecx
+
+					; // First clear the render list
+ 00000184  8D 49 34			lea ecx, (Scene PTR [ecx]).renderCommands
+ 00000187  C7 41 04			mov (UnorderedVector PTR [ecx]).count, 0
+	   00000000
+
+					; // Build render list
+ 0000018E  8B 4D FC			mov ecx, pThis
+ 00000191  8D 49 10			lea ecx, (Scene PTR [ecx]).gameObjects
+ 00000194  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
+ 00000197  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
+ 00000199  BA 00000000			mov edx, 0 ; // int i = 0
+					
+					; // Iterate through the Game Objects
+					.WHILE edx < ebx
+ 0000019E  EB 71	   *	    jmp    @C000A
+ 000001A0		   *@C000B:
+						; // esi = gameObjects[i]
+ 000001A0  8B 34 90				mov esi, [eax + edx * 4]
+
+						; // If the object is pending free, skip it
+ 000001A3  8B 4E 18				mov ecx, (GameObject PTR [esi]).awaitingFree
+						.IF ecx != 0
+ 000001A6  0B C9	   *	    or	ecx, ecx
+ 000001A8  74 02	   *	    je	@C000C
+							.CONTINUE
+ 000001AA  EB 65	   *	    jmp    @C000A
+						.ENDIF
+
+ 000001AC		   *@C000C:
+ 000001AC  50					push eax
+						; // If it has a SpriteComponent or a RectComponent, add the render command
+						; // ----------------------------------------------------------------------
+						; // First check if there's a RectComponent
+ 000001AD  8B CE				mov ecx, esi
+						INVOKE get_first_component_which_is_a, RECT_COMPONENT_ID
+ 000001AF  6A 01	   *	    push   +000000001h
+ 000001B1  E8 00000000 E   *	    call   get_first_component_which_is_a
+						
+						.IF eax != 0
+ 000001B6  0B C0	   *	    or	eax, eax
+ 000001B8  74 24	   *	    je	@C000F
+							; // Create the new RenderCommand
+ 000001BA  53						push ebx
+ 000001BB  8B D8					mov ebx, eax
+
+ 000001BD  8B CE					mov ecx, esi
+							INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID ; // Get the transform pointer from the GameObject
+ 000001BF  6A 03	   *	    push   +000000003h
+ 000001C1  E8 00000000 E   *	    call   get_first_component_which_is_a
+							INVOKE new_render_command, RC_RECT, eax, ebx
+ 000001C6  53		   *	    push   ebx
+ 000001C7  50		   *	    push   eax
+ 000001C8  6A 00	   *	    push   +000000000h
+ 000001CA  E8 00000000 E   *	    call   new_render_command
+
+ 000001CF  5B						pop ebx
+
+							; // Add the render command to the RenderCommands list
+ 000001D0  8B 4D FC					mov ecx, pThis
+ 000001D3  8D 49 34					lea ecx, (Scene PTR [ecx]).renderCommands
+							INVOKE push_back, eax 
+ 000001D6  50		   *	    push   eax
+ 000001D7  E8 00000000 E   *	    call   push_back
+
+ 000001DC  EB 31					jmp scene_render_frame_loop_exit
+						.ENDIF
+
+						; // Now check if there's a SpriteComponent
+ 000001DE		   *@C000F:
+ 000001DE  8B CE				mov ecx, esi
+						INVOKE get_first_component_which_is_a, SPRITE_COMPONENT_ID
+ 000001E0  6A 02	   *	    push   +000000002h
+ 000001E2  E8 00000000 E   *	    call   get_first_component_which_is_a
+						
+						.IF eax != 0
+ 000001E7  0B C0	   *	    or	eax, eax
+ 000001E9  74 24	   *	    je	@C0011
+							; // Create the new RenderCommand
+ 000001EB  53						push ebx
+ 000001EC  8B CE					mov ecx, esi
+
+ 000001EE  8B D8					mov ebx, eax
+							INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID ; // Get the transform pointer from the GameObject
+ 000001F0  6A 03	   *	    push   +000000003h
+ 000001F2  E8 00000000 E   *	    call   get_first_component_which_is_a
+							INVOKE new_render_command, RC_SPRITE, eax, eax
+ 000001F7  50		   *	    push   eax
+ 000001F8  50		   *	    push   eax
+ 000001F9  6A 01	   *	    push   +000000001h
+ 000001FB  E8 00000000 E   *	    call   new_render_command
+
+ 00000200  5B						pop ebx
+
+							; // Add the render command to the RenderCommands list
+ 00000201  8B 4D FC					mov ecx, pThis
+ 00000204  8D 49 34					lea ecx, (Scene PTR [ecx]).renderCommands
+							INVOKE push_back, eax 
+ 00000207  50		   *	    push   eax
+ 00000208  E8 00000000 E   *	    call   push_back
+
+ 0000020D  EB 00					jmp scene_render_frame_loop_exit
+						.ENDIF
+
+ 0000020F					scene_render_frame_loop_exit:
+						; // Restore the pointer to pData and continue
+ 0000020F		   *@C0011:
+ 0000020F  58					pop eax
+ 00000210  42					inc edx ; // i++
+					.ENDW
+ 00000211		   *@C000A:
+ 00000211  3B D3	   *	    cmp    edx, ebx
+ 00000213  72 8B	   *	    jb	@C000B
+
+ 00000215  8B 4D FC			mov ecx, pThis
+ 00000218  8D 31			lea esi, (Scene PTR [ecx]).camera
+ 0000021A  8D 49 34			lea ecx, (Scene PTR [ecx]).renderCommands
+ 0000021D  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
+ 00000220  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
+ 00000222  BA 00000000			mov edx, 0 ; // int i = 0
+
+					; // Pass render list to renderer
+					INVOKE renderCommands, eax, ebx, esi
+ 00000227  56		   *	    push   esi
+ 00000228  53		   *	    push   ebx
+ 00000229  50		   *	    push   eax
+ 0000022A  E8 00000000 E   *	    call   renderCommands
+					ret
+ 0000022F  5F		   *	    pop    edi
+ 00000230  5E		   *	    pop    esi
+ 00000231  5A		   *	    pop    edx
+ 00000232  5B		   *	    pop    ebx
+ 00000233  58		   *	    pop    eax
+ 00000234  C9		   *	    leave  
+ 00000235  C3		   *	    ret    00000h
+ 00000236			scene_render_frame ENDP
+
+				; // ----------------------------------
+				; // scene_update
+				; // Responsible for updating the game objects and simulations every frame.
+				; //
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
+				; // ----------------------------------
+ 00000236			scene_update PROC PUBLIC USES eax ebx ecx edx esi edi, deltaTime: REAL4
+					local pThis
+ 00000236  55		   *	    push   ebp
+ 00000237  8B EC	   *	    mov    ebp, esp
+ 00000239  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 0000023C  50		   *	    push   eax
+ 0000023D  53		   *	    push   ebx
+ 0000023E  51		   *	    push   ecx
+ 0000023F  52		   *	    push   edx
+ 00000240  56		   *	    push   esi
+ 00000241  57		   *	    push   edi
+ 00000242  89 4D FC			mov pThis, ecx ; // Save the THIS pointer just in case
+
+					; // Take Input
+					INVOKE updateInput
+ 00000245  E8 00000000 E   *	    call   updateInput
+
+					; // Process start queue
+					INVOKE scene_process_start_queue
+ 0000024A  E8 FFFFFE46	   *	    call   scene_process_start_queue
+
+					; // NYI Update time sensitive components such as timers and tweens 
+
+					; // Update all of the GameObject logic
+					INVOKE scene_update_game_objects, deltaTime
+ 0000024F  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000252  E8 FFFFFE8F	   *	    call   scene_update_game_objects
+
+					; // NYI Update animator components 
+
+					; // Free any GameObjects that were queued to be freed by gameplay logic
+					INVOKE scene_free_game_objects
+ 00000257  E8 FFFFFEC9	   *	    call   scene_free_game_objects
+
+					; // Render the scene
+					INVOKE scene_render_frame
+ 0000025C  E8 FFFFFF15	   *	    call   scene_render_frame
+					
+					ret
+ 00000261  5F		   *	    pop    edi
+ 00000262  5E		   *	    pop    esi
+ 00000263  5A		   *	    pop    edx
+ 00000264  59		   *	    pop    ecx
+ 00000265  5B		   *	    pop    ebx
+ 00000266  58		   *	    pop    eax
+ 00000267  C9		   *	    leave  
+ 00000268  C2 0004	   *	    ret    00004h
+ 0000026B			scene_update ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/29/26 21:15:40
-renderer.asm						     Symbols 2 - 1
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/29/26 21:24:29
+scene.asm						     Symbols 2 - 1
 
 
 
@@ -1018,9 +1136,6 @@ Structures and Unions:
                 N a m e                  Size
                                          Offset      Type
 
-CONSOLE_CURSOR_INFO  . . . . . .	 00000008
-  dwSize . . . . . . . . . . . .	 00000000	 DWord
-  bVisible . . . . . . . . . . .	 00000004	 DWord
 Camera . . . . . . . . . . . . .	 00000010
   x  . . . . . . . . . . . . . .	 00000000	 DWord
   y  . . . . . . . . . . . . . .	 00000004	 DWord
@@ -1031,11 +1146,17 @@ Component_vtable . . . . . . . .	 00000004
 Component  . . . . . . . . . . .	 00000008
   componentType  . . . . . . . .	 00000000	 DWord
   pVt  . . . . . . . . . . . . .	 00000004	 DWord
-Pixel  . . . . . . . . . . . . .	 00000004
-  r  . . . . . . . . . . . . . .	 00000000	 Byte
-  g  . . . . . . . . . . . . . .	 00000001	 Byte
-  b  . . . . . . . . . . . . . .	 00000002	 Byte
-  a  . . . . . . . . . . . . . .	 00000003	 Byte
+GameObject_vtable  . . . . . . .	 00000010
+  pStart . . . . . . . . . . . .	 00000000	 DWord
+  pUpdate  . . . . . . . . . . .	 00000004	 DWord
+  pExit  . . . . . . . . . . . .	 00000008	 DWord
+  pFree  . . . . . . . . . . . .	 0000000C	 DWord
+GameObject . . . . . . . . . . .	 0000001C
+  gameObjectType . . . . . . . .	 00000000	 DWord
+  components . . . . . . . . . .	 00000004	 
+  pVt  . . . . . . . . . . . . .	 00000010	 DWord
+  pParentScene . . . . . . . . .	 00000014	 DWord
+  awaitingFree . . . . . . . . .	 00000018	 DWord
 RectComponent  . . . . . . . . .	 00000018
   baseComponent  . . . . . . . .	 00000000	 QWord
   h  . . . . . . . . . . . . . .	 00000008	 DWord
@@ -1049,6 +1170,12 @@ RenderCommand  . . . . . . . . .	 0000000C
   rcType . . . . . . . . . . . .	 00000000	 DWord
   pTransform . . . . . . . . . .	 00000004	 DWord
   pRenderable  . . . . . . . . .	 00000008	 DWord
+Scene  . . . . . . . . . . . . .	 00000040
+  camera . . . . . . . . . . . .	 00000000	 XmmWord
+  gameObjects  . . . . . . . . .	 00000010	 
+  startQueue . . . . . . . . . .	 0000001C	 
+  freeQueue  . . . . . . . . . .	 00000028	 
+  renderCommands . . . . . . . .	 00000034	 
 SpriteComponent  . . . . . . . .	 00000030
   baseComponent  . . . . . . . .	 00000000	 QWord
   originX  . . . . . . . . . . .	 00000008	 DWord
@@ -1066,6 +1193,10 @@ TransformComponent . . . . . . .	 00000014
   x  . . . . . . . . . . . . . .	 00000008	 DWord
   y  . . . . . . . . . . . . . .	 0000000C	 DWord
   ignoreCamera . . . . . . . . .	 00000010	 DWord
+UnorderedVector  . . . . . . . .	 0000000C
+  pData  . . . . . . . . . . . .	 00000000	 DWord
+  count  . . . . . . . . . . . .	 00000004	 DWord
+  capacity . . . . . . . . . . .	 00000008	 DWord
 
 
 Types:
@@ -1073,6 +1204,8 @@ Types:
                 N a m e                  Size     Attr
 
 ENUM_COMPONENT_ID  . . . . . . .	 00000004     DWord
+ENUM_GAME_OBJECT_ID  . . . . . .	 00000004     DWord
+HANDLE . . . . . . . . . . . . .	 00000004     DWord
 RC_ENUM  . . . . . . . . . . . .	 00000004     DWord
 
 
@@ -1082,85 +1215,75 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 0001C538 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000003E1 DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000026B DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
-GetConsoleCursorInfo . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-GetConsoleMode . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-GetStdHandle . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-SetConsoleCursorInfo . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-SetConsoleCursorPosition . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-SetConsoleMode . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-SetConsoleOutputCP . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-WriteConsoleA  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-displayBuffer  . . . . . . . . .	P Near	 00000029 _TEXT	Length= 0000012E Public STDCALL
-  pBuffer  . . . . . . . . . . .	DWord	 bp + 00000008
-  y_loop . . . . . . . . . . . .	L Near	 00000044 _TEXT	
-  x_loop . . . . . . . . . . . .	L Near	 0000004F _TEXT	
-  row_end  . . . . . . . . . . .	L Near	 0000010F _TEXT	
-  done . . . . . . . . . . . . .	L Near	 0000011F _TEXT	
-drawRect . . . . . . . . . . . .	P Near	 000001C2 _TEXT	Length= 00000106 Private STDCALL
-  pTrans . . . . . . . . . . . .	DWord	 bp + 00000008
-  pRect  . . . . . . . . . . . .	DWord	 bp + 0000000C
-  pCamera  . . . . . . . . . . .	DWord	 bp + 00000010
-  pBuffer  . . . . . . . . . . .	DWord	 bp + 00000014
-  sx . . . . . . . . . . . . . .	DWord	 bp - 00000004
-  sy . . . . . . . . . . . . . .	DWord	 bp - 00000008
-  rw . . . . . . . . . . . . . .	DWord	 bp - 0000000C
-  rh . . . . . . . . . . . . . .	DWord	 bp - 00000010
-  color  . . . . . . . . . . . .	DWord	 bp - 00000014
-  check_x_end  . . . . . . . . .	L Near	 0000022C _TEXT	
-  set_x_bounds . . . . . . . . .	L Near	 00000236 _TEXT	
-  check_y_end  . . . . . . . . .	L Near	 00000259 _TEXT	
-  set_y_bounds . . . . . . . . .	L Near	 00000263 _TEXT	
-  yloop_rect . . . . . . . . . .	L Near	 0000029A _TEXT	
-  xloop_rect . . . . . . . . . .	L Near	 000002B1 _TEXT	
-  drawRect_done  . . . . . . . .	L Near	 000002BF _TEXT	
-drawSprite . . . . . . . . . . .	P Near	 000002C8 _TEXT	Length= 0000008F Private STDCALL
-  pTrans . . . . . . . . . . . .	DWord	 bp + 00000008
-  pSprite  . . . . . . . . . . .	DWord	 bp + 0000000C
-  pCamera  . . . . . . . . . . .	DWord	 bp + 00000010
-  pBuffer  . . . . . . . . . . .	DWord	 bp + 00000014
-  sx . . . . . . . . . . . . . .	DWord	 bp - 00000004
-  sy . . . . . . . . . . . . . .	DWord	 bp - 00000008
-  sw . . . . . . . . . . . . . .	DWord	 bp - 0000000C
-  sh . . . . . . . . . . . . . .	DWord	 bp - 00000010
-  pTex . . . . . . . . . . . . .	DWord	 bp - 00000014
-  yloop_sprite . . . . . . . . .	L Near	 00000316 _TEXT	
-  xloop_sprite . . . . . . . . .	L Near	 0000033E _TEXT	
-  drawSprite_done  . . . . . . .	L Near	 0000034E _TEXT	
+GetProcessHeap . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+HeapAlloc  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+add_component  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+displayBuffer  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_camera  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_component_virtual . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_component . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+free_game_object . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_rect_component  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_render_command  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+free_scene . . . . . . . . . . .	P Near	 00000068 _TEXT	Length= 0000000F Public STDCALL
 free_transform_component . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+free_unordered_vector  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+game_object_exit . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+game_object_start_virtual  . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+game_object_start  . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+game_object_update_virtual . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+get_first_component_which_is_a .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_camera  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_component . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+init_game_object . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_rect_component  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_render_command  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+init_scene . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000044 Public STDCALL
+  maxGameObjects . . . . . . . .	DWord	 bp + 00000008
 init_transform_component . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-initializeRenderer . . . . . . .	P Near	 00000157 _TEXT	Length= 0000006B Public STDCALL
+init_unordered_vector  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+initializeRenderer . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+instantiate_game_object  . . . .	P Near	 00000077 _TEXT	Length= 0000001E Public STDCALL
+  pGameObject  . . . . . . . . .	DWord	 bp + 00000008
+isKeyJustPressed . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+isKeyPressed . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_camera . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_component  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+new_game_object  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_rect_component . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_render_command . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+new_scene  . . . . . . . . . . .	P Near	 00000044 _TEXT	Length= 00000024 Public STDCALL
+  maxGameObjects . . . . . . . .	DWord	 bp + 00000008
 new_transform_component  . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-renderCommands . . . . . . . . .	P Near	 00000357 _TEXT	Length= 0000008A Public STDCALL
-  pRenderCommands  . . . . . . .	DWord	 bp + 00000008
-  numCommands  . . . . . . . . .	DWord	 bp + 0000000C
-  pCamera  . . . . . . . . . . .	DWord	 bp + 00000010
-  pBuffer  . . . . . . . . . . .	DWord	 bp - 00000004
-  cmd_loop . . . . . . . . . . .	L Near	 0000037D _TEXT	
-  render_done  . . . . . . . . .	L Near	 000003B9 _TEXT	
-writeByteInDecimal . . . . . . .	P Near	 00000000 _TEXT	Length= 00000029 Private STDCALL
-  print_tens . . . . . . . . . .	L Near	 00000010 _TEXT	
-  print_ones . . . . . . . . . .	L Near	 00000021 _TEXT	
+new_unordered_vector . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+push_back  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+remove_element . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+renderCommands . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+scene_free_game_objects  . . . .	P Near	 00000125 _TEXT	Length= 00000051 Private STDCALL
+  pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
+scene_process_start_queue  . . .	P Near	 00000095 _TEXT	Length= 00000051 Private STDCALL
+  pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
+scene_render_frame . . . . . . .	P Near	 00000176 _TEXT	Length= 000000C0 Private STDCALL
+  pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
+  scene_render_frame_loop_exit .	L Near	 0000020F _TEXT	
+scene_update_game_objects  . . .	P Near	 000000E6 _TEXT	Length= 0000003F Private STDCALL
+  deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
+  pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
+scene_update . . . . . . . . . .	P Near	 00000236 _TEXT	Length= 00000035 Public STDCALL
+  deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
+  pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
+updateInput  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 
 
 Symbols:
@@ -1177,35 +1300,33 @@ Symbols:
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 CAMERA_INC . . . . . . . . . . .	Number	 00000001h   
+CAMERA_MOVER_GAME_OBJECT_ID  . .	Number	 00000001h   
 COMPONENT_IDS_INC  . . . . . . .	Number	 00000001h   
 COMPONENT_INC  . . . . . . . . .	Number	 00000001h   
-CR . . . . . . . . . . . . . . .	Number	 0000000Dh   
-ConsoleMode  . . . . . . . . . .	DWord	 00000004 _DATA	
 DEFAULT_COMPONENT_ID . . . . . .	Number	 00000000h   
-ENABLE_VIRTUAL_TERMINAL_PROCESSING .	Number	 00000004h   
-ENGINE_TYPES_INC . . . . . . . .	Number	 00000001h   
-ESCP . . . . . . . . . . . . . .	Number	 0000001Bh   
-LF . . . . . . . . . . . . . . .	Number	 0000000Ah   
+DEFAULT_GAME_OBJECT_ID . . . . .	Number	 00000000h   
+GAME_OBJECT_IDS_INC  . . . . . .	Number	 00000001h   
+GAME_OBJECT_INC  . . . . . . . .	Number	 00000001h   
+HEAP_FUNCTIONS_INC . . . . . . .	Number	 00000001h   
+HEAP_GENERATE_EXCEPTIONS . . . .	Number	 00000004h   
+HEAP_NO_SERIALIZE  . . . . . . .	Number	 00000001h   
+HEAP_ZERO_MEMORY . . . . . . . .	Number	 00000008h   
+INPUT_MANAGER_INC  . . . . . . .	Number	 00000001h   
+NULL . . . . . . . . . . . . . .	Number	 00000000h   
 RC_RECT  . . . . . . . . . . . .	Number	 00000000h   
 RC_SPRITE  . . . . . . . . . . .	Number	 00000001h   
 RECT_COMMAND_INC . . . . . . . .	Number	 00000001h   
 RECT_COMPONENT_ID  . . . . . . .	Number	 00000001h   
 RENDERER_COMMAND_INC . . . . . .	Number	 00000001h   
 RENDERER_INC . . . . . . . . . .	Number	 00000001h   
-SCREEN_HEIGHT  . . . . . . . . .	Number	 00000032h   
-SCREEN_WIDTH . . . . . . . . . .	Number	 00000050h   
+SCENE_INC  . . . . . . . . . . .	Number	 00000001h   
 SPRITE_COMPONENT_ID  . . . . . .	Number	 00000002h   
 SPRITE_COMPONENT_INC . . . . . .	Number	 00000001h   
-STD_OUTPUT_HANDLE  . . . . . . .	Number	 -0000000Bh   
 TRANSFORM_COMPONENT_ID . . . . .	Number	 00000003h   
 TRANSFORM_COMPONENT_INC  . . . .	Number	 00000001h   
-bytesWritten . . . . . . . . . .	DWord	 0000000C _DATA	
-consoleCursorInfo  . . . . . . .	CONSOLE_CURSOR_INFO  00000010 _DATA	
+UNORDERED_VECTOR_INC . . . . . .	Number	 00000001h   
 enumId . . . . . . . . . . . . .	Number	 00000004h   
-hConsoleOutput . . . . . . . . .	DWord	 00000008 _DATA	
-outputTextBuffer . . . . . . . .	Byte	 00003E98 _DATA	
-rendererInitialized  . . . . . .	DWord	 00000000 _DATA	
-screenBuffer . . . . . . . . . .	Pixel	 00000018 _DATA	
+hHeap  . . . . . . . . . . . . .	DWord	 00000000 FLAT	External STDCALL
 
 	   0 Warnings
 	   0 Errors
