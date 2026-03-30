@@ -32,7 +32,7 @@ loop_start:
 	mov ecx, pScene
 	INVOKE scene_update, deltaTime
 
-	INVOKE Sleep, 33 ; // Sleep 33 MS
+	INVOKE Sleep, 33 ; // Sleep for 1/30 seconds
 	jmp loop_start
 
 	INVOKE free_scene
