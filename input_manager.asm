@@ -11,8 +11,15 @@
 INCLUDE default_header.inc
 INCLUDE input_manager.inc
 
-GetKeyboardState PROTO pBuffer : DWORD
-
+; // This is a Win32 API function that was added to the program out of need, 
+; // although we did not learn about it in class. The reason this function is present
+; // is because it allows for a "real-time" input system where the hardware is polled
+; // at the instant the frame is updated to determine what keys are currently being
+; // pressed. Because the function is asynchronous, we can call it at any time and it
+; // will reliably spit out the exact keys being pressed.
+; // Documentation used: learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getasynckeystate
+GetAsyncKeyState PROTO vk_code : DWORD
+	
 .data
 ; // Holds the data for all 256 virtual keys and whether they are currently pressed
 curInputBuffer BYTE 256 DUP(0)
@@ -34,12 +41,21 @@ updateInput PROC PUBLIC USES ebx ecx edx esi edi
     mov ecx, 256
     rep movsb
 
-	; // Get the current input state
-	; // This is a Win32 API function that was added to the program before we learned about it
-	; // during class. This function was used because it provided the greatest flexibility
-	; // compared to the Irvine32 libraries for this engine.
-	; // Documentation used: learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getkeyboardstate
-	INVOKE GetKeyboardState, OFFSET curInputBuffer
+	; // Get the current input state for all 256 key codes
+	mov ebx, 0
+	.WHILE ebx <= 0FFh
+		INVOKE GetAsyncKeyState, ebx
+		test ah, 80h
+		jz keyUp
+
+	keyDown:
+		mov curInputBuffer[ebx], 80h ; // Set the most significant bit
+		jmp endLoop
+	keyUp:
+		mov curInputBuffer[ebx], 0 ; // Clear the most significant bit
+	endLoop:
+		inc ebx
+	.ENDW
 
 	ret
 updateInput ENDP
@@ -49,8 +65,9 @@ updateInput ENDP
 ; // Returns 1 if a key is currently pressed and 0 if a key
 ; // is not currently pressed this frame.
 ; // ----------------------------------
-isKeyPressed PROC PUBLIC, vkCode: DWORD
-	mov al, [curInputBuffer + vkCode]
+isKeyPressed PROC PUBLIC USES ebx, vkCode: VK_CODE
+	movzx ebx, vkCode
+	mov al, curInputBuffer[ebx]
 	test al, 80h ; // Test the high bit
 	jz keyNotPressed
 
@@ -70,9 +87,9 @@ isKeyPressed ENDP
 ; // Returns 1 if a key is just pressed this frame and 0 if the key
 ; // was not just pressed this frame.
 ; // ----------------------------------
-isKeyJustPressed PROC PUBLIC USES ebx, vkCode: DWORD
-	mov al, [curInputBuffer + vkCode]
-	mov bl, [prevInputBuffer + vkCode]
+isKeyJustPressed PROC PUBLIC USES ebx, vkCode: VK_CODE
+	mov al, curInputBuffer[vkCode]
+	mov bl, prevInputBuffer[vkCode]
 
 	test al, 80h ; // Test the high bit
 	jz keyNotJustPressed

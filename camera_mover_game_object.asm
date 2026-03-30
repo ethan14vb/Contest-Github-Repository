@@ -6,8 +6,12 @@
 ; // ==================================
 
 INCLUDE default_header.inc
+INCLUDE game_object.inc
+INCLUDE scene.inc
+INCLUDE camera.inc
 INCLUDE camera_mover_game_object.inc
 INCLUDE heap_functions.inc
+INCLUDE input_manager.inc
 
 .data
 CAMERA_MOVER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET camera_mover_update, OFFSET game_object_exit>
@@ -53,14 +57,44 @@ new_camera_mover_game_object ENDP
 
 ; // ----------------------------------
 ; // camera_mover_update
-; // Default blank update method for a GameObject
-; // Can be left blank, or overriden by the virtual function table
+; // Moves the camera depending on the keys pressed
 ; // 
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-camera_mover_update PROC stdcall, deltaTime: REAL4
-	mov eax, deltaTime
+camera_mover_update PROC stdcall USES eax, deltaTime: REAL4
+	local pThis : DWORD, xMov : SDWORD, yMov : SDWORD
+	mov pThis, ecx
+	mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
+
+	mov xMov, 0
+	mov yMov, 0
+
+	; // Check if any of the keys are pressed
+	INVOKE isKeyPressed, VK_LEFT
+	neg eax
+	add xMov, eax
+
+	INVOKE isKeyPressed, VK_RIGHT
+	add xMov, eax
+
+	INVOKE isKeyPressed, VK_UP
+	neg eax
+	add yMov, eax
+
+	INVOKE isKeyPressed, VK_DOWN
+	add yMov, eax
+
+	; // Now move the camera
+	mov ecx, (GameObject PTR [ecx]).pParentScene
+	lea ecx, (Scene PTR [ecx]).camera
+
+	mov eax, xMov
+	add (Camera PTR [ecx]).x, eax
+	mov eax, yMov
+	add (Camera PTR [ecx]).y, eax
+
+	mov ecx, pThis ; // Restore the THIS pointer
 	ret
 camera_mover_update ENDP
 

@@ -15,4 +15,7 @@ CameraMoverGameObject STRUCT
 	moveSpeed DWORD ?
 CameraMoverGameObject ENDS
 
+init_camera_mover_game_object PROTO
+new_camera_mover_game_object PROTO
+
 ENDIF

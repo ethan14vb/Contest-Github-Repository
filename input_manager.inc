@@ -11,8 +11,16 @@
 IFNDEF INPUT_MANAGER_INC
 INPUT_MANAGER_INC EQU 1
 
+VK_CODE typedef BYTE 
+
+; // Win32 virtual key codes taken from learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+VK_LEFT		=	025h
+VK_UP		=	026h
+VK_RIGHT	=	027h
+VK_DOWN		=	028h
+
 updateInput PROTO
-isKeyPressed PROTO vkCode: DWORD
-isKeyJustPressed PROTO vkCode: DWORD
+isKeyPressed PROTO vkCode: VK_CODE
+isKeyJustPressed PROTO vkCode: VK_CODE
 
 ENDIF
