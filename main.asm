@@ -15,7 +15,7 @@ ExitProcess PROTO : DWORD
 Sleep		PROTO : DWORD ; // This function was added because it is the Win32 method of waiting for a specified number of miliseconds
 
 .data
-deltaTime REAL4 0.03333
+deltaTime REAL4 0.016667
 
 .code
 main PROC PUBLIC
@@ -32,7 +32,7 @@ loop_start:
 	mov ecx, pScene
 	INVOKE scene_update, deltaTime
 
-	INVOKE Sleep, 33 ; // Sleep for 1/30 seconds
+	INVOKE Sleep, 16 ; // Sleep for 1/60 seconds
 	jmp loop_start
 
 	INVOKE free_scene
