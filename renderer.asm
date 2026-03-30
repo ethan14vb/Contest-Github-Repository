@@ -21,6 +21,16 @@ SetConsoleOutputCP PROTO STDCALL : DWORD ; // Used to change the output format t
 GetConsoleMode     PROTO STDCALL : DWORD, : DWORD
 SetConsoleMode     PROTO STDCALL : DWORD, : DWORD
 
+; // ConsoleCursorInfo STRUCT used by the GetConsoleCursorInfo and SetConsoleCursorInfo functions
+CONSOLE_CURSOR_INFO STRUCT
+	dwSize      DWORD ?
+	bVisible    DWORD ?
+CONSOLE_CURSOR_INFO ENDS
+
+; // Used to disable the blinking cursor
+GetConsoleCursorInfo PROTO STDCALL : DWORD, : DWORD
+SetConsoleCursorInfo PROTO STDCALL : DWORD, : DWORD
+
 ; // Windows functions for displaying the text buffer of RGB data.
 ; //	WriteConsoleA was chosen instead of the Irvine library functions because of its
 ; //	support for things like virtual terminal processing and greater flexibility.
@@ -38,6 +48,8 @@ ENABLE_VIRTUAL_TERMINAL_PROCESSING = 4
 ConsoleMode DD ?
 hConsoleOutput DD ?
 bytesWritten DD 0
+
+consoleCursorInfo CONSOLE_CURSOR_INFO <>
 
 ; // Constants
 CR = 13 ; // Carriage return
@@ -276,6 +288,11 @@ initializeRenderer PROC PUBLIC USES eax
 	INVOKE GetConsoleMode, hConsoleOutput, OFFSET ConsoleMode
 	or ConsoleMode, ENABLE_VIRTUAL_TERMINAL_PROCESSING
 	INVOKE SetConsoleMode, hConsoleOutput, ConsoleMode
+
+	; // Disable the blinking cursor
+	INVOKE GetConsoleCursorInfo, hConsoleOutput, OFFSET consoleCursorInfo
+	mov consoleCursorInfo.bVisible, 0
+	INVOKE SetConsoleCursorInfo, hConsoleOutput, OFFSET consoleCursorInfo
 
 	ret
 initializeRenderer ENDP
