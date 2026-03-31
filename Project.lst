@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/31/26 00:06:49
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/31/26 00:09:33
 neon_square_player.asm					     Page 1 - 1
 
 
@@ -522,7 +522,7 @@ neon_square_player.asm					     Page 1 - 1
 
  00000000			.data
  00000000 00000000 E		NEON_SQUARE_PLAYER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET neon_square_player_update, OFFSET game_object_exit>
-	   00000072 R
+	   00000075 R
 	   00000000 E
 	   00000000
 
@@ -580,34 +580,36 @@ neon_square_player.asm					     Page 1 - 1
  0000004B  50		   *	    push   eax
  0000004C  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
  0000004F  E8 00000000 E   *	    call   add_component
+
+ 00000054  8B 45 FC			mov eax, pThis
 						
 					ret
- 00000054  5A		   *	    pop    edx
- 00000055  5B		   *	    pop    ebx
- 00000056  5E		   *	    pop    esi
- 00000057  C9		   *	    leave  
- 00000058  C3		   *	    ret    00000h
- 00000059			init_neon_square_player ENDP
+ 00000057  5A		   *	    pop    edx
+ 00000058  5B		   *	    pop    ebx
+ 00000059  5E		   *	    pop    esi
+ 0000005A  C9		   *	    leave  
+ 0000005B  C3		   *	    ret    00000h
+ 0000005C			init_neon_square_player ENDP
 
 				; // ----------------------------------
 				; // new_neon_square_player
 				; // Reserves heap space for the Object with parameters calls the initializer method
 				; // ----------------------------------
- 00000059			new_neon_square_player PROC PUBLIC USES ecx
- 00000059  51		   *	    push   ecx
+ 0000005C			new_neon_square_player PROC PUBLIC USES ecx
+ 0000005C  51		   *	    push   ecx
 					INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF NeonSquarePlayer
- 0000005A  6A 1C	   *	    push   +00000001Ch
- 0000005C  6A 04	   *	    push   +000000004h
- 0000005E  FF 35 00000000 E *	    push   hHeap
- 00000064  E8 00000000 E   *	    call   HeapAlloc
- 00000069  8B C8			mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
+ 0000005D  6A 1C	   *	    push   +00000001Ch
+ 0000005F  6A 04	   *	    push   +000000004h
+ 00000061  FF 35 00000000 E *	    push   hHeap
+ 00000067  E8 00000000 E   *	    call   HeapAlloc
+ 0000006C  8B C8			mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
 					INVOKE init_neon_square_player
- 0000006B  E8 FFFFFF90	   *	    call   init_neon_square_player
+ 0000006E  E8 FFFFFF8D	   *	    call   init_neon_square_player
 
 					ret ; // Return with the address of the memory block in HeapAlloc
- 00000070  59		   *	    pop    ecx
- 00000071  C3		   *	    ret    00000h
- 00000072			new_neon_square_player ENDP
+ 00000073  59		   *	    pop    ecx
+ 00000074  C3		   *	    ret    00000h
+ 00000075			new_neon_square_player ENDP
 
 				; // ********************************************
 				; // Instance methods
@@ -620,46 +622,46 @@ neon_square_player.asm					     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000072			neon_square_player_update PROC stdcall USES eax, deltaTime: REAL4
+ 00000075			neon_square_player_update PROC stdcall USES eax, deltaTime: REAL4
 					local pThis : DWORD, yMov : SDWORD
- 00000072  55		   *	    push   ebp
- 00000073  8B EC	   *	    mov    ebp, esp
- 00000075  83 C4 F8	   *	    add    esp, 0FFFFFFF8h
- 00000078  50		   *	    push   eax
- 00000079  89 4D FC			mov pThis, ecx
- 0000007C  8B 45 08			mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
+ 00000075  55		   *	    push   ebp
+ 00000076  8B EC	   *	    mov    ebp, esp
+ 00000078  83 C4 F8	   *	    add    esp, 0FFFFFFF8h
+ 0000007B  50		   *	    push   eax
+ 0000007C  89 4D FC			mov pThis, ecx
+ 0000007F  8B 45 08			mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
 
- 0000007F  C7 45 F8			mov yMov, 0
+ 00000082  C7 45 F8			mov yMov, 0
 	   00000000
 
 					; // Check if any of the keys are pressed
 					INVOKE isKeyPressed, VK_UP
- 00000086  6A 26	   *	    push   +000000026h
- 00000088  E8 00000000 E   *	    call   isKeyPressed
- 0000008D  F7 D8			neg eax
- 0000008F  01 45 F8			add yMov, eax
+ 00000089  6A 26	   *	    push   +000000026h
+ 0000008B  E8 00000000 E   *	    call   isKeyPressed
+ 00000090  F7 D8			neg eax
+ 00000092  01 45 F8			add yMov, eax
 
 					INVOKE isKeyPressed, VK_DOWN
- 00000092  6A 28	   *	    push   +000000028h
- 00000094  E8 00000000 E   *	    call   isKeyPressed
- 00000099  01 45 F8			add yMov, eax
+ 00000095  6A 28	   *	    push   +000000028h
+ 00000097  E8 00000000 E   *	    call   isKeyPressed
+ 0000009C  01 45 F8			add yMov, eax
 
 					; // Now move the camera
- 0000009C  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
- 0000009F  8D 09			lea ecx, (Scene PTR [ecx]).camera
+ 0000009F  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
+ 000000A2  8D 09			lea ecx, (Scene PTR [ecx]).camera
 
- 000000A1  8B 45 F8			mov eax, yMov
- 000000A4  01 41 04			add (Camera PTR [ecx]).y, eax
+ 000000A4  8B 45 F8			mov eax, yMov
+ 000000A7  01 41 04			add (Camera PTR [ecx]).y, eax
 
- 000000A7  8B 4D FC			mov ecx, pThis ; // Restore the THIS pointer
+ 000000AA  8B 4D FC			mov ecx, pThis ; // Restore the THIS pointer
 					ret
- 000000AA  58		   *	    pop    eax
- 000000AB  C9		   *	    leave  
- 000000AC  C2 0004	   *	    ret    00004h
- 000000AF			neon_square_player_update ENDP
+ 000000AD  58		   *	    pop    eax
+ 000000AE  C9		   *	    leave  
+ 000000AF  C2 0004	   *	    ret    00004h
+ 000000B2			neon_square_player_update ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/31/26 00:06:49
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/31/26 00:09:33
 neon_square_player.asm					     Symbols 2 - 1
 
 
@@ -743,7 +745,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000010 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000000AF DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000B2 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -771,7 +773,7 @@ get_first_component_which_is_a .	P Near	 00000000 FLAT	Length= 00000000 External
 init_camera  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_component . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_game_object . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-init_neon_square_player  . . . .	P Near	 00000000 _TEXT	Length= 00000059 Public STDCALL
+init_neon_square_player  . . . .	P Near	 00000000 _TEXT	Length= 0000005C Public STDCALL
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
 init_rect_component  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_scene . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -781,14 +783,14 @@ initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 instantiate_game_object  . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 isKeyJustPressed . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 isKeyPressed . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-neon_square_player_update  . . .	P Near	 00000072 _TEXT	Length= 0000003D Private STDCALL
+neon_square_player_update  . . .	P Near	 00000075 _TEXT	Length= 0000003D Private STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
   yMov . . . . . . . . . . . . .	DWord	 bp - 00000008
 new_camera . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_component  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_game_object  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-new_neon_square_player . . . . .	P Near	 00000059 _TEXT	Length= 00000019 Public STDCALL
+new_neon_square_player . . . . .	P Near	 0000005C _TEXT	Length= 00000019 Public STDCALL
 new_rect_component . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_scene  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_transform_component  . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL

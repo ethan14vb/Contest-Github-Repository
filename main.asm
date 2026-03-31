@@ -8,7 +8,7 @@
 
 INCLUDE default_header.inc
 INCLUDE heap_functions.inc
-INCLUDE rectangle_test_scene.inc
+INCLUDE neon_square_scene.inc
 INCLUDE scene.inc
 
 ExitProcess PROTO : DWORD
@@ -26,7 +26,7 @@ main PROC PUBLIC
 	INVOKE new_scene, 2
 	mov pScene, eax
 	
-	INVOKE populate_rectangle_test_scene, pScene
+	INVOKE populate_neon_square_scene, pScene
 
 loop_start:
 	mov ecx, pScene

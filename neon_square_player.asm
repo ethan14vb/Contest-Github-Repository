@@ -46,6 +46,8 @@ init_neon_square_player PROC PUBLIC USES esi ebx edx
 	; // Add rect component
 	INVOKE new_rect_component, 2, 2, 0, 255, 0, 255
 	INVOKE add_component, pThis, eax
+
+	mov eax, pThis
 		
 	ret
 init_neon_square_player ENDP
