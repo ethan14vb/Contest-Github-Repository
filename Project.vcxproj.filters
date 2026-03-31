@@ -53,6 +53,9 @@
     <None Include="camera_mover_game_object.inc">
       <Filter>Include\Engine</Filter>
     </None>
+    <None Include="neon_square_scene.inc">
+      <Filter>Resource\Scenes</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">
@@ -125,6 +128,9 @@
     </MASM>
     <MASM Include="main.asm">
       <Filter>Source\Engine</Filter>
+    </MASM>
+    <MASM Include="neon_square_scene.asm">
+      <Filter>Resource\Scenes</Filter>
     </MASM>
   </ItemGroup>
 </Project>
