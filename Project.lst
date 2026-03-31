@@ -1,7 +1,12 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/30/26 21:54:24
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/30/26 21:55:10
 neon_square_scene.asm					     Page 1 - 1
 
 
+				; // ==================================
+				; // neon_square_scene.asm
+				; // ----------------------------------
+				; // The main scene of our demo game for our engine: Neon Square
+				; // ==================================
 
 				INCLUDE default_header.inc
 			      C .386
@@ -10,6 +15,7 @@ neon_square_scene.asm					     Page 1 - 1
 			      C .stack 4096
 			      C OPTION PROC : PRIVATE
 			      C 
+
  00000000			.code
  00000000			populate_neon_square_scene PROC PUBLIC USES eax ebx edx esi edi, pScene: DWORD
  00000000  55		   *	    push   ebp
@@ -31,7 +37,7 @@ neon_square_scene.asm					     Page 1 - 1
  00000014			populate_neon_square_scene ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/30/26 21:54:24
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/30/26 21:55:10
 neon_square_scene.asm					     Symbols 2 - 1
 
 
