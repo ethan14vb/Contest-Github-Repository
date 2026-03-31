@@ -74,9 +74,28 @@ new_neon_square_player ENDP
 ; //	ecx - THIS pointer
 ; // ----------------------------------
 neon_square_player_update PROC stdcall USES eax, deltaTime: REAL4
-	local pThis : DWORD
+	local pThis : DWORD, yMov : SDWORD
 	mov pThis, ecx
 	mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
+
+	mov yMov, 0
+
+	; // Check if any of the keys are pressed
+	INVOKE isKeyPressed, VK_UP
+	neg eax
+	add yMov, eax
+
+	INVOKE isKeyPressed, VK_DOWN
+	add yMov, eax
+
+	; // Now move the camera
+	mov ecx, (GameObject PTR [ecx]).pParentScene
+	lea ecx, (Scene PTR [ecx]).camera
+
+	mov eax, yMov
+	add (Camera PTR [ecx]).y, eax
+
+	mov ecx, pThis ; // Restore the THIS pointer
 	ret
 neon_square_player_update ENDP
 
