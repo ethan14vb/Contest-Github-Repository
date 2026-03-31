@@ -35,6 +35,17 @@ init_neon_square_player PROC PUBLIC USES esi ebx edx
 	ret
 init_neon_square_player ENDP
 
+; // ********************************************
+; // Instance methods
+; // ********************************************
+
+; // ----------------------------------
+; // neon_square_player_update
+; // Moves the player up and down depending on keyboard input.
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
 neon_square_player_update PROC stdcall USES eax, deltaTime: REAL4
 	local pThis : DWORD
 	mov pThis, ecx
