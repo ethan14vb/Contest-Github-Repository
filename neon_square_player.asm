@@ -75,7 +75,7 @@ new_neon_square_player ENDP
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-neon_square_player_update PROC stdcall USES eax ebx, deltaTime: REAL4
+neon_square_player_update PROC stdcall USES eax ebx edx, deltaTime: REAL4
 	local pThis : DWORD, yMov : SDWORD
 	mov pThis, ecx
 	mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
@@ -83,12 +83,24 @@ neon_square_player_update PROC stdcall USES eax ebx, deltaTime: REAL4
 	mov yMov, 0
 
 	; // Check if any of the keys are pressed
+	INVOKE isKeyPressed, VK_GAMEPAD_LEFT_THUMBSTICK_UP
+	mov edx, eax
+	INVOKE isKeyPressed, VK_GAMEPAD_DPAD_UP
+	mov ebx, eax
 	INVOKE isKeyPressed, VK_UP
+	or eax, ebx
+	or eax, edx
 	neg eax
 	shl eax, 1 ; // Multiply the movement by 2 to speed things up
 	add yMov, eax
 		 
+	INVOKE isKeyPressed, VK_GAMEPAD_LEFT_THUMBSTICK_DOWN
+	mov edx, eax
 	INVOKE isKeyPressed, VK_DOWN
+	mov ebx, eax
+	INVOKE isKeyPressed, VK_GAMEPAD_DPAD_DOWN
+	or eax, ebx
+	or eax, edx
 	shl eax, 1 ; // Multiply the movement by 2 to speed things up
 	add yMov, eax
 

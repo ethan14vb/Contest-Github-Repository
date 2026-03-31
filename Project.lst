@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/31/26 00:21:01
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/31/26 00:37:01
 neon_square_player.asm					     Page 1 - 1
 
 
@@ -375,6 +375,12 @@ neon_square_player.asm					     Page 1 - 1
  = 00000027		      C VK_RIGHT	=	027h
  = 00000028		      C VK_DOWN		=	028h
 			      C 
+ = 000000CB		      C VK_GAMEPAD_DPAD_UP		= 0CBh
+ = 000000CC		      C VK_GAMEPAD_DPAD_DOWN	= 0CCh
+			      C 
+ = 000000D3		      C VK_GAMEPAD_LEFT_THUMBSTICK_UP	= 0D3h	
+ = 000000D4		      C VK_GAMEPAD_LEFT_THUMBSTICK_DOWN = 0D4h
+			      C 
 			      C updateInput PROTO
 			      C isKeyPressed PROTO vkCode: VK_CODE
 			      C isKeyJustPressed PROTO vkCode: VK_CODE
@@ -622,51 +628,73 @@ neon_square_player.asm					     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000075			neon_square_player_update PROC stdcall USES eax ebx, deltaTime: REAL4
+ 00000075			neon_square_player_update PROC stdcall USES eax ebx edx, deltaTime: REAL4
 					local pThis : DWORD, yMov : SDWORD
  00000075  55		   *	    push   ebp
  00000076  8B EC	   *	    mov    ebp, esp
  00000078  83 C4 F8	   *	    add    esp, 0FFFFFFF8h
  0000007B  50		   *	    push   eax
  0000007C  53		   *	    push   ebx
- 0000007D  89 4D FC			mov pThis, ecx
- 00000080  8B 45 08			mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
+ 0000007D  52		   *	    push   edx
+ 0000007E  89 4D FC			mov pThis, ecx
+ 00000081  8B 45 08			mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
 
- 00000083  C7 45 F8			mov yMov, 0
+ 00000084  C7 45 F8			mov yMov, 0
 	   00000000
 
 					; // Check if any of the keys are pressed
+					INVOKE isKeyPressed, VK_GAMEPAD_LEFT_THUMBSTICK_UP
+ 0000008B  68 000000D3	   *	    push   +0000000D3h
+ 00000090  E8 00000000 E   *	    call   isKeyPressed
+ 00000095  8B D0			mov edx, eax
+					INVOKE isKeyPressed, VK_GAMEPAD_DPAD_UP
+ 00000097  68 000000CB	   *	    push   +0000000CBh
+ 0000009C  E8 00000000 E   *	    call   isKeyPressed
+ 000000A1  8B D8			mov ebx, eax
 					INVOKE isKeyPressed, VK_UP
- 0000008A  6A 26	   *	    push   +000000026h
- 0000008C  E8 00000000 E   *	    call   isKeyPressed
- 00000091  F7 D8			neg eax
- 00000093  D1 E0			shl eax, 1
- 00000095  01 45 F8			add yMov, eax
-
+ 000000A3  6A 26	   *	    push   +000000026h
+ 000000A5  E8 00000000 E   *	    call   isKeyPressed
+ 000000AA  0B C3			or eax, ebx
+ 000000AC  0B C2			or eax, edx
+ 000000AE  F7 D8			neg eax
+ 000000B0  D1 E0			shl eax, 1 ; // Multiply the movement by 2 to speed things up
+ 000000B2  01 45 F8			add yMov, eax
+						 
+					INVOKE isKeyPressed, VK_GAMEPAD_LEFT_THUMBSTICK_DOWN
+ 000000B5  68 000000D4	   *	    push   +0000000D4h
+ 000000BA  E8 00000000 E   *	    call   isKeyPressed
+ 000000BF  8B D0			mov edx, eax
 					INVOKE isKeyPressed, VK_DOWN
- 00000098  6A 28	   *	    push   +000000028h
- 0000009A  E8 00000000 E   *	    call   isKeyPressed
- 0000009F  D1 E0			shl eax, 1
- 000000A1  01 45 F8			add yMov, eax
+ 000000C1  6A 28	   *	    push   +000000028h
+ 000000C3  E8 00000000 E   *	    call   isKeyPressed
+ 000000C8  8B D8			mov ebx, eax
+					INVOKE isKeyPressed, VK_GAMEPAD_DPAD_DOWN
+ 000000CA  68 000000CC	   *	    push   +0000000CCh
+ 000000CF  E8 00000000 E   *	    call   isKeyPressed
+ 000000D4  0B C3			or eax, ebx
+ 000000D6  0B C2			or eax, edx
+ 000000D8  D1 E0			shl eax, 1 ; // Multiply the movement by 2 to speed things up
+ 000000DA  01 45 F8			add yMov, eax
 
 					; // Now move the player
 					INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID
- 000000A4  6A 03	   *	    push   +000000003h
- 000000A6  E8 00000000 E   *	    call   get_first_component_which_is_a
+ 000000DD  6A 03	   *	    push   +000000003h
+ 000000DF  E8 00000000 E   *	    call   get_first_component_which_is_a
 
- 000000AB  8B 5D F8			mov ebx, yMov
- 000000AE  01 58 0C			add (TransformComponent PTR [eax]).y, ebx
+ 000000E4  8B 5D F8			mov ebx, yMov
+ 000000E7  01 58 0C			add (TransformComponent PTR [eax]).y, ebx
 
- 000000B1  8B 4D FC			mov ecx, pThis ; // Restore the THIS pointer
+ 000000EA  8B 4D FC			mov ecx, pThis ; // Restore the THIS pointer
 					ret
- 000000B4  5B		   *	    pop    ebx
- 000000B5  58		   *	    pop    eax
- 000000B6  C9		   *	    leave  
- 000000B7  C2 0004	   *	    ret    00004h
- 000000BA			neon_square_player_update ENDP
+ 000000ED  5A		   *	    pop    edx
+ 000000EE  5B		   *	    pop    ebx
+ 000000EF  58		   *	    pop    eax
+ 000000F0  C9		   *	    leave  
+ 000000F1  C2 0004	   *	    ret    00004h
+ 000000F4			neon_square_player_update ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/31/26 00:21:01
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/31/26 00:37:01
 neon_square_player.asm					     Symbols 2 - 1
 
 
@@ -750,7 +778,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000010 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000000BA DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000F4 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -788,7 +816,7 @@ initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 instantiate_game_object  . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 isKeyJustPressed . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 isKeyPressed . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-neon_square_player_update  . . .	P Near	 00000075 _TEXT	Length= 00000045 Private STDCALL
+neon_square_player_update  . . .	P Near	 00000075 _TEXT	Length= 0000007F Private STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
   yMov . . . . . . . . . . . . .	DWord	 bp - 00000008
@@ -844,6 +872,10 @@ TRANSFORM_COMPONENT_ID . . . . .	Number	 00000003h
 TRANSFORM_COMPONENT_INC  . . . .	Number	 00000001h   
 UNORDERED_VECTOR_INC . . . . . .	Number	 00000001h   
 VK_DOWN  . . . . . . . . . . . .	Number	 00000028h   
+VK_GAMEPAD_DPAD_DOWN . . . . . .	Number	 000000CCh   
+VK_GAMEPAD_DPAD_UP . . . . . . .	Number	 000000CBh   
+VK_GAMEPAD_LEFT_THUMBSTICK_DOWN 	Number	 000000D4h   
+VK_GAMEPAD_LEFT_THUMBSTICK_UP  .	Number	 000000D3h   
 VK_LEFT  . . . . . . . . . . . .	Number	 00000025h   
 VK_RIGHT . . . . . . . . . . . .	Number	 00000027h   
 VK_UP  . . . . . . . . . . . . .	Number	 00000026h   
