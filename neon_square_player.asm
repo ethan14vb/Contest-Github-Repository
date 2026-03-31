@@ -40,7 +40,7 @@ init_neon_square_player PROC PUBLIC USES esi ebx edx
 	mov (GameObject PTR [ecx]).pVt, OFFSET NEON_SQUARE_PLAYER_GAMEOBJECT_VTABLE
 
 	; // Add transform component
-	INVOKE new_transform_component, 20, 40, 0
+	INVOKE new_transform_component, 20, 25, 0
 	INVOKE add_component, pThis, eax
 
 	; // Add rect component
@@ -75,7 +75,7 @@ new_neon_square_player ENDP
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-neon_square_player_update PROC stdcall USES eax, deltaTime: REAL4
+neon_square_player_update PROC stdcall USES eax ebx, deltaTime: REAL4
 	local pThis : DWORD, yMov : SDWORD
 	mov pThis, ecx
 	mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
@@ -85,17 +85,18 @@ neon_square_player_update PROC stdcall USES eax, deltaTime: REAL4
 	; // Check if any of the keys are pressed
 	INVOKE isKeyPressed, VK_UP
 	neg eax
+	shl eax, 1 ; // Multiply the movement by 2 to speed things up
 	add yMov, eax
-
+		 
 	INVOKE isKeyPressed, VK_DOWN
+	shl eax, 1 ; // Multiply the movement by 2 to speed things up
 	add yMov, eax
 
-	; // Now move the camera
-	mov ecx, (GameObject PTR [ecx]).pParentScene
-	lea ecx, (Scene PTR [ecx]).camera
+	; // Now move the player
+	INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID
 
-	mov eax, yMov
-	add (Camera PTR [ecx]).y, eax
+	mov ebx, yMov
+	add (TransformComponent PTR [eax]).y, ebx
 
 	mov ecx, pThis ; // Restore the THIS pointer
 	ret
