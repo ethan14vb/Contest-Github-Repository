@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/30/26 23:20:08
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/30/26 23:22:10
 neon_square_player.asm					     Page 1 - 1
 
 
@@ -320,6 +320,12 @@ neon_square_player.asm					     Page 1 - 1
 			      C ENDIF
 			      C 
 
+ 00000000			.data
+ 00000000 00000000 E		NEON_SQUARE_PLAYER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET neon_square_player_update, OFFSET game_object_exit>
+	   00000015 R
+	   00000000 E
+	   00000000
+
  00000000			.code
 				; // ********************************************
 				; // Constructor Methods
@@ -341,17 +347,32 @@ neon_square_player.asm					     Page 1 - 1
  00000003  6A 02	   *	    push   +000000002h
  00000005  E8 00000000 E   *	    call   init_game_object
 					;mov (GameObject PTR [ecx]).gameObjectType, NEON_SQUARE_PLAYER_GAME_OBJECT_ID
-					;mov (GameObject PTR [ecx]).pVt, OFFSET NEON_SQUARE_PLAYER_GAMEOBJECT_VTABLE
+ 0000000A  C7 41 10			mov (GameObject PTR [ecx]).pVt, OFFSET NEON_SQUARE_PLAYER_GAMEOBJECT_VTABLE
+	   00000000 R
 						
 					ret
- 0000000A  5A		   *	    pop    edx
- 0000000B  5B		   *	    pop    ebx
- 0000000C  5E		   *	    pop    esi
- 0000000D  C3		   *	    ret    00000h
- 0000000E			init_neon_square_player ENDP
+ 00000011  5A		   *	    pop    edx
+ 00000012  5B		   *	    pop    ebx
+ 00000013  5E		   *	    pop    esi
+ 00000014  C3		   *	    ret    00000h
+ 00000015			init_neon_square_player ENDP
+
+ 00000015			neon_square_player_update PROC stdcall USES eax, deltaTime: REAL4
+					local pThis : DWORD
+ 00000015  55		   *	    push   ebp
+ 00000016  8B EC	   *	    mov    ebp, esp
+ 00000018  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 0000001B  50		   *	    push   eax
+ 0000001C  89 4D FC			mov pThis, ecx
+ 0000001F  8B 45 08			mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
+					ret
+ 00000022  58		   *	    pop    eax
+ 00000023  C9		   *	    leave  
+ 00000024  C2 0004	   *	    ret    00004h
+ 00000027			neon_square_player_update ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/30/26 23:20:08
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/30/26 23:22:10
 neon_square_player.asm					     Symbols 2 - 1
 
 
@@ -413,8 +434,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000000E DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000010 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000027 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -437,13 +458,16 @@ game_object_update_virtual . . .	P Near	 00000000 FLAT	Length= 00000000 External
 get_first_component_which_is_a .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_camera  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_game_object . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-init_neon_square_player  . . . .	P Near	 00000000 _TEXT	Length= 0000000E Public STDCALL
+init_neon_square_player  . . . .	P Near	 00000000 _TEXT	Length= 00000015 Public STDCALL
 init_scene . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_unordered_vector  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 instantiate_game_object  . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 isKeyJustPressed . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 isKeyPressed . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+neon_square_player_update  . . .	P Near	 00000015 _TEXT	Length= 00000012 Private STDCALL
+  deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
+  pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
 new_camera . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_game_object  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_scene  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -479,6 +503,7 @@ HEAP_GENERATE_EXCEPTIONS . . . .	Number	 00000004h
 HEAP_NO_SERIALIZE  . . . . . . .	Number	 00000001h   
 HEAP_ZERO_MEMORY . . . . . . . .	Number	 00000008h   
 INPUT_MANAGER_INC  . . . . . . .	Number	 00000001h   
+NEON_SQUARE_PLAYER_GAMEOBJECT_VTABLE .	GameObject_vtable  00000000 _DATA	
 NULL . . . . . . . . . . . . . .	Number	 00000000h   
 RECT_COMPONENT_ID  . . . . . . .	Number	 00000001h   
 SCENE_INC  . . . . . . . . . . .	Number	 00000001h   
