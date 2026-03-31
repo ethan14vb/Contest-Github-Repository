@@ -12,6 +12,8 @@ INCLUDE scene.inc
 INCLUDE neon_square_player.inc
 INCLUDE heap_functions.inc
 INCLUDE input_manager.inc
+INCLUDE transform_component.inc
+INCLUDE rect_component.inc
 
 .data
 NEON_SQUARE_PLAYER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET neon_square_player_update, OFFSET game_object_exit>
@@ -29,10 +31,21 @@ NEON_SQUARE_PLAYER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start
 ; //	ecx - THIS pointer
 ; // ----------------------------------
 init_neon_square_player PROC PUBLIC USES esi ebx edx
+	local pThis
+	mov pThis, ecx
+
 	; // Parent constructor
 	INVOKE init_game_object, 2
 	mov (GameObject PTR [ecx]).gameObjectType, NEON_SQUARE_PLAYER_GAME_OBJECT_ID
 	mov (GameObject PTR [ecx]).pVt, OFFSET NEON_SQUARE_PLAYER_GAMEOBJECT_VTABLE
+
+	; // Add transform component
+	INVOKE new_transform_component, 20, 40, 0
+	INVOKE add_component, pThis, eax
+
+	; // Add rect component
+	INVOKE new_rect_component, 2, 2, 0, 255, 0, 255
+	INVOKE add_component, pThis, eax
 		
 	ret
 init_neon_square_player ENDP
