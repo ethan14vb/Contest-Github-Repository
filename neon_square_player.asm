@@ -7,6 +7,7 @@
 
 INCLUDE default_header.inc
 INCLUDE game_object.inc
+INCLUDE game_object_ids.inc
 INCLUDE scene.inc
 INCLUDE neon_square_player.inc
 INCLUDE heap_functions.inc
@@ -30,7 +31,7 @@ NEON_SQUARE_PLAYER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start
 init_neon_square_player PROC PUBLIC USES esi ebx edx
 	; // Parent constructor
 	INVOKE init_game_object, 2
-	;mov (GameObject PTR [ecx]).gameObjectType, NEON_SQUARE_PLAYER_GAME_OBJECT_ID
+	mov (GameObject PTR [ecx]).gameObjectType, NEON_SQUARE_PLAYER_GAME_OBJECT_ID
 	mov (GameObject PTR [ecx]).pVt, OFFSET NEON_SQUARE_PLAYER_GAMEOBJECT_VTABLE
 		
 	ret
