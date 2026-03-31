@@ -56,6 +56,9 @@
     <None Include="neon_square_scene.inc">
       <Filter>Resource\Scenes</Filter>
     </None>
+    <None Include="neon_square_player.inc">
+      <Filter>Include\Engine</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">

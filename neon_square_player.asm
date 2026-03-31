@@ -8,6 +8,7 @@
 INCLUDE default_header.inc
 INCLUDE game_object.inc
 INCLUDE scene.inc
+INCLUDE neon_square_player.inc
 INCLUDE heap_functions.inc
 INCLUDE input_manager.inc
 
@@ -40,7 +41,7 @@ init_neon_square_player ENDP
 ; // Reserves heap space for the Object with parameters calls the initializer method
 ; // ----------------------------------
 new_neon_square_player PROC PUBLIC USES ecx
-	;INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF NeonSquarePlayer
+	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF NeonSquarePlayer
 	mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
 	INVOKE init_neon_square_player
 
