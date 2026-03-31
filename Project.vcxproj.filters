@@ -132,5 +132,8 @@
     <MASM Include="neon_square_scene.asm">
       <Filter>Resource\Scenes</Filter>
     </MASM>
+    <MASM Include="neon_square_player.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
   </ItemGroup>
 </Project>
