@@ -35,6 +35,18 @@ init_neon_square_player PROC PUBLIC USES esi ebx edx
 	ret
 init_neon_square_player ENDP
 
+; // ----------------------------------
+; // new_neon_square_player
+; // Reserves heap space for the Object with parameters calls the initializer method
+; // ----------------------------------
+new_neon_square_player PROC PUBLIC USES ecx
+	;INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF NeonSquarePlayer
+	mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
+	INVOKE init_neon_square_player
+
+	ret ; // Return with the address of the memory block in HeapAlloc
+new_neon_square_player ENDP
+
 ; // ********************************************
 ; // Instance methods
 ; // ********************************************

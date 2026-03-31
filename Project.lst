@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/30/26 23:22:10
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/30/26 23:26:25
 neon_square_player.asm					     Page 1 - 1
 
 
@@ -322,7 +322,7 @@ neon_square_player.asm					     Page 1 - 1
 
  00000000			.data
  00000000 00000000 E		NEON_SQUARE_PLAYER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET neon_square_player_update, OFFSET game_object_exit>
-	   00000015 R
+	   0000001F R
 	   00000000 E
 	   00000000
 
@@ -357,22 +357,49 @@ neon_square_player.asm					     Page 1 - 1
  00000014  C3		   *	    ret    00000h
  00000015			init_neon_square_player ENDP
 
- 00000015			neon_square_player_update PROC stdcall USES eax, deltaTime: REAL4
+				; // ----------------------------------
+				; // new_neon_square_player
+				; // Reserves heap space for the Object with parameters calls the initializer method
+				; // ----------------------------------
+ 00000015			new_neon_square_player PROC PUBLIC USES ecx
+					;INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF NeonSquarePlayer
+ 00000015  51		   *	    push   ecx
+ 00000016  8B C8			mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
+					INVOKE init_neon_square_player
+ 00000018  E8 FFFFFFE3	   *	    call   init_neon_square_player
+
+					ret ; // Return with the address of the memory block in HeapAlloc
+ 0000001D  59		   *	    pop    ecx
+ 0000001E  C3		   *	    ret    00000h
+ 0000001F			new_neon_square_player ENDP
+
+				; // ********************************************
+				; // Instance methods
+				; // ********************************************
+
+				; // ----------------------------------
+				; // neon_square_player_update
+				; // Moves the player up and down depending on keyboard input.
+				; // 
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
+				; // ----------------------------------
+ 0000001F			neon_square_player_update PROC stdcall USES eax, deltaTime: REAL4
 					local pThis : DWORD
- 00000015  55		   *	    push   ebp
- 00000016  8B EC	   *	    mov    ebp, esp
- 00000018  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 0000001B  50		   *	    push   eax
- 0000001C  89 4D FC			mov pThis, ecx
- 0000001F  8B 45 08			mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
+ 0000001F  55		   *	    push   ebp
+ 00000020  8B EC	   *	    mov    ebp, esp
+ 00000022  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 00000025  50		   *	    push   eax
+ 00000026  89 4D FC			mov pThis, ecx
+ 00000029  8B 45 08			mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
 					ret
- 00000022  58		   *	    pop    eax
- 00000023  C9		   *	    leave  
- 00000024  C2 0004	   *	    ret    00004h
- 00000027			neon_square_player_update ENDP
+ 0000002C  58		   *	    pop    eax
+ 0000002D  C9		   *	    leave  
+ 0000002E  C2 0004	   *	    ret    00004h
+ 00000031			neon_square_player_update ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/30/26 23:22:10
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/30/26 23:26:25
 neon_square_player.asm					     Symbols 2 - 1
 
 
@@ -435,7 +462,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000010 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000027 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000031 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -465,11 +492,12 @@ initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 instantiate_game_object  . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 isKeyJustPressed . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 isKeyPressed . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-neon_square_player_update  . . .	P Near	 00000015 _TEXT	Length= 00000012 Private STDCALL
+neon_square_player_update  . . .	P Near	 0000001F _TEXT	Length= 00000012 Private STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
 new_camera . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_game_object  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+new_neon_square_player . . . . .	P Near	 00000015 _TEXT	Length= 0000000A Public STDCALL
 new_scene  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_unordered_vector . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 push_back  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL

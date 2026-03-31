@@ -40,7 +40,7 @@ init_camera_mover_game_object PROC PUBLIC USES esi ebx edx
 init_camera_mover_game_object ENDP
 
 ; // ----------------------------------
-; // init_camera_mover_game_object
+; // new_camera_mover_game_object
 ; // Reserves heap space for the Object with parameters calls the initializer method
 ; // ----------------------------------
 new_camera_mover_game_object PROC PUBLIC USES ecx
