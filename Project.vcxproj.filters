@@ -141,5 +141,8 @@
     <MASM Include="neon_square_player.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
+    <MASM Include="wall_obstacle.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
   </ItemGroup>
 </Project>
