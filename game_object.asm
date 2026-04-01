@@ -21,7 +21,7 @@ INCLUDE component_ids.inc
 INCLUDE heap_functions.inc
 
 .data
-GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_object_update, OFFSET game_object_exit>
+GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_object_update, OFFSET game_object_exit, OFFSET free_game_object>
 
 .code
 ; // ********************************************
@@ -190,6 +190,20 @@ game_object_start_virtual PROC PUBLIC USES ebx
 	call ebx
 	ret
 game_object_start_virtual ENDP
+
+; // ----------------------------------
+; // game_object_free_virtual
+; // Calls the GameObject's virtual free method
+; //
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+game_object_free_virtual PROC PUBLIC USES ebx
+	mov ebx, (GameObject PTR [ecx]).pVt
+	mov ebx, (GameObject_vtable PTR [ebx]).pFree
+	call ebx
+	ret
+game_object_free_virtual ENDP
 
 ; // ----------------------------------
 ; // game_object_update_virtual

@@ -16,7 +16,7 @@ INCLUDE transform_component.inc
 INCLUDE rect_component.inc
 
 .data
-NEON_SQUARE_PLAYER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET neon_square_player_update, OFFSET game_object_exit>
+NEON_SQUARE_PLAYER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET neon_square_player_update, OFFSET game_object_exit, OFFSET free_game_object>
 
 .code
 ; // ********************************************

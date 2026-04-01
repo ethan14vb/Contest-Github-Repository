@@ -14,7 +14,7 @@ INCLUDE heap_functions.inc
 INCLUDE input_manager.inc
 
 .data
-CAMERA_MOVER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET camera_mover_update, OFFSET game_object_exit>
+CAMERA_MOVER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET camera_mover_update, OFFSET game_object_exit, OFFSET free_game_object>
 
 .code
 ; // ********************************************

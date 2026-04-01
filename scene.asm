@@ -210,7 +210,7 @@ scene_free_game_objects PROC PRIVATE USES eax ebx ecx edx esi edi
 
 		; // call the free() method on the GameObject
 		mov ecx, esi
-		INVOKE free_game_object
+		INVOKE game_object_free_virtual
 		inc edx
 	.ENDW
 

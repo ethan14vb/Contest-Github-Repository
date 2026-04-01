@@ -17,7 +17,7 @@ INCLUDE transform_component.inc
 INCLUDE rect_component.inc
 
 .data
-WALL_OBSTACLE_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_object_update, OFFSET game_object_exit>
+WALL_OBSTACLE_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_object_update, OFFSET game_object_exit, OFFSET free_game_object>
 
 .code
 ; // ********************************************
