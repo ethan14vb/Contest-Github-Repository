@@ -43,6 +43,7 @@
       <FileType>Document</FileType>
     </None>
     <None Include="unordered_vector.inc" />
+    <None Include="wall_obstacle.inc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="camera.inc" />
