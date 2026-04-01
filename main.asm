@@ -11,6 +11,10 @@ INCLUDE heap_functions.inc
 INCLUDE neon_square_scene.inc
 INCLUDE scene.inc
 
+; // Irvine32 protos
+Randomize PROTO
+
+; // Win32 protos
 ExitProcess PROTO : DWORD
 Sleep		PROTO : DWORD ; // This function was added because it is the Win32 method of waiting for a specified number of miliseconds
 
@@ -21,6 +25,7 @@ deltaTime REAL4 0.016667
 main PROC PUBLIC
 	local pScene
 
+	INVOKE Randomize
 	INVOKE initialize_heap
 
 	INVOKE new_scene, 2

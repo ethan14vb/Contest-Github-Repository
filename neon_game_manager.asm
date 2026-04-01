@@ -20,9 +20,13 @@ INCLUDE neon_square_player.inc
 INCLUDE neon_game_manager.inc
 INCLUDE heap_functions.inc
 
+; // Irvine32 functions
+RandomRange PROTO
+Random32 PROTO
+
 .data
 NEON_GAME_MANAGER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET neon_game_manager_update, OFFSET game_object_exit, OFFSET free_game_object>
-spawnTime REAL4 0.5
+spawnTime REAL4 0.25
 
 .code
 ; // ********************************************
@@ -106,7 +110,12 @@ neon_game_manager_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 	mov ecx, pThis
 	mov ecx, (GameObject PTR [ecx]).pParentScene
 
-	INVOKE new_wall_obstacle, SCREEN_WIDTH, 20, 20
+	mov eax, SCREEN_HEIGHT
+	sub eax, 20
+
+	INVOKE RandomRange
+
+	INVOKE new_wall_obstacle, SCREEN_WIDTH, eax, 20
 	
 	mov ecx, pThis
 	mov ecx, (GameObject PTR [ecx]).pParentScene
