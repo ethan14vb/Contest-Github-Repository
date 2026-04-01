@@ -42,6 +42,7 @@ GameObject ENDS
 
 ; // Static methods
 add_component PROTO pGameObject: DWORD, pComponent: DWORD
+check_rect_collision PROTO pRect1 : DWORD, pTrans1 : DWORD, pRect2 : DWORD, pTrans2 : DWORD
 
 ; // Constructors
 init_game_object PROTO maxComponents : DWORD

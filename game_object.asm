@@ -50,7 +50,7 @@ add_component ENDP
 ; // with each other and 0 if not. If HitboxComponents are added to the engine
 ; // later, then this function will become obsolete.
 ; // ----------------------------------
-check_rect_collision PROC PUBLIC USES eax ebx ecx esi edi, pRect1 : DWORD, pTrans1 : DWORD, pRect2 : DWORD, pTrans2 : DWORD
+check_rect_collision PROC PUBLIC USES ebx ecx esi edi, pRect1 : DWORD, pTrans1 : DWORD, pRect2 : DWORD, pTrans2 : DWORD
 	LOCAL x1 : DWORD, y1 : DWORD, w1 : DWORD, h1 : DWORD
 	LOCAL x2 : DWORD, y2 : DWORD, w2 : DWORD, h2 : DWORD
 

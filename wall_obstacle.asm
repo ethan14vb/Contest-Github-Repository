@@ -108,12 +108,33 @@ wall_obstacle_update PROC stdcall USES eax ebx edx, deltaTime: REAL4
 	mov pThis, ecx
 	mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
 
-	; // Now move the player
+	; // Move the wall
 	INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID
 	add (TransformComponent PTR [eax]).x, -1
 
+	; // Check if I'm touching the player
+	mov ebx, eax
+	INVOKE get_first_component_which_is_a, RECT_COMPONENT_ID
+	mov edx, eax
+
+	mov ecx, (WallObstacle PTR [ecx]).pNeonPlayer
+	INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID
+	mov esi, eax
+	INVOKE get_first_component_which_is_a, RECT_COMPONENT_ID
+	INVOKE check_rect_collision, edx, ebx, eax, esi
+
+	.IF eax != 0
+		; // Make the player invisible
+		mov ecx, pThis
+		mov ecx, (WallObstacle PTR [ecx]).pNeonPlayer
+		INVOKE get_first_component_which_is_a, RECT_COMPONENT_ID
+		mov (RectComponent PTR [eax]).visible, 0
+	.ENDIF
+
+	mov ecx, pThis
+	INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID
 	; // If I'm past the edge of the screen, free me
-	mov ebx, (TransformComponent PTR[eax]).x
+	mov ebx, (TransformComponent PTR [eax]).x
 	.IF ebx <= 1
 		mov ebx, pThis
 		mov ecx, (GameObject PTR [ebx]).pParentScene
