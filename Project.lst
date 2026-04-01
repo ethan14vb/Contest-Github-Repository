@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 17:35:09
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 17:45:08
 game_object.asm						     Page 1 - 1
 
 
@@ -394,10 +394,10 @@ game_object.asm						     Page 1 - 1
 			      C 
 
  00000000			.data
- 00000000 00000151 R		GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_object_update, OFFSET game_object_exit, OFFSET free_game_object>
-	   0000017B R
-	   00000185 R
-	   000000D0 R
+ 00000000 00000191 R		GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_object_update, OFFSET game_object_exit, OFFSET free_game_object>
+	   000001BB R
+	   000001C5 R
+	   00000110 R
 
  00000000			.code
 				; // ********************************************
@@ -440,7 +440,7 @@ game_object.asm						     Page 1 - 1
 				; // with each other and 0 if not. If HitboxComponents are added to the engine
 				; // later, then this function will become obsolete.
 				; // ----------------------------------
- 00000020			check_rect_collision PROC PUBLIC USES eax ebx ecx esi edi, pRect1 : DWORD, pTrans1 : DWORD, pRect2 : DWORD, pTrans2
+ 00000020			check_rect_collision PROC PUBLIC USES eax ebx ecx esi edi, pRect1 : DWORD, pTrans1 : DWORD, pRect2 : DWORD, pTrans2 : DWORD
 					LOCAL x1 : DWORD, y1 : DWORD, w1 : DWORD, h1 : DWORD
 					LOCAL x2 : DWORD, y2 : DWORD, w2 : DWORD, h2 : DWORD
 
@@ -476,15 +476,51 @@ game_object.asm						     Page 1 - 1
  0000005E  89 7D E0			mov h2, edi
  00000061  8B 7E 0C			mov edi, (RectComponent PTR [esi]).w
  00000064  89 7D E4			mov w2, edi
+
+					; // If obj1 left >= obj2 right -> No Collision
+ 00000067  8B 45 FC			mov eax, x1
+ 0000006A  8B 4D EC			mov ecx, x2
+ 0000006D  03 4D E4			add ecx, w2
+ 00000070  3B C1			cmp eax, ecx
+ 00000072  7D 2E			jge no_collision
+
+					; // If obj1 right <= obj2 left) -> No Collision
+ 00000074  8B 45 FC			mov eax, x1
+ 00000077  03 45 F4			add eax, w1
+ 0000007A  8B 4D EC			mov ecx, x2
+ 0000007D  3B C1			cmp eax, ecx
+ 0000007F  7E 21			jle no_collision
+
+					; // If obj1 top >= obj2 bottom -> No Collision
+ 00000081  8B 45 F8			mov eax, y1
+ 00000084  8B 4D E8			mov ecx, y2
+ 00000087  03 4D E0			add ecx, h2
+ 0000008A  3B C1			cmp eax, ecx
+ 0000008C  7D 14			jge no_collision
+				
+					; // If obj1 bottom <= obj2 top -> No Collision
+ 0000008E  8B 45 F8			mov eax, y1
+ 00000091  03 45 F0			add eax, h1
+ 00000094  8B 4D E8			mov ecx, y2
+ 00000097  3B C1			cmp eax, ecx
+ 00000099  7E 07			jle no_collision
+
+					; // All checks passed, there must be a collision
+ 0000009B  B8 00000001			mov eax, 1
+ 000000A0  EB 05			jmp check_rect_collision_exit
+
+ 000000A2			no_collision:
+ 000000A2  B8 00000000			mov eax, 0
+ 000000A7			check_rect_collision_exit:
 					ret
- 00000067  5F		   *	    pop    edi
- 00000068  5E		   *	    pop    esi
- 00000069  59		   *	    pop    ecx
- 0000006A  5B		   *	    pop    ebx
- 0000006B  58		   *	    pop    eax
- 0000006C  C9		   *	    leave  
- 0000006D  C2 0010	   *	    ret    00010h
- 00000070			check_rect_collision ENDP
+ 000000A7  5F		   *	    pop    edi
+ 000000A8  5E		   *	    pop    esi
+ 000000A9  59		   *	    pop    ecx
+ 000000AA  5B		   *	    pop    ebx
+ 000000AB  58		   *	    pop    eax
+ 000000AC  C9		   *	    leave  
+ 000000AD  C2 0010	   *	    ret    00010h
+ 000000B0			check_rect_collision ENDP
 
 				; // ********************************************
 				; // Constructor Methods
@@ -497,65 +533,65 @@ game_object.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000070			init_game_object PROC PUBLIC USES esi ebx edx, maxComponents : DWORD
+ 000000B0			init_game_object PROC PUBLIC USES esi ebx edx, maxComponents : DWORD
 					local pThis: DWORD
- 00000070  55		   *	    push   ebp
- 00000071  8B EC	   *	    mov    ebp, esp
- 00000073  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 00000076  56		   *	    push   esi
- 00000077  53		   *	    push   ebx
- 00000078  52		   *	    push   edx
- 00000079  89 4D FC			mov pThis, ecx
- 0000007C  C7 01 00000000		mov (GameObject PTR [ecx]).gameObjectType, DEFAULT_GAME_OBJECT_ID
- 00000082  C7 41 18			mov (GameObject PTR [ecx]).awaitingFree, 0 ; // Set awaiting free to false (0)
+ 000000B0  55		   *	    push   ebp
+ 000000B1  8B EC	   *	    mov    ebp, esp
+ 000000B3  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 000000B6  56		   *	    push   esi
+ 000000B7  53		   *	    push   ebx
+ 000000B8  52		   *	    push   edx
+ 000000B9  89 4D FC			mov pThis, ecx
+ 000000BC  C7 01 00000000		mov (GameObject PTR [ecx]).gameObjectType, DEFAULT_GAME_OBJECT_ID
+ 000000C2  C7 41 18			mov (GameObject PTR [ecx]).awaitingFree, 0 ; // Set awaiting free to false (0)
 	   00000000
- 00000089  C7 41 14			mov (GameObject PTR [ecx]).pParentScene, 0 ; // Set parent to a NULL pointer
+ 000000C9  C7 41 14			mov (GameObject PTR [ecx]).pParentScene, 0 ; // Set parent to a NULL pointer
 	   00000000
 
 					; // Set up vTable
- 00000090  C7 41 10			mov (GameObject PTR [ecx]).pVt, OFFSET GAMEOBJECT_VTABLE
+ 000000D0  C7 41 10			mov (GameObject PTR [ecx]).pVt, OFFSET GAMEOBJECT_VTABLE
 	   00000000 R
 
 					; // Now set up the component pointer table
- 00000097  8D 49 04			lea ecx, (GameObject PTR [ecx]).components
+ 000000D7  8D 49 04			lea ecx, (GameObject PTR [ecx]).components
 					INVOKE init_unordered_vector, maxComponents
- 0000009A  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 0000009D  E8 00000000 E   *	    call   init_unordered_vector
+ 000000DA  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 000000DD  E8 00000000 E   *	    call   init_unordered_vector
 
- 000000A2  8B 4D FC			mov ecx, pThis
- 000000A5  8B C1			mov eax, ecx ; // Return the this pointer
+ 000000E2  8B 4D FC			mov ecx, pThis
+ 000000E5  8B C1			mov eax, ecx ; // Return the this pointer
 
 					ret
- 000000A7  5A		   *	    pop    edx
- 000000A8  5B		   *	    pop    ebx
- 000000A9  5E		   *	    pop    esi
- 000000AA  C9		   *	    leave  
- 000000AB  C2 0004	   *	    ret    00004h
- 000000AE			init_game_object ENDP
+ 000000E7  5A		   *	    pop    edx
+ 000000E8  5B		   *	    pop    ebx
+ 000000E9  5E		   *	    pop    esi
+ 000000EA  C9		   *	    leave  
+ 000000EB  C2 0004	   *	    ret    00004h
+ 000000EE			init_game_object ENDP
 
 				; // ----------------------------------
 				; // new_game_object
 				; // Reserves heap space for the Object with parameters calls the initializer method
 				; // ----------------------------------
- 000000AE			new_game_object PROC PUBLIC USES ecx, maxComponents : DWORD
- 000000AE  55		   *	    push   ebp
- 000000AF  8B EC	   *	    mov    ebp, esp
- 000000B1  51		   *	    push   ecx
+ 000000EE			new_game_object PROC PUBLIC USES ecx, maxComponents : DWORD
+ 000000EE  55		   *	    push   ebp
+ 000000EF  8B EC	   *	    mov    ebp, esp
+ 000000F1  51		   *	    push   ecx
 					INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF GameObject
- 000000B2  6A 1C	   *	    push   +00000001Ch
- 000000B4  6A 04	   *	    push   +000000004h
- 000000B6  FF 35 00000000 E *	    push   hHeap
- 000000BC  E8 00000000 E   *	    call   HeapAlloc
- 000000C1  8B C8			mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
+ 000000F2  6A 1C	   *	    push   +00000001Ch
+ 000000F4  6A 04	   *	    push   +000000004h
+ 000000F6  FF 35 00000000 E *	    push   hHeap
+ 000000FC  E8 00000000 E   *	    call   HeapAlloc
+ 00000101  8B C8			mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
 					INVOKE init_game_object, maxComponents
- 000000C3  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 000000C6  E8 FFFFFFA5	   *	    call   init_game_object
+ 00000103  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000106  E8 FFFFFFA5	   *	    call   init_game_object
 
 					ret ; // Return with the address of the memory block in HeapAlloc
- 000000CB  59		   *	    pop    ecx
- 000000CC  C9		   *	    leave  
- 000000CD  C2 0004	   *	    ret    00004h
- 000000D0			new_game_object ENDP
+ 0000010B  59		   *	    pop    ecx
+ 0000010C  C9		   *	    leave  
+ 0000010D  C2 0004	   *	    ret    00004h
+ 00000110			new_game_object ENDP
 
 				; // ----------------------------------
 				; // free_game_object
@@ -564,56 +600,56 @@ game_object.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 000000D0			free_game_object PROC PUBLIC USES eax esi ebx
+ 00000110			free_game_object PROC PUBLIC USES eax esi ebx
 					; // Destruct the components
- 000000D0  50		   *	    push   eax
- 000000D1  56		   *	    push   esi
- 000000D2  53		   *	    push   ebx
- 000000D3  8B F1			mov esi, ecx ; // Move the this pointer to esi
- 000000D5  8D 49 04			lea ecx, (GameObject PTR [ecx]).components
+ 00000110  50		   *	    push   eax
+ 00000111  56		   *	    push   esi
+ 00000112  53		   *	    push   ebx
+ 00000113  8B F1			mov esi, ecx ; // Move the this pointer to esi
+ 00000115  8D 49 04			lea ecx, (GameObject PTR [ecx]).components
 
- 000000D8  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
- 000000DA  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
+ 00000118  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
+ 0000011A  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
 
- 000000DD  B9 00000000			mov ecx, 0 ; // Loop counter (int i = 0)
+ 0000011D  B9 00000000			mov ecx, 0 ; // Loop counter (int i = 0)
 					.WHILE ecx < ebx
- 000000E2  EB 0F	   *	    jmp    @C0001
- 000000E4		   *@C0002:
- 000000E4  8B 14 88				mov edx, [eax + ecx * 4] ; // edx = pComponents[i]
+ 00000122  EB 0F	   *	    jmp    @C0001
+ 00000124		   *@C0002:
+ 00000124  8B 14 88				mov edx, [eax + ecx * 4] ; // edx = pComponents[i]
 
 						; // pComponents[i]->free()
- 000000E7  51					push ecx
- 000000E8  50					push eax
- 000000E9  8B CA				mov ecx, edx
+ 00000127  51					push ecx
+ 00000128  50					push eax
+ 00000129  8B CA				mov ecx, edx
 						INVOKE free_component_virtual
- 000000EB  E8 00000000 E   *	    call   free_component_virtual
- 000000F0  58					pop eax
- 000000F1  59					pop ecx
+ 0000012B  E8 00000000 E   *	    call   free_component_virtual
+ 00000130  58					pop eax
+ 00000131  59					pop ecx
 
- 000000F2  41					inc ecx ; // i++
+ 00000132  41					inc ecx ; // i++
 					.ENDW
- 000000F3		   *@C0001:
- 000000F3  3B CB	   *	    cmp    ecx, ebx
- 000000F5  72 ED	   *	    jb	@C0002
+ 00000133		   *@C0001:
+ 00000133  3B CB	   *	    cmp    ecx, ebx
+ 00000135  72 ED	   *	    jb	@C0002
 					
- 000000F7  8B CE			mov ecx, esi
- 000000F9  8D 49 04			lea ecx, (GameObject PTR [ecx]).components
+ 00000137  8B CE			mov ecx, esi
+ 00000139  8D 49 04			lea ecx, (GameObject PTR [ecx]).components
 					INVOKE free_unordered_vector
- 000000FC  E8 00000000 E   *	    call   free_unordered_vector
+ 0000013C  E8 00000000 E   *	    call   free_unordered_vector
 
- 00000101  8B CE			mov ecx, esi ; // Restore the THIS pointer to ecx
+ 00000141  8B CE			mov ecx, esi ; // Restore the THIS pointer to ecx
 
 					INVOKE HeapFree, hHeap, 0, ecx ; // Free myself
- 00000103  51		   *	    push   ecx
- 00000104  6A 00	   *	    push   +000000000h
- 00000106  FF 35 00000000 E *	    push   hHeap
- 0000010C  E8 00000000 E   *	    call   HeapFree
+ 00000143  51		   *	    push   ecx
+ 00000144  6A 00	   *	    push   +000000000h
+ 00000146  FF 35 00000000 E *	    push   hHeap
+ 0000014C  E8 00000000 E   *	    call   HeapFree
 					ret
- 00000111  5B		   *	    pop    ebx
- 00000112  5E		   *	    pop    esi
- 00000113  58		   *	    pop    eax
- 00000114  C3		   *	    ret    00000h
- 00000115			free_game_object ENDP
+ 00000151  5B		   *	    pop    ebx
+ 00000152  5E		   *	    pop    esi
+ 00000153  58		   *	    pop    eax
+ 00000154  C3		   *	    ret    00000h
+ 00000155			free_game_object ENDP
 
 				; // ********************************************
 				; // Instance methods
@@ -627,54 +663,54 @@ game_object.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000115			get_first_component_which_is_a PROC PUBLIC USES ecx ebx edx esi, componentType: ENUM_COMPONENT_ID
+ 00000155			get_first_component_which_is_a PROC PUBLIC USES ecx ebx edx esi, componentType: ENUM_COMPONENT_ID
 					local pThis
- 00000115  55		   *	    push   ebp
- 00000116  8B EC	   *	    mov    ebp, esp
- 00000118  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 0000011B  51		   *	    push   ecx
- 0000011C  53		   *	    push   ebx
- 0000011D  52		   *	    push   edx
- 0000011E  56		   *	    push   esi
- 0000011F  89 4D FC			mov pThis, ecx
+ 00000155  55		   *	    push   ebp
+ 00000156  8B EC	   *	    mov    ebp, esp
+ 00000158  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 0000015B  51		   *	    push   ecx
+ 0000015C  53		   *	    push   ebx
+ 0000015D  52		   *	    push   edx
+ 0000015E  56		   *	    push   esi
+ 0000015F  89 4D FC			mov pThis, ecx
 
- 00000122  8D 49 04			lea ecx, (GameObject PTR [ecx]).components
- 00000125  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
- 00000128  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
- 0000012A  BA 00000000			mov edx, 0 ; // int i = 0
+ 00000162  8D 49 04			lea ecx, (GameObject PTR [ecx]).components
+ 00000165  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
+ 00000168  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
+ 0000016A  BA 00000000			mov edx, 0 ; // int i = 0
 
 					; // Iterate through the Components
 					.WHILE edx < ebx
- 0000012F  EB 0F	   *	    jmp    @C0004
- 00000131		   *@C0005:
+ 0000016F  EB 0F	   *	    jmp    @C0004
+ 00000171		   *@C0005:
 						; // esi = components[i]
- 00000131  8B 34 90				mov esi, [eax + edx * 4]
+ 00000171  8B 34 90				mov esi, [eax + edx * 4]
 
- 00000134  8B 0E				mov ecx, (Component PTR [esi]).componentType
+ 00000174  8B 0E				mov ecx, (Component PTR [esi]).componentType
 						.IF ecx == componentType
- 00000136  3B 4D 08	   *	    cmp    ecx, componentType
- 00000139  75 04	   *	    jne    @C0006
- 0000013B  8B C6					mov eax, esi ; // return the pointer to the component
- 0000013D  EB 0A					jmp exit_get_first_component_which_is_a
+ 00000176  3B 4D 08	   *	    cmp    ecx, componentType
+ 00000179  75 04	   *	    jne    @C0006
+ 0000017B  8B C6					mov eax, esi ; // return the pointer to the component
+ 0000017D  EB 0A					jmp exit_get_first_component_which_is_a
 						.ENDIF
 
- 0000013F		   *@C0006:
- 0000013F  42					inc edx
+ 0000017F		   *@C0006:
+ 0000017F  42					inc edx
 					.ENDW
- 00000140		   *@C0004:
- 00000140  3B D3	   *	    cmp    edx, ebx
- 00000142  72 ED	   *	    jb	@C0005
+ 00000180		   *@C0004:
+ 00000180  3B D3	   *	    cmp    edx, ebx
+ 00000182  72 ED	   *	    jb	@C0005
 
- 00000144  B8 00000000			mov eax, 0 ; // Return NULL if nothing was found
- 00000149				exit_get_first_component_which_is_a:
+ 00000184  B8 00000000			mov eax, 0 ; // Return NULL if nothing was found
+ 00000189				exit_get_first_component_which_is_a:
 					ret
- 00000149  5E		   *	    pop    esi
- 0000014A  5A		   *	    pop    edx
- 0000014B  5B		   *	    pop    ebx
- 0000014C  59		   *	    pop    ecx
- 0000014D  C9		   *	    leave  
- 0000014E  C2 0004	   *	    ret    00004h
- 00000151			get_first_component_which_is_a ENDP
+ 00000189  5E		   *	    pop    esi
+ 0000018A  5A		   *	    pop    edx
+ 0000018B  5B		   *	    pop    ebx
+ 0000018C  59		   *	    pop    ecx
+ 0000018D  C9		   *	    leave  
+ 0000018E  C2 0004	   *	    ret    00004h
+ 00000191			get_first_component_which_is_a ENDP
 
 				; // ----------------------------------
 				; // game_object_start
@@ -684,9 +720,9 @@ game_object.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000151			game_object_start PROC stdcall PUBLIC
- 00000151  C3				ret
- 00000152			game_object_start ENDP
+ 00000191			game_object_start PROC stdcall PUBLIC
+ 00000191  C3				ret
+ 00000192			game_object_start ENDP
 
 				; // ----------------------------------
 				; // game_object_start_virtual
@@ -695,15 +731,15 @@ game_object.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000152			game_object_start_virtual PROC PUBLIC USES ebx
- 00000152  53		   *	    push   ebx
- 00000153  8B 59 10			mov ebx, (GameObject PTR [ecx]).pVt
- 00000156  8B 1B			mov ebx, (GameObject_vtable PTR [ebx]).pStart
- 00000158  FF D3			call ebx
+ 00000192			game_object_start_virtual PROC PUBLIC USES ebx
+ 00000192  53		   *	    push   ebx
+ 00000193  8B 59 10			mov ebx, (GameObject PTR [ecx]).pVt
+ 00000196  8B 1B			mov ebx, (GameObject_vtable PTR [ebx]).pStart
+ 00000198  FF D3			call ebx
 					ret
- 0000015A  5B		   *	    pop    ebx
- 0000015B  C3		   *	    ret    00000h
- 0000015C			game_object_start_virtual ENDP
+ 0000019A  5B		   *	    pop    ebx
+ 0000019B  C3		   *	    ret    00000h
+ 0000019C			game_object_start_virtual ENDP
 
 				; // ----------------------------------
 				; // game_object_free_virtual
@@ -712,15 +748,15 @@ game_object.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 0000015C			game_object_free_virtual PROC PUBLIC USES ebx
- 0000015C  53		   *	    push   ebx
- 0000015D  8B 59 10			mov ebx, (GameObject PTR [ecx]).pVt
- 00000160  8B 5B 0C			mov ebx, (GameObject_vtable PTR [ebx]).pFree
- 00000163  FF D3			call ebx
+ 0000019C			game_object_free_virtual PROC PUBLIC USES ebx
+ 0000019C  53		   *	    push   ebx
+ 0000019D  8B 59 10			mov ebx, (GameObject PTR [ecx]).pVt
+ 000001A0  8B 5B 0C			mov ebx, (GameObject_vtable PTR [ebx]).pFree
+ 000001A3  FF D3			call ebx
 					ret
- 00000165  5B		   *	    pop    ebx
- 00000166  C3		   *	    ret    00000h
- 00000167			game_object_free_virtual ENDP
+ 000001A5  5B		   *	    pop    ebx
+ 000001A6  C3		   *	    ret    00000h
+ 000001A7			game_object_free_virtual ENDP
 
 				; // ----------------------------------
 				; // game_object_update_virtual
@@ -729,19 +765,19 @@ game_object.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000167			game_object_update_virtual PROC stdcall PUBLIC USES ebx, deltaTime: REAL4
- 00000167  55		   *	    push   ebp
- 00000168  8B EC	   *	    mov    ebp, esp
- 0000016A  53		   *	    push   ebx
- 0000016B  8B 59 10			mov ebx, (GameObject PTR [ecx]).pVt
- 0000016E  8B 5B 04			mov ebx, (GameObject_vtable PTR [ebx]).pUpdate
- 00000171  FF 75 08			push deltaTime
- 00000174  FF D3			call ebx
+ 000001A7			game_object_update_virtual PROC stdcall PUBLIC USES ebx, deltaTime: REAL4
+ 000001A7  55		   *	    push   ebp
+ 000001A8  8B EC	   *	    mov    ebp, esp
+ 000001AA  53		   *	    push   ebx
+ 000001AB  8B 59 10			mov ebx, (GameObject PTR [ecx]).pVt
+ 000001AE  8B 5B 04			mov ebx, (GameObject_vtable PTR [ebx]).pUpdate
+ 000001B1  FF 75 08			push deltaTime
+ 000001B4  FF D3			call ebx
 					ret
- 00000176  5B		   *	    pop    ebx
- 00000177  C9		   *	    leave  
- 00000178  C2 0004	   *	    ret    00004h
- 0000017B			game_object_update_virtual ENDP
+ 000001B6  5B		   *	    pop    ebx
+ 000001B7  C9		   *	    leave  
+ 000001B8  C2 0004	   *	    ret    00004h
+ 000001BB			game_object_update_virtual ENDP
 
 				; // ----------------------------------
 				; // game_object_update
@@ -751,14 +787,14 @@ game_object.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 0000017B			game_object_update PROC stdcall PUBLIC, deltaTime: REAL4
- 0000017B  55		   *	    push   ebp
- 0000017C  8B EC	   *	    mov    ebp, esp
- 0000017E  8B 45 08			mov eax, deltaTime
+ 000001BB			game_object_update PROC stdcall PUBLIC, deltaTime: REAL4
+ 000001BB  55		   *	    push   ebp
+ 000001BC  8B EC	   *	    mov    ebp, esp
+ 000001BE  8B 45 08			mov eax, deltaTime
 					ret
- 00000181  C9		   *	    leave  
- 00000182  C2 0004	   *	    ret    00004h
- 00000185			game_object_update ENDP
+ 000001C1  C9		   *	    leave  
+ 000001C2  C2 0004	   *	    ret    00004h
+ 000001C5			game_object_update ENDP
 
 				; // ----------------------------------
 				; // game_object_exit
@@ -768,12 +804,12 @@ game_object.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000185			game_object_exit PROC stdcall PUBLIC
- 00000185  C3				ret
- 00000186			game_object_exit ENDP
+ 000001C5			game_object_exit PROC stdcall PUBLIC
+ 000001C5  C3				ret
+ 000001C6			game_object_exit ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 17:35:09
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 17:45:08
 game_object.asm						     Symbols 2 - 1
 
 
@@ -843,7 +879,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000010 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000186 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000001C6 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -857,7 +893,7 @@ HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 add_component  . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000020 Public STDCALL
   pGameObject  . . . . . . . . .	DWord	 bp + 00000008
   pComponent . . . . . . . . . .	DWord	 bp + 0000000C
-check_rect_collision . . . . . .	P Near	 00000020 _TEXT	Length= 00000050 Public STDCALL
+check_rect_collision . . . . . .	P Near	 00000020 _TEXT	Length= 00000090 Public STDCALL
   pRect1 . . . . . . . . . . . .	DWord	 bp + 00000008
   pTrans1  . . . . . . . . . . .	DWord	 bp + 0000000C
   pRect2 . . . . . . . . . . . .	DWord	 bp + 00000010
@@ -870,26 +906,28 @@ check_rect_collision . . . . . .	P Near	 00000020 _TEXT	Length= 00000050 Public 
   y2 . . . . . . . . . . . . . .	DWord	 bp - 00000018
   w2 . . . . . . . . . . . . . .	DWord	 bp - 0000001C
   h2 . . . . . . . . . . . . . .	DWord	 bp - 00000020
+  no_collision . . . . . . . . .	L Near	 000000A2 _TEXT	
+  check_rect_collision_exit  . .	L Near	 000000A7 _TEXT	
 free_component_virtual . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_component . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-free_game_object . . . . . . . .	P Near	 000000D0 _TEXT	Length= 00000045 Public STDCALL
+free_game_object . . . . . . . .	P Near	 00000110 _TEXT	Length= 00000045 Public STDCALL
 free_rect_component  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_transform_component . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_unordered_vector  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-game_object_exit . . . . . . . .	P Near	 00000185 _TEXT	Length= 00000001 Public STDCALL
-game_object_free_virtual . . . .	P Near	 0000015C _TEXT	Length= 0000000B Public STDCALL
-game_object_start_virtual  . . .	P Near	 00000152 _TEXT	Length= 0000000A Public STDCALL
-game_object_start  . . . . . . .	P Near	 00000151 _TEXT	Length= 00000001 Public STDCALL
-game_object_update_virtual . . .	P Near	 00000167 _TEXT	Length= 00000014 Public STDCALL
+game_object_exit . . . . . . . .	P Near	 000001C5 _TEXT	Length= 00000001 Public STDCALL
+game_object_free_virtual . . . .	P Near	 0000019C _TEXT	Length= 0000000B Public STDCALL
+game_object_start_virtual  . . .	P Near	 00000192 _TEXT	Length= 0000000A Public STDCALL
+game_object_start  . . . . . . .	P Near	 00000191 _TEXT	Length= 00000001 Public STDCALL
+game_object_update_virtual . . .	P Near	 000001A7 _TEXT	Length= 00000014 Public STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
-game_object_update . . . . . . .	P Near	 0000017B _TEXT	Length= 0000000A Public STDCALL
+game_object_update . . . . . . .	P Near	 000001BB _TEXT	Length= 0000000A Public STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
-get_first_component_which_is_a .	P Near	 00000115 _TEXT	Length= 0000003C Public STDCALL
+get_first_component_which_is_a .	P Near	 00000155 _TEXT	Length= 0000003C Public STDCALL
   componentType  . . . . . . . .	DWord	 bp + 00000008
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
-  exit_get_first_component_which_is_a 	L Near	 00000149 _TEXT	
+  exit_get_first_component_which_is_a 	L Near	 00000189 _TEXT	
 init_component . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-init_game_object . . . . . . . .	P Near	 00000070 _TEXT	Length= 0000003E Public STDCALL
+init_game_object . . . . . . . .	P Near	 000000B0 _TEXT	Length= 0000003E Public STDCALL
   maxComponents  . . . . . . . .	DWord	 bp + 00000008
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
 init_rect_component  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -897,7 +935,7 @@ init_transform_component . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 init_unordered_vector  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_component  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-new_game_object  . . . . . . . .	P Near	 000000AE _TEXT	Length= 00000022 Public STDCALL
+new_game_object  . . . . . . . .	P Near	 000000EE _TEXT	Length= 00000022 Public STDCALL
   maxComponents  . . . . . . . .	DWord	 bp + 00000008
 new_rect_component . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_transform_component  . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL

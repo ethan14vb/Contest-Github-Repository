@@ -50,7 +50,7 @@ add_component ENDP
 ; // with each other and 0 if not. If HitboxComponents are added to the engine
 ; // later, then this function will become obsolete.
 ; // ----------------------------------
-check_rect_collision PROC PUBLIC USES eax ebx ecx esi edi, pRect1 : DWORD, pTrans1 : DWORD, pRect2 : DWORD, pTrans2
+check_rect_collision PROC PUBLIC USES eax ebx ecx esi edi, pRect1 : DWORD, pTrans1 : DWORD, pRect2 : DWORD, pTrans2 : DWORD
 	LOCAL x1 : DWORD, y1 : DWORD, w1 : DWORD, h1 : DWORD
 	LOCAL x2 : DWORD, y2 : DWORD, w2 : DWORD, h2 : DWORD
 
@@ -78,6 +78,42 @@ check_rect_collision PROC PUBLIC USES eax ebx ecx esi edi, pRect1 : DWORD, pTran
 	mov h2, edi
 	mov edi, (RectComponent PTR [esi]).w
 	mov w2, edi
+
+	; // If obj1 left >= obj2 right -> No Collision
+	mov eax, x1
+	mov ecx, x2
+	add ecx, w2
+	cmp eax, ecx
+	jge no_collision
+
+	; // If obj1 right <= obj2 left) -> No Collision
+	mov eax, x1
+	add eax, w1
+	mov ecx, x2
+	cmp eax, ecx
+	jle no_collision
+
+	; // If obj1 top >= obj2 bottom -> No Collision
+	mov eax, y1
+	mov ecx, y2
+	add ecx, h2
+	cmp eax, ecx
+	jge no_collision
+
+	; // If obj1 bottom <= obj2 top -> No Collision
+	mov eax, y1
+	add eax, h1
+	mov ecx, y2
+	cmp eax, ecx
+	jle no_collision
+
+	; // All checks passed, there must be a collision
+	mov eax, 1
+	jmp check_rect_collision_exit
+
+no_collision:
+	mov eax, 0
+check_rect_collision_exit:
 	ret
 check_rect_collision ENDP
 
