@@ -214,7 +214,7 @@ game_object_update_virtual ENDP
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-game_object_update PROC stdcall, deltaTime: REAL4
+game_object_update PROC stdcall PUBLIC, deltaTime: REAL4
 	mov eax, deltaTime
 	ret
 game_object_update ENDP

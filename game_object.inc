@@ -54,5 +54,6 @@ game_object_start_virtual		PROTO
 game_object_update_virtual		PROTO deltaTime : REAL4
 game_object_exit				PROTO
 game_object_start				PROTO
+game_object_update				PROTO deltaTime: REAL4
 
 ENDIF
