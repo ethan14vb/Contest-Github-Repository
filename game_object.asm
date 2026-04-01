@@ -42,6 +42,20 @@ add_component PROC PUBLIC USES eax ebx ecx esi edi, pGameObject: DWORD, pCompone
 	ret
 add_component ENDP
 
+; // ----------------------------------
+; // check_rect_collision
+; // Returns 1 if the given RectComponent/TransformComponent pairs are overlapping
+; // with each other and 0 if not. If HitboxComponents are added to the engine
+; // later, then this function will become obsolete.
+; // ----------------------------------
+check_rect_collision PROC PUBLIC USES eax ebx ecx esi edi, pRect1 : DWORD, pTrans1 : DWORD, pRect2 : DWORD, pTrans2
+	mov eax, pRect1
+	mov eax, pTrans1
+	mov eax, pRect2
+	mov eax, pTrans2
+	ret
+check_rect_collision ENDP
+
 ; // ********************************************
 ; // Constructor Methods
 ; // ********************************************
