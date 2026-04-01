@@ -6,6 +6,7 @@
 ; // ==================================
 
 INCLUDE default_header.inc
+INCLUDE engine_types.inc
 INCLUDE game_object.inc
 INCLUDE game_object_ids.inc
 INCLUDE scene.inc
@@ -17,7 +18,7 @@ INCLUDE transform_component.inc
 INCLUDE rect_component.inc
 
 .data
-WALL_OBSTACLE_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_object_update, OFFSET game_object_exit, OFFSET free_game_object>
+WALL_OBSTACLE_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET wall_obstacle_update, OFFSET game_object_exit, OFFSET free_game_object>
 
 .code
 ; // ********************************************
@@ -64,5 +65,37 @@ new_wall_obstacle PROC PUBLIC USES ecx, startX : DWORD, startY : DWORD, height :
 
 	ret ; // Return with the address of the memory block in HeapAlloc
 new_wall_obstacle ENDP
+
+; // ********************************************
+; // Instance methods
+; // ********************************************
+
+; // ----------------------------------
+; // wall_obstacle_update
+; // Moves the wall to the left of the screen
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+wall_obstacle_update PROC stdcall USES eax ebx edx, deltaTime: REAL4
+	local pThis : DWORD
+	mov pThis, ecx
+	mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
+
+	; // Now move the player
+	INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID
+	add (TransformComponent PTR [eax]).x, -1
+
+	; // If I'm past the edge of the screen, free me
+	mov ebx, (TransformComponent PTR[eax]).x
+	.IF ebx < 15
+		mov ebx, pThis
+		mov ecx, (GameObject PTR [ebx]).pParentScene
+		INVOKE queue_free_game_object, ebx
+	.ENDIF
+		
+	mov ecx, pThis ; // Restore the THIS pointer
+	ret
+wall_obstacle_update ENDP
 
 END 

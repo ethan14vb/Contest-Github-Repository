@@ -84,7 +84,7 @@ free_scene ENDP
 ; // ********************************************
 
 ; // ----------------------------------
-; // add_game_object
+; // instantiate_game_object
 ; // Adds a game object to the scene's start queue
 ; //
 ; // Register Parameters: 
@@ -103,6 +103,27 @@ instantiate_game_object PROC PUBLIC USES esi, pGameObject: DWORD
 
 	ret
 instantiate_game_object ENDP
+
+; // ----------------------------------
+; // queue_free_game_object
+; // Queues a GameObject for removal
+; //
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+queue_free_game_object PROC PUBLIC USES esi, pGameObject: DWORD
+	mov esi, ecx ; // Store the THIS pointer in ecx
+
+	lea ecx, (Scene PTR[ecx]).freeQueue
+	INVOKE push_back, pGameObject
+	
+	mov ecx, pGameObject
+	mov (GameObject PTR [ecx]).awaitingFree, 0FFFFFFFFh
+		
+	mov ecx, esi ; // Restore the THIS pointer
+	
+	ret
+queue_free_game_object ENDP
 
 ; // ----------------------------------
 ; // scene_process_start_queue
@@ -167,8 +188,15 @@ scene_update_game_objects PROC PRIVATE USES eax ebx ecx edx esi edi, deltaTime: 
 		; // esi = gameObjects[i]
 		mov esi, [eax + edx * 4]
 
-		; // call the update() method in the GameObject gameObjects[i]
 		push eax
+
+		; // If the GameObject is pending free, don't update it
+		mov eax, (GameObject PTR [esi]).awaitingFree
+		.IF eax != 0
+			.CONTINUE
+		.ENDIF
+
+		; // call the update() method in the GameObject gameObjects[i]
 
 		mov ecx, esi
 		INVOKE game_object_update_virtual, deltaTime

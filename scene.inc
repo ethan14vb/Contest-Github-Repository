@@ -31,12 +31,13 @@ Scene STRUCT
 Scene ENDS
 
 ; // Constructors
-init_scene PROTO maxGameObjects		: DWORD
-new_scene PROTO maxGameObjects		: DWORD
-free_scene PROTO
+init_scene	PROTO maxGameObjects		: DWORD
+new_scene	PROTO maxGameObjects		: DWORD
+free_scene	PROTO
 
 ; // Instance methods
-instantiate_game_object PROTO pGameObject: DWORD
-scene_update PROTO deltaTime: REAL4
+instantiate_game_object PROTO pGameObject	:DWORD
+queue_free_game_object	PROTO pGameObject	:DWORD
+scene_update			PROTO deltaTime		:REAL4
 
 ENDIF

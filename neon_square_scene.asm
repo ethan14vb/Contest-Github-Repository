@@ -5,6 +5,7 @@
 ; // ==================================
 
 INCLUDE default_header.inc
+INCLUDE engine_types.inc
 INCLUDE scene.inc
 INCLUDE neon_square_player.inc
 INCLUDE wall_obstacle.inc
@@ -21,7 +22,7 @@ populate_neon_square_scene PROC PUBLIC USES eax ebx edx esi edi, pScene: DWORD
 	INVOKE instantiate_game_object, esi
 
 	; // Wall Obstacle
-	INVOKE new_wall_obstacle, 50, 20, 20
+	INVOKE new_wall_obstacle, SCREEN_WIDTH, 20, 20
 	mov esi, eax
 
 	mov ecx, pScene

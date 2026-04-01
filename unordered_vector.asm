@@ -69,8 +69,6 @@ free_unordered_vector PROC PUBLIC USES esi
 	INVOKE HeapFree, hHeap, 0, esi
 	pop ecx
 
-	; // Free myself
-	INVOKE HeapFree, hHeap, 0, ecx
 	ret
 free_unordered_vector ENDP
 
