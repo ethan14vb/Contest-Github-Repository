@@ -38,6 +38,7 @@
     <None Include="game_object_ids.inc" />
     <None Include="heap_functions.inc" />
     <None Include="input_manager.inc" />
+    <None Include="neon_game_manager.inc" />
     <None Include="neon_square_player.inc" />
     <None Include="neon_square_scene.inc" />
     <None Include="rectangle_test_scene.inc" />

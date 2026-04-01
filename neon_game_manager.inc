@@ -1,5 +1,5 @@
 ; // ==================================
-; // neon_game_manager.asm
+; // neon_game_manager.inc
 ; // ----------------------------------
 ; // A GameObject with logic that controls the NeonSquare game.
 ; // It is responsible for the spawning of obstacles that the
@@ -10,16 +10,13 @@
 ; // adjusting the difficulty over time.
 ; // ==================================
 
-INCLUDE default_header.inc
-INCLUDE engine_types.inc
+IFNDEF NEON_GAME_MANAGER_INC
+NEON_GAME_MANAGER_INC EQU 1
+
 INCLUDE game_object.inc
-INCLUDE game_object_ids.inc
-INCLUDE scene.inc
-INCLUDE wall_obstacle.inc
-INCLUDE neon_square_player.inc
-INCLUDE heap_functions.inc
 
-.data
-NEON_GAME_MANAGER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_object_update, OFFSET game_object_exit, OFFSET free_game_object>
+NeonGameManager STRUCT
+	baseGameObject GameObject<>
+NeonGameManager ENDS
 
-END 
+ENDIF

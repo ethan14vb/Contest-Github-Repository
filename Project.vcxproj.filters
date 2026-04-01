@@ -62,6 +62,9 @@
     <None Include="wall_obstacle.inc">
       <Filter>Include\Engine</Filter>
     </None>
+    <None Include="neon_game_manager.inc">
+      <Filter>Include\Engine</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">
