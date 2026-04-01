@@ -91,6 +91,9 @@ push_back PROC PUBLIC USES eax ebx edx edi, element: DWORD
 
 	; // Check if the vector needs to be resized first
 	.IF ebx == edx
+		.IF edx == 0
+			mov edx, 1 ; // Avoid a 0 * 2 = 0 situation
+		.ENDIF
 		; // Double the capacity
 		shl edx, 1 
 		mov (UnorderedVector PTR [ecx]).capacity, edx

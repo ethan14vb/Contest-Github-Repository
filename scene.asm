@@ -136,14 +136,19 @@ queue_free_game_object ENDP
 scene_process_start_queue PROC PRIVATE USES eax ebx ecx edx esi edi
 	local pThis
 	mov pThis, ecx ; // Save the THIS pointer just in case
+	mov edx, 0 ; // int i = 0
 
 	lea ecx, (Scene PTR [ecx]).startQueue
 	mov ebx, (UnorderedVector PTR [ecx]).count
 	mov eax, (UnorderedVector PTR [ecx]).pData
-	mov edx, 0 ; // int i = 0
 	
 	; // Iterate through the Game Objects and add them to the gameObjects vector, then call their start methods
 	.WHILE edx < ebx
+		mov ecx, pThis
+		lea ecx, (Scene PTR[ecx]).startQueue
+		mov ebx, (UnorderedVector PTR [ecx]).count
+		mov eax, (UnorderedVector PTR [ecx]).pData
+		
 		; // esi = startQueue[i]
 		mov esi, [eax + edx * 4]
 		
@@ -178,17 +183,24 @@ scene_update_game_objects PROC PRIVATE USES eax ebx ecx edx esi edi, deltaTime: 
 	local pThis
 	mov pThis, ecx ; // Save the THIS pointer just in case
 
+	mov edx, 0 ; // int i = 0
 	lea ecx, (Scene PTR [ecx]).gameObjects
 	mov ebx, (UnorderedVector PTR [ecx]).count
 	mov eax, (UnorderedVector PTR [ecx]).pData
-	mov edx, 0 ; // int i = 0
 	
 	; // Iterate through the Game Objects and call their update methods if they are still alive
 	.WHILE edx < ebx
+		mov ecx, pThis
+		lea ecx, (Scene PTR [ecx]).gameObjects
+		mov ebx, (UnorderedVector PTR [ecx]).count
+		mov eax, (UnorderedVector PTR [ecx]).pData
+
 		; // esi = gameObjects[i]
 		mov esi, [eax + edx * 4]
 
 		push eax
+		push ebx
+		push edx
 
 		; // If the GameObject is pending free, don't update it
 		mov eax, (GameObject PTR [esi]).awaitingFree
@@ -202,7 +214,10 @@ scene_update_game_objects PROC PRIVATE USES eax ebx ecx edx esi edi, deltaTime: 
 		INVOKE game_object_update_virtual, deltaTime
 
 	scene_update_game_objects_loop_exit:
+		pop edx
+		pop ebx
 		pop eax
+
 		inc edx
 	.ENDW
 
@@ -221,16 +236,26 @@ scene_free_game_objects PROC PRIVATE USES eax ebx ecx edx esi edi
 	local pThis
 	mov pThis, ecx ; // Save the THIS pointer just in case
 
+	mov edx, 0 ; // int i = 0
+
 	lea ecx, (Scene PTR [ecx]).freeQueue
 	mov ebx, (UnorderedVector PTR [ecx]).count
 	mov eax, (UnorderedVector PTR [ecx]).pData
-	mov edx, 0 ; // int i = 0
 	
 	; // Iterate through the freeQueue vector
 	; // Remove the element from gameObjects and free it
 	.WHILE edx < ebx
+		mov ecx, pThis
+		lea ecx, (Scene PTR [ecx]).freeQueue
+		mov ebx, (UnorderedVector PTR [ecx]).count
+		mov eax, (UnorderedVector PTR [ecx]).pData
+
 		; // esi = freeQueue[i]
 		mov esi, [eax + edx * 4]
+
+		push eax
+		push ebx
+		push edx
 
 		; // Remove the element pointer from gameObjects
 		mov ecx, pThis
@@ -240,6 +265,11 @@ scene_free_game_objects PROC PRIVATE USES eax ebx ecx edx esi edi
 		; // call the free() method on the GameObject
 		mov ecx, esi
 		INVOKE game_object_free_virtual
+
+		pop edx
+		pop ebx
+		pop eax
+
 		inc edx
 	.ENDW
 
@@ -276,10 +306,12 @@ scene_render_frame PROC PRIVATE USES eax ebx edx esi edi
 
 		; // renderCommands[i]->free()
 		push ecx
+		push ebx
 		push eax
 		mov ecx, edx
 		INVOKE free_render_command
 		pop eax
+		pop ebx
 		pop ecx
 
 		inc ecx ; // i++
@@ -294,17 +326,20 @@ scene_render_frame PROC PRIVATE USES eax ebx edx esi edi
 	mov ecx, pThis
 	lea ecx, (Scene PTR [ecx]).gameObjects
 	mov ebx, (UnorderedVector PTR [ecx]).count
-	mov eax, (UnorderedVector PTR [ecx]).pData
 	mov edx, 0 ; // int i = 0
 	
 	; // Iterate through the Game Objects
 	.WHILE edx < ebx
+		mov ecx, pThis
+		lea ecx, (Scene PTR [ecx]).gameObjects
+		mov ebx, (UnorderedVector PTR [ecx]).count
+		mov eax, (UnorderedVector PTR [ecx]).pData
+
 		; // esi = gameObjects[i]
 		mov esi, [eax + edx * 4]
 
 		push eax
 		push ebx
-		push ecx
 		push edx
 
 		; // If the object is pending free, skip it
@@ -364,9 +399,9 @@ scene_render_frame PROC PRIVATE USES eax ebx edx esi edi
 		scene_render_frame_loop_exit:
 		; // Restore the pointer to pData and continue
 		pop edx
-		pop ecx
 		pop ebx
 		pop eax
+
 		inc edx ; // i++
 	.ENDW
 

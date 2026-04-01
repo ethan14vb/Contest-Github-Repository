@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 13:03:06
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 15:31:41
 scene.asm						     Page 1 - 1
 
 
@@ -781,53 +781,58 @@ scene.asm						     Page 1 - 1
  000000C1  56		   *	    push   esi
  000000C2  57		   *	    push   edi
  000000C3  89 4D FC			mov pThis, ecx ; // Save the THIS pointer just in case
+ 000000C6  BA 00000000			mov edx, 0 ; // int i = 0
 
- 000000C6  8D 49 1C			lea ecx, (Scene PTR [ecx]).startQueue
- 000000C9  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
- 000000CC  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
- 000000CE  BA 00000000			mov edx, 0 ; // int i = 0
+ 000000CB  8D 49 1C			lea ecx, (Scene PTR [ecx]).startQueue
+ 000000CE  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
+ 000000D1  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
 					
 					; // Iterate through the Game Objects and add them to the gameObjects vector, then call their start methods
 					.WHILE edx < ebx
- 000000D3  EB 17	   *	    jmp    @C0001
+ 000000D3  EB 22	   *	    jmp    @C0001
  000000D5		   *@C0002:
+ 000000D5  8B 4D FC				mov ecx, pThis
+ 000000D8  8D 49 1C				lea ecx, (Scene PTR[ecx]).startQueue
+ 000000DB  8B 59 04				mov ebx, (UnorderedVector PTR [ecx]).count
+ 000000DE  8B 01				mov eax, (UnorderedVector PTR [ecx]).pData
+						
 						; // esi = startQueue[i]
- 000000D5  8B 34 90				mov esi, [eax + edx * 4]
+ 000000E0  8B 34 90				mov esi, [eax + edx * 4]
 						
 						; // push the game object startQueue[i] into GameObjects
- 000000D8  8B 4D FC				mov ecx, pThis
- 000000DB  8D 49 10				lea ecx, (Scene PTR [ECX]).gameObjects
+ 000000E3  8B 4D FC				mov ecx, pThis
+ 000000E6  8D 49 10				lea ecx, (Scene PTR [ECX]).gameObjects
 						INVOKE push_back, esi
- 000000DE  56		   *	    push   esi
- 000000DF  E8 00000000 E   *	    call   push_back
+ 000000E9  56		   *	    push   esi
+ 000000EA  E8 00000000 E   *	    call   push_back
 					
 						; // call the start() method in the GameObject startQueue[i]
- 000000E4  8B CE				mov ecx, esi
+ 000000EF  8B CE				mov ecx, esi
 						INVOKE game_object_start_virtual
- 000000E6  E8 00000000 E   *	    call   game_object_start_virtual
- 000000EB  42					inc edx
+ 000000F1  E8 00000000 E   *	    call   game_object_start_virtual
+ 000000F6  42					inc edx
 					.ENDW
- 000000EC		   *@C0001:
- 000000EC  3B D3	   *	    cmp    edx, ebx
- 000000EE  72 E5	   *	    jb	@C0002
+ 000000F7		   *@C0001:
+ 000000F7  3B D3	   *	    cmp    edx, ebx
+ 000000F9  72 DA	   *	    jb	@C0002
 
 					; // Set the length of startQueue to be 0, effectively clearing it
- 000000F0  8B 4D FC			mov ecx, pThis
- 000000F3  8D 49 1C			lea ecx, (Scene PTR [ecx]).startQueue
- 000000F6  C7 41 04			mov (UnorderedVector PTR [ecx]).count, 0
+ 000000FB  8B 4D FC			mov ecx, pThis
+ 000000FE  8D 49 1C			lea ecx, (Scene PTR [ecx]).startQueue
+ 00000101  C7 41 04			mov (UnorderedVector PTR [ecx]).count, 0
 	   00000000
 
- 000000FD  8B 4D FC			mov ecx, pThis
+ 00000108  8B 4D FC			mov ecx, pThis
 					ret
- 00000100  5F		   *	    pop    edi
- 00000101  5E		   *	    pop    esi
- 00000102  5A		   *	    pop    edx
- 00000103  59		   *	    pop    ecx
- 00000104  5B		   *	    pop    ebx
- 00000105  58		   *	    pop    eax
- 00000106  C9		   *	    leave  
- 00000107  C3		   *	    ret    00000h
- 00000108			scene_process_start_queue ENDP
+ 0000010B  5F		   *	    pop    edi
+ 0000010C  5E		   *	    pop    esi
+ 0000010D  5A		   *	    pop    edx
+ 0000010E  59		   *	    pop    ecx
+ 0000010F  5B		   *	    pop    ebx
+ 00000110  58		   *	    pop    eax
+ 00000111  C9		   *	    leave  
+ 00000112  C3		   *	    ret    00000h
+ 00000113			scene_process_start_queue ENDP
 
 				; // ----------------------------------
 				; // scene_update_game_objects
@@ -836,68 +841,78 @@ scene.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000108			scene_update_game_objects PROC PRIVATE USES eax ebx ecx edx esi edi, deltaTime: REAL4
+ 00000113			scene_update_game_objects PROC PRIVATE USES eax ebx ecx edx esi edi, deltaTime: REAL4
 					local pThis
- 00000108  55		   *	    push   ebp
- 00000109  8B EC	   *	    mov    ebp, esp
- 0000010B  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 0000010E  50		   *	    push   eax
- 0000010F  53		   *	    push   ebx
- 00000110  51		   *	    push   ecx
- 00000111  52		   *	    push   edx
- 00000112  56		   *	    push   esi
- 00000113  57		   *	    push   edi
- 00000114  89 4D FC			mov pThis, ecx ; // Save the THIS pointer just in case
+ 00000113  55		   *	    push   ebp
+ 00000114  8B EC	   *	    mov    ebp, esp
+ 00000116  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 00000119  50		   *	    push   eax
+ 0000011A  53		   *	    push   ebx
+ 0000011B  51		   *	    push   ecx
+ 0000011C  52		   *	    push   edx
+ 0000011D  56		   *	    push   esi
+ 0000011E  57		   *	    push   edi
+ 0000011F  89 4D FC			mov pThis, ecx ; // Save the THIS pointer just in case
 
- 00000117  8D 49 10			lea ecx, (Scene PTR [ecx]).gameObjects
- 0000011A  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
- 0000011D  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
- 0000011F  BA 00000000			mov edx, 0 ; // int i = 0
+ 00000122  BA 00000000			mov edx, 0 ; // int i = 0
+ 00000127  8D 49 10			lea ecx, (Scene PTR [ecx]).gameObjects
+ 0000012A  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
+ 0000012D  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
 					
 					; // Iterate through the Game Objects and call their update methods if they are still alive
 					.WHILE edx < ebx
- 00000124  EB 19	   *	    jmp    @C0004
- 00000126		   *@C0005:
-						; // esi = gameObjects[i]
- 00000126  8B 34 90				mov esi, [eax + edx * 4]
+ 0000012F  EB 28	   *	    jmp    @C0004
+ 00000131		   *@C0005:
+ 00000131  8B 4D FC				mov ecx, pThis
+ 00000134  8D 49 10				lea ecx, (Scene PTR [ecx]).gameObjects
+ 00000137  8B 59 04				mov ebx, (UnorderedVector PTR [ecx]).count
+ 0000013A  8B 01				mov eax, (UnorderedVector PTR [ecx]).pData
 
- 00000129  50					push eax
+						; // esi = gameObjects[i]
+ 0000013C  8B 34 90				mov esi, [eax + edx * 4]
+
+ 0000013F  50					push eax
+ 00000140  53					push ebx
+ 00000141  52					push edx
 
 						; // If the GameObject is pending free, don't update it
- 0000012A  8B 46 18				mov eax, (GameObject PTR [esi]).awaitingFree
+ 00000142  8B 46 18				mov eax, (GameObject PTR [esi]).awaitingFree
 						.IF eax != 0
- 0000012D  0B C0	   *	    or	eax, eax
- 0000012F  74 02	   *	    je	@C0006
- 00000131  EB 0A					jmp scene_update_game_objects_loop_exit
+ 00000145  0B C0	   *	    or	eax, eax
+ 00000147  74 02	   *	    je	@C0006
+ 00000149  EB 0A					jmp scene_update_game_objects_loop_exit
 						.ENDIF
 
 						; // call the update() method in the GameObject gameObjects[i]
 
- 00000133		   *@C0006:
- 00000133  8B CE				mov ecx, esi
+ 0000014B		   *@C0006:
+ 0000014B  8B CE				mov ecx, esi
 						INVOKE game_object_update_virtual, deltaTime
- 00000135  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 00000138  E8 00000000 E   *	    call   game_object_update_virtual
+ 0000014D  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000150  E8 00000000 E   *	    call   game_object_update_virtual
 
- 0000013D				scene_update_game_objects_loop_exit:
- 0000013D  58					pop eax
- 0000013E  42					inc edx
+ 00000155				scene_update_game_objects_loop_exit:
+ 00000155  5A					pop edx
+ 00000156  5B					pop ebx
+ 00000157  58					pop eax
+
+ 00000158  42					inc edx
 					.ENDW
- 0000013F		   *@C0004:
- 0000013F  3B D3	   *	    cmp    edx, ebx
- 00000141  72 E3	   *	    jb	@C0005
+ 00000159		   *@C0004:
+ 00000159  3B D3	   *	    cmp    edx, ebx
+ 0000015B  72 D4	   *	    jb	@C0005
 
- 00000143  8B 4D FC			mov ecx, pThis
+ 0000015D  8B 4D FC			mov ecx, pThis
 					ret
- 00000146  5F		   *	    pop    edi
- 00000147  5E		   *	    pop    esi
- 00000148  5A		   *	    pop    edx
- 00000149  59		   *	    pop    ecx
- 0000014A  5B		   *	    pop    ebx
- 0000014B  58		   *	    pop    eax
- 0000014C  C9		   *	    leave  
- 0000014D  C2 0004	   *	    ret    00004h
- 00000150			scene_update_game_objects ENDP
+ 00000160  5F		   *	    pop    edi
+ 00000161  5E		   *	    pop    esi
+ 00000162  5A		   *	    pop    edx
+ 00000163  59		   *	    pop    ecx
+ 00000164  5B		   *	    pop    ebx
+ 00000165  58		   *	    pop    eax
+ 00000166  C9		   *	    leave  
+ 00000167  C2 0004	   *	    ret    00004h
+ 0000016A			scene_update_game_objects ENDP
 
 				; // ----------------------------------
 				; // scene_free_game_objects
@@ -906,66 +921,81 @@ scene.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000150			scene_free_game_objects PROC PRIVATE USES eax ebx ecx edx esi edi
+ 0000016A			scene_free_game_objects PROC PRIVATE USES eax ebx ecx edx esi edi
 					local pThis
- 00000150  55		   *	    push   ebp
- 00000151  8B EC	   *	    mov    ebp, esp
- 00000153  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 00000156  50		   *	    push   eax
- 00000157  53		   *	    push   ebx
- 00000158  51		   *	    push   ecx
- 00000159  52		   *	    push   edx
- 0000015A  56		   *	    push   esi
- 0000015B  57		   *	    push   edi
- 0000015C  89 4D FC			mov pThis, ecx ; // Save the THIS pointer just in case
+ 0000016A  55		   *	    push   ebp
+ 0000016B  8B EC	   *	    mov    ebp, esp
+ 0000016D  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 00000170  50		   *	    push   eax
+ 00000171  53		   *	    push   ebx
+ 00000172  51		   *	    push   ecx
+ 00000173  52		   *	    push   edx
+ 00000174  56		   *	    push   esi
+ 00000175  57		   *	    push   edi
+ 00000176  89 4D FC			mov pThis, ecx ; // Save the THIS pointer just in case
 
- 0000015F  8D 49 28			lea ecx, (Scene PTR [ecx]).freeQueue
- 00000162  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
- 00000165  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
- 00000167  BA 00000000			mov edx, 0 ; // int i = 0
+ 00000179  BA 00000000			mov edx, 0 ; // int i = 0
+
+ 0000017E  8D 49 28			lea ecx, (Scene PTR [ecx]).freeQueue
+ 00000181  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
+ 00000184  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
 					
 					; // Iterate through the freeQueue vector
 					; // Remove the element from gameObjects and free it
 					.WHILE edx < ebx
- 0000016C  EB 17	   *	    jmp    @C0009
- 0000016E		   *@C000A:
+ 00000186  EB 28	   *	    jmp    @C0009
+ 00000188		   *@C000A:
+ 00000188  8B 4D FC				mov ecx, pThis
+ 0000018B  8D 49 28				lea ecx, (Scene PTR [ecx]).freeQueue
+ 0000018E  8B 59 04				mov ebx, (UnorderedVector PTR [ecx]).count
+ 00000191  8B 01				mov eax, (UnorderedVector PTR [ecx]).pData
+
 						; // esi = freeQueue[i]
- 0000016E  8B 34 90				mov esi, [eax + edx * 4]
+ 00000193  8B 34 90				mov esi, [eax + edx * 4]
+
+ 00000196  50					push eax
+ 00000197  53					push ebx
+ 00000198  52					push edx
 
 						; // Remove the element pointer from gameObjects
- 00000171  8B 4D FC				mov ecx, pThis
- 00000174  8D 49 10				lea ecx, (Scene PTR [ecx]).gameObjects
+ 00000199  8B 4D FC				mov ecx, pThis
+ 0000019C  8D 49 10				lea ecx, (Scene PTR [ecx]).gameObjects
 						INVOKE remove_element, esi
- 00000177  56		   *	    push   esi
- 00000178  E8 00000000 E   *	    call   remove_element
+ 0000019F  56		   *	    push   esi
+ 000001A0  E8 00000000 E   *	    call   remove_element
 
 						; // call the free() method on the GameObject
- 0000017D  8B CE				mov ecx, esi
+ 000001A5  8B CE				mov ecx, esi
 						INVOKE game_object_free_virtual
- 0000017F  E8 00000000 E   *	    call   game_object_free_virtual
- 00000184  42					inc edx
+ 000001A7  E8 00000000 E   *	    call   game_object_free_virtual
+
+ 000001AC  5A					pop edx
+ 000001AD  5B					pop ebx
+ 000001AE  58					pop eax
+
+ 000001AF  42					inc edx
 					.ENDW
- 00000185		   *@C0009:
- 00000185  3B D3	   *	    cmp    edx, ebx
- 00000187  72 E5	   *	    jb	@C000A
+ 000001B0		   *@C0009:
+ 000001B0  3B D3	   *	    cmp    edx, ebx
+ 000001B2  72 D4	   *	    jb	@C000A
 
 					; // Set the length of freeQueue to be 0, effectively clearing it
- 00000189  8B 4D FC			mov ecx, pThis
- 0000018C  8D 49 28			lea ecx, (Scene PTR [ecx]).freeQueue
- 0000018F  C7 41 04			mov (UnorderedVector PTR [ecx]).count, 0
+ 000001B4  8B 4D FC			mov ecx, pThis
+ 000001B7  8D 49 28			lea ecx, (Scene PTR [ecx]).freeQueue
+ 000001BA  C7 41 04			mov (UnorderedVector PTR [ecx]).count, 0
 	   00000000
 
- 00000196  8B 4D FC			mov ecx, pThis
+ 000001C1  8B 4D FC			mov ecx, pThis
 					ret
- 00000199  5F		   *	    pop    edi
- 0000019A  5E		   *	    pop    esi
- 0000019B  5A		   *	    pop    edx
- 0000019C  59		   *	    pop    ecx
- 0000019D  5B		   *	    pop    ebx
- 0000019E  58		   *	    pop    eax
- 0000019F  C9		   *	    leave  
- 000001A0  C3		   *	    ret    00000h
- 000001A1			scene_free_game_objects ENDP
+ 000001C4  5F		   *	    pop    edi
+ 000001C5  5E		   *	    pop    esi
+ 000001C6  5A		   *	    pop    edx
+ 000001C7  59		   *	    pop    ecx
+ 000001C8  5B		   *	    pop    ebx
+ 000001C9  58		   *	    pop    eax
+ 000001CA  C9		   *	    leave  
+ 000001CB  C3		   *	    ret    00000h
+ 000001CC			scene_free_game_objects ENDP
 
 				; // ----------------------------------
 				; // scene_render_frame
@@ -974,188 +1004,193 @@ scene.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 000001A1			scene_render_frame PROC PRIVATE USES eax ebx edx esi edi
+ 000001CC			scene_render_frame PROC PRIVATE USES eax ebx edx esi edi
 					local pThis
- 000001A1  55		   *	    push   ebp
- 000001A2  8B EC	   *	    mov    ebp, esp
- 000001A4  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 000001A7  50		   *	    push   eax
- 000001A8  53		   *	    push   ebx
- 000001A9  52		   *	    push   edx
- 000001AA  56		   *	    push   esi
- 000001AB  57		   *	    push   edi
- 000001AC  89 4D FC			mov pThis, ecx
+ 000001CC  55		   *	    push   ebp
+ 000001CD  8B EC	   *	    mov    ebp, esp
+ 000001CF  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 000001D2  50		   *	    push   eax
+ 000001D3  53		   *	    push   ebx
+ 000001D4  52		   *	    push   edx
+ 000001D5  56		   *	    push   esi
+ 000001D6  57		   *	    push   edi
+ 000001D7  89 4D FC			mov pThis, ecx
 
 					; // First clear the render list
 					; // Free the render commands
- 000001AF  8D 49 34			lea ecx, (Scene PTR [ecx]).renderCommands
+ 000001DA  8D 49 34			lea ecx, (Scene PTR [ecx]).renderCommands
 
- 000001B2  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
- 000001B4  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
+ 000001DD  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
+ 000001DF  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
 
- 000001B7  B9 00000000			mov ecx, 0 ; // Loop counter (int i = 0)
+ 000001E2  B9 00000000			mov ecx, 0 ; // Loop counter (int i = 0)
 					.WHILE ecx < ebx
- 000001BC  EB 0F	   *	    jmp    @C000C
- 000001BE		   *@C000D:
- 000001BE  8B 14 88				mov edx, [eax + ecx * 4] ; // edx = renderCommands[i]
+ 000001E7  EB 11	   *	    jmp    @C000C
+ 000001E9		   *@C000D:
+ 000001E9  8B 14 88				mov edx, [eax + ecx * 4] ; // edx = renderCommands[i]
 
 						; // renderCommands[i]->free()
- 000001C1  51					push ecx
- 000001C2  50					push eax
- 000001C3  8B CA				mov ecx, edx
+ 000001EC  51					push ecx
+ 000001ED  53					push ebx
+ 000001EE  50					push eax
+ 000001EF  8B CA				mov ecx, edx
 						INVOKE free_render_command
- 000001C5  E8 00000000 E   *	    call   free_render_command
- 000001CA  58					pop eax
- 000001CB  59					pop ecx
+ 000001F1  E8 00000000 E   *	    call   free_render_command
+ 000001F6  58					pop eax
+ 000001F7  5B					pop ebx
+ 000001F8  59					pop ecx
 
- 000001CC  41					inc ecx ; // i++
+ 000001F9  41					inc ecx ; // i++
 					.ENDW
- 000001CD		   *@C000C:
- 000001CD  3B CB	   *	    cmp    ecx, ebx
- 000001CF  72 ED	   *	    jb	@C000D
+ 000001FA		   *@C000C:
+ 000001FA  3B CB	   *	    cmp    ecx, ebx
+ 000001FC  72 EB	   *	    jb	@C000D
 
 					; // Now set the size to 0
- 000001D1  8B 4D FC			mov ecx, pThis
- 000001D4  8D 49 34			lea ecx, (Scene PTR [ecx]).renderCommands
- 000001D7  C7 41 04			mov (UnorderedVector PTR [ecx]).count, 0
+ 000001FE  8B 4D FC			mov ecx, pThis
+ 00000201  8D 49 34			lea ecx, (Scene PTR [ecx]).renderCommands
+ 00000204  C7 41 04			mov (UnorderedVector PTR [ecx]).count, 0
 	   00000000
 
 					; // Build render list
- 000001DE  8B 4D FC			mov ecx, pThis
- 000001E1  8D 49 10			lea ecx, (Scene PTR [ecx]).gameObjects
- 000001E4  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
- 000001E7  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
- 000001E9  BA 00000000			mov edx, 0 ; // int i = 0
+ 0000020B  8B 4D FC			mov ecx, pThis
+ 0000020E  8D 49 10			lea ecx, (Scene PTR [ecx]).gameObjects
+ 00000211  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
+ 00000214  BA 00000000			mov edx, 0 ; // int i = 0
 					
 					; // Iterate through the Game Objects
 					.WHILE edx < ebx
- 000001EE  EB 77	   *	    jmp    @C000F
- 000001F0		   *@C0010:
-						; // esi = gameObjects[i]
- 000001F0  8B 34 90				mov esi, [eax + edx * 4]
+ 00000219  E9 00000080	   *	    jmp    @C000F
+ 0000021E		   *@C0010:
+ 0000021E  8B 4D FC				mov ecx, pThis
+ 00000221  8D 49 10				lea ecx, (Scene PTR [ecx]).gameObjects
+ 00000224  8B 59 04				mov ebx, (UnorderedVector PTR [ecx]).count
+ 00000227  8B 01				mov eax, (UnorderedVector PTR [ecx]).pData
 
- 000001F3  50					push eax
- 000001F4  53					push ebx
- 000001F5  51					push ecx
- 000001F6  52					push edx
+						; // esi = gameObjects[i]
+ 00000229  8B 34 90				mov esi, [eax + edx * 4]
+
+ 0000022C  50					push eax
+ 0000022D  53					push ebx
+ 0000022E  52					push edx
 
 						; // If the object is pending free, skip it
- 000001F7  8B 4E 18				mov ecx, (GameObject PTR [esi]).awaitingFree
+ 0000022F  8B 4E 18				mov ecx, (GameObject PTR [esi]).awaitingFree
 						.IF ecx != 0
- 000001FA  0B C9	   *	    or	ecx, ecx
- 000001FC  74 02	   *	    je	@C0011
- 000001FE  EB 62					jmp scene_render_frame_loop_exit
+ 00000232  0B C9	   *	    or	ecx, ecx
+ 00000234  74 02	   *	    je	@C0011
+ 00000236  EB 62					jmp scene_render_frame_loop_exit
 						.ENDIF
 
 						; // If it has a SpriteComponent or a RectComponent, add the render command
 						; // ----------------------------------------------------------------------
 						; // First check if there's a RectComponent
- 00000200		   *@C0011:
- 00000200  8B CE				mov ecx, esi
+ 00000238		   *@C0011:
+ 00000238  8B CE				mov ecx, esi
 						INVOKE get_first_component_which_is_a, RECT_COMPONENT_ID
- 00000202  6A 01	   *	    push   +000000001h
- 00000204  E8 00000000 E   *	    call   get_first_component_which_is_a
+ 0000023A  6A 01	   *	    push   +000000001h
+ 0000023C  E8 00000000 E   *	    call   get_first_component_which_is_a
 						
 						.IF eax != 0
- 00000209  0B C0	   *	    or	eax, eax
- 0000020B  74 24	   *	    je	@C0013
+ 00000241  0B C0	   *	    or	eax, eax
+ 00000243  74 24	   *	    je	@C0013
 							; // Create the new RenderCommand
- 0000020D  53						push ebx
- 0000020E  8B D8					mov ebx, eax
+ 00000245  53						push ebx
+ 00000246  8B D8					mov ebx, eax
 
- 00000210  8B CE					mov ecx, esi
+ 00000248  8B CE					mov ecx, esi
 							INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID ; // Get the transform pointer from the GameObject
- 00000212  6A 03	   *	    push   +000000003h
- 00000214  E8 00000000 E   *	    call   get_first_component_which_is_a
+ 0000024A  6A 03	   *	    push   +000000003h
+ 0000024C  E8 00000000 E   *	    call   get_first_component_which_is_a
 							INVOKE new_render_command, RC_RECT, eax, ebx
- 00000219  53		   *	    push   ebx
- 0000021A  50		   *	    push   eax
- 0000021B  6A 00	   *	    push   +000000000h
- 0000021D  E8 00000000 E   *	    call   new_render_command
+ 00000251  53		   *	    push   ebx
+ 00000252  50		   *	    push   eax
+ 00000253  6A 00	   *	    push   +000000000h
+ 00000255  E8 00000000 E   *	    call   new_render_command
 
- 00000222  5B						pop ebx
+ 0000025A  5B						pop ebx
 
 							; // Add the render command to the RenderCommands list
- 00000223  8B 4D FC					mov ecx, pThis
- 00000226  8D 49 34					lea ecx, (Scene PTR [ecx]).renderCommands
+ 0000025B  8B 4D FC					mov ecx, pThis
+ 0000025E  8D 49 34					lea ecx, (Scene PTR [ecx]).renderCommands
 							INVOKE push_back, eax 
- 00000229  50		   *	    push   eax
- 0000022A  E8 00000000 E   *	    call   push_back
+ 00000261  50		   *	    push   eax
+ 00000262  E8 00000000 E   *	    call   push_back
 
- 0000022F  EB 31					jmp scene_render_frame_loop_exit
+ 00000267  EB 31					jmp scene_render_frame_loop_exit
 						.ENDIF
 
 						; // Now check if there's a SpriteComponent
- 00000231		   *@C0013:
- 00000231  8B CE				mov ecx, esi
+ 00000269		   *@C0013:
+ 00000269  8B CE				mov ecx, esi
 						INVOKE get_first_component_which_is_a, SPRITE_COMPONENT_ID
- 00000233  6A 02	   *	    push   +000000002h
- 00000235  E8 00000000 E   *	    call   get_first_component_which_is_a
+ 0000026B  6A 02	   *	    push   +000000002h
+ 0000026D  E8 00000000 E   *	    call   get_first_component_which_is_a
 						
 						.IF eax != 0
- 0000023A  0B C0	   *	    or	eax, eax
- 0000023C  74 24	   *	    je	@C0015
+ 00000272  0B C0	   *	    or	eax, eax
+ 00000274  74 24	   *	    je	@C0015
 							; // Create the new RenderCommand
- 0000023E  53						push ebx
- 0000023F  8B CE					mov ecx, esi
+ 00000276  53						push ebx
+ 00000277  8B CE					mov ecx, esi
 
- 00000241  8B D8					mov ebx, eax
+ 00000279  8B D8					mov ebx, eax
 							INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID ; // Get the transform pointer from the GameObject
- 00000243  6A 03	   *	    push   +000000003h
- 00000245  E8 00000000 E   *	    call   get_first_component_which_is_a
+ 0000027B  6A 03	   *	    push   +000000003h
+ 0000027D  E8 00000000 E   *	    call   get_first_component_which_is_a
 							INVOKE new_render_command, RC_SPRITE, eax, eax
- 0000024A  50		   *	    push   eax
- 0000024B  50		   *	    push   eax
- 0000024C  6A 01	   *	    push   +000000001h
- 0000024E  E8 00000000 E   *	    call   new_render_command
+ 00000282  50		   *	    push   eax
+ 00000283  50		   *	    push   eax
+ 00000284  6A 01	   *	    push   +000000001h
+ 00000286  E8 00000000 E   *	    call   new_render_command
 
- 00000253  5B						pop ebx
+ 0000028B  5B						pop ebx
 
 							; // Add the render command to the RenderCommands list
- 00000254  8B 4D FC					mov ecx, pThis
- 00000257  8D 49 34					lea ecx, (Scene PTR [ecx]).renderCommands
+ 0000028C  8B 4D FC					mov ecx, pThis
+ 0000028F  8D 49 34					lea ecx, (Scene PTR [ecx]).renderCommands
 							INVOKE push_back, eax 
- 0000025A  50		   *	    push   eax
- 0000025B  E8 00000000 E   *	    call   push_back
+ 00000292  50		   *	    push   eax
+ 00000293  E8 00000000 E   *	    call   push_back
 
- 00000260  EB 00					jmp scene_render_frame_loop_exit
+ 00000298  EB 00					jmp scene_render_frame_loop_exit
 						.ENDIF
 
- 00000262					scene_render_frame_loop_exit:
+ 0000029A					scene_render_frame_loop_exit:
 						; // Restore the pointer to pData and continue
- 00000262		   *@C0015:
- 00000262  5A					pop edx
- 00000263  59					pop ecx
- 00000264  5B					pop ebx
- 00000265  58					pop eax
- 00000266  42					inc edx ; // i++
-					.ENDW
- 00000267		   *@C000F:
- 00000267  3B D3	   *	    cmp    edx, ebx
- 00000269  72 85	   *	    jb	@C0010
+ 0000029A		   *@C0015:
+ 0000029A  5A					pop edx
+ 0000029B  5B					pop ebx
+ 0000029C  58					pop eax
 
- 0000026B  8B 4D FC			mov ecx, pThis
- 0000026E  8D 31			lea esi, (Scene PTR [ecx]).camera
- 00000270  8D 49 34			lea ecx, (Scene PTR [ecx]).renderCommands
- 00000273  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
- 00000276  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
- 00000278  BA 00000000			mov edx, 0 ; // int i = 0
+ 0000029D  42					inc edx ; // i++
+					.ENDW
+ 0000029E		   *@C000F:
+ 0000029E  3B D3	   *	    cmp    edx, ebx
+ 000002A0  0F 82 FFFFFF78  *	    jb	@C0010
+
+ 000002A6  8B 4D FC			mov ecx, pThis
+ 000002A9  8D 31			lea esi, (Scene PTR [ecx]).camera
+ 000002AB  8D 49 34			lea ecx, (Scene PTR [ecx]).renderCommands
+ 000002AE  8B 59 04			mov ebx, (UnorderedVector PTR [ecx]).count
+ 000002B1  8B 01			mov eax, (UnorderedVector PTR [ecx]).pData
+ 000002B3  BA 00000000			mov edx, 0 ; // int i = 0
 
 					; // Pass render list to renderer
 					INVOKE renderCommands, eax, ebx, esi
- 0000027D  56		   *	    push   esi
- 0000027E  53		   *	    push   ebx
- 0000027F  50		   *	    push   eax
- 00000280  E8 00000000 E   *	    call   renderCommands
+ 000002B8  56		   *	    push   esi
+ 000002B9  53		   *	    push   ebx
+ 000002BA  50		   *	    push   eax
+ 000002BB  E8 00000000 E   *	    call   renderCommands
 					ret
- 00000285  5F		   *	    pop    edi
- 00000286  5E		   *	    pop    esi
- 00000287  5A		   *	    pop    edx
- 00000288  5B		   *	    pop    ebx
- 00000289  58		   *	    pop    eax
- 0000028A  C9		   *	    leave  
- 0000028B  C3		   *	    ret    00000h
- 0000028C			scene_render_frame ENDP
+ 000002C0  5F		   *	    pop    edi
+ 000002C1  5E		   *	    pop    esi
+ 000002C2  5A		   *	    pop    edx
+ 000002C3  5B		   *	    pop    ebx
+ 000002C4  58		   *	    pop    eax
+ 000002C5  C9		   *	    leave  
+ 000002C6  C3		   *	    ret    00000h
+ 000002C7			scene_render_frame ENDP
 
 				; // ----------------------------------
 				; // scene_update
@@ -1164,57 +1199,57 @@ scene.asm						     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 0000028C			scene_update PROC PUBLIC USES eax ebx ecx edx esi edi, deltaTime: REAL4
+ 000002C7			scene_update PROC PUBLIC USES eax ebx ecx edx esi edi, deltaTime: REAL4
 					local pThis
- 0000028C  55		   *	    push   ebp
- 0000028D  8B EC	   *	    mov    ebp, esp
- 0000028F  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 00000292  50		   *	    push   eax
- 00000293  53		   *	    push   ebx
- 00000294  51		   *	    push   ecx
- 00000295  52		   *	    push   edx
- 00000296  56		   *	    push   esi
- 00000297  57		   *	    push   edi
- 00000298  89 4D FC			mov pThis, ecx ; // Save the THIS pointer just in case
+ 000002C7  55		   *	    push   ebp
+ 000002C8  8B EC	   *	    mov    ebp, esp
+ 000002CA  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 000002CD  50		   *	    push   eax
+ 000002CE  53		   *	    push   ebx
+ 000002CF  51		   *	    push   ecx
+ 000002D0  52		   *	    push   edx
+ 000002D1  56		   *	    push   esi
+ 000002D2  57		   *	    push   edi
+ 000002D3  89 4D FC			mov pThis, ecx ; // Save the THIS pointer just in case
 
 					; // Take Input
 					INVOKE updateInput
- 0000029B  E8 00000000 E   *	    call   updateInput
+ 000002D6  E8 00000000 E   *	    call   updateInput
 
 					; // Process start queue
 					INVOKE scene_process_start_queue
- 000002A0  E8 FFFFFE12	   *	    call   scene_process_start_queue
+ 000002DB  E8 FFFFFDD7	   *	    call   scene_process_start_queue
 
 					; // NYI Update time sensitive components such as timers and tweens 
 
 					; // Update all of the GameObject logic
 					INVOKE scene_update_game_objects, deltaTime
- 000002A5  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 000002A8  E8 FFFFFE5B	   *	    call   scene_update_game_objects
+ 000002E0  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 000002E3  E8 FFFFFE2B	   *	    call   scene_update_game_objects
 
 					; // NYI Update animator components 
 
 					; // Free any GameObjects that were queued to be freed by gameplay logic
 					INVOKE scene_free_game_objects
- 000002AD  E8 FFFFFE9E	   *	    call   scene_free_game_objects
+ 000002E8  E8 FFFFFE7D	   *	    call   scene_free_game_objects
 
 					; // Render the scene
 					INVOKE scene_render_frame
- 000002B2  E8 FFFFFEEA	   *	    call   scene_render_frame
+ 000002ED  E8 FFFFFEDA	   *	    call   scene_render_frame
 					
 					ret
- 000002B7  5F		   *	    pop    edi
- 000002B8  5E		   *	    pop    esi
- 000002B9  5A		   *	    pop    edx
- 000002BA  59		   *	    pop    ecx
- 000002BB  5B		   *	    pop    ebx
- 000002BC  58		   *	    pop    eax
- 000002BD  C9		   *	    leave  
- 000002BE  C2 0004	   *	    ret    00004h
- 000002C1			scene_update ENDP
+ 000002F2  5F		   *	    pop    edi
+ 000002F3  5E		   *	    pop    esi
+ 000002F4  5A		   *	    pop    edx
+ 000002F5  59		   *	    pop    ecx
+ 000002F6  5B		   *	    pop    ebx
+ 000002F7  58		   *	    pop    eax
+ 000002F8  C9		   *	    leave  
+ 000002F9  C2 0004	   *	    ret    00004h
+ 000002FC			scene_update ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 13:03:06
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 15:31:41
 scene.asm						     Symbols 2 - 1
 
 
@@ -1313,7 +1348,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000002C1 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000002FC DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -1371,18 +1406,18 @@ queue_free_game_object . . . . .	P Near	 00000095 _TEXT	Length= 00000022 Public 
   pGameObject  . . . . . . . . .	DWord	 bp + 00000008
 remove_element . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 renderCommands . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-scene_free_game_objects  . . . .	P Near	 00000150 _TEXT	Length= 00000051 Private STDCALL
+scene_free_game_objects  . . . .	P Near	 0000016A _TEXT	Length= 00000062 Private STDCALL
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
-scene_process_start_queue  . . .	P Near	 000000B7 _TEXT	Length= 00000051 Private STDCALL
+scene_process_start_queue  . . .	P Near	 000000B7 _TEXT	Length= 0000005C Private STDCALL
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
-scene_render_frame . . . . . . .	P Near	 000001A1 _TEXT	Length= 000000EB Private STDCALL
+scene_render_frame . . . . . . .	P Near	 000001CC _TEXT	Length= 000000FB Private STDCALL
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
-  scene_render_frame_loop_exit .	L Near	 00000262 _TEXT	
-scene_update_game_objects  . . .	P Near	 00000108 _TEXT	Length= 00000048 Private STDCALL
+  scene_render_frame_loop_exit .	L Near	 0000029A _TEXT	
+scene_update_game_objects  . . .	P Near	 00000113 _TEXT	Length= 00000057 Private STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
-  scene_update_game_objects_loop_exit 	L Near	 0000013D _TEXT	
-scene_update . . . . . . . . . .	P Near	 0000028C _TEXT	Length= 00000035 Public STDCALL
+  scene_update_game_objects_loop_exit 	L Near	 00000155 _TEXT	
+scene_update . . . . . . . . . .	P Near	 000002C7 _TEXT	Length= 00000035 Public STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
 updateInput  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
