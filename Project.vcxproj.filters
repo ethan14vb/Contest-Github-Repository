@@ -153,5 +153,8 @@
     <MASM Include="neon_game_manager.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
+    <MASM Include="renderable_component.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
   </ItemGroup>
 </Project>

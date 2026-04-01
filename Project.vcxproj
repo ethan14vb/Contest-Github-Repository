@@ -23,6 +23,7 @@
     <MASM Include="neon_square_scene.asm" />
     <MASM Include="rectangle_test_scene.asm" />
     <MASM Include="rect_component.asm" />
+    <MASM Include="renderable_component.asm" />
     <MASM Include="render_command.asm" />
     <MASM Include="transform_component.asm" />
     <MASM Include="unordered_vector.asm" />
