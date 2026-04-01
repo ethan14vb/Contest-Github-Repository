@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/31/26 23:13:20
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/31/26 23:17:23
 scene.asm						     Page 1 - 1
 
 
@@ -213,6 +213,7 @@ scene.asm						     Page 1 - 1
 			      C DEF_ENUM CAMERA_MOVER_GAME_OBJECT_ID
 			      C DEF_ENUM NEON_SQUARE_PLAYER_GAME_OBJECT_ID
 			      C DEF_ENUM WALL_OBSTACLE_GAME_OBJECT_ID
+			      C DEF_ENUM NEON_GAME_MANAGER_GAME_OBJECT_ID
 			      C 
 			      C ENDIF
 			      C 
@@ -567,6 +568,7 @@ scene.asm						     Page 1 - 1
 			      C 
 			      C IFNDEF CAMERA_INC
 			      C ENDIF
+
 			      C 
 				INCLUDE input_manager.inc
 			      C ; // ==================================
@@ -1178,7 +1180,7 @@ scene.asm						     Page 1 - 1
  00000296			scene_update ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/31/26 23:13:20
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/31/26 23:17:23
 scene.asm						     Symbols 2 - 1
 
 
@@ -1377,6 +1379,7 @@ HEAP_GENERATE_EXCEPTIONS . . . .	Number	 00000004h
 HEAP_NO_SERIALIZE  . . . . . . .	Number	 00000001h   
 HEAP_ZERO_MEMORY . . . . . . . .	Number	 00000008h   
 INPUT_MANAGER_INC  . . . . . . .	Number	 00000001h   
+NEON_GAME_MANAGER_GAME_OBJECT_ID .	Number	 00000004h   
 NEON_SQUARE_PLAYER_GAME_OBJECT_ID 	Number	 00000002h   
 NULL . . . . . . . . . . . . . .	Number	 00000000h   
 RC_RECT  . . . . . . . . . . . .	Number	 00000000h   

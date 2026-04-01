@@ -19,4 +19,7 @@ NeonGameManager STRUCT
 	baseGameObject GameObject<>
 NeonGameManager ENDS
 
+init_neon_game_manager PROTO
+new_neon_game_manager PROTO
+
 ENDIF
