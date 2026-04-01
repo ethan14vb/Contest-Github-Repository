@@ -40,6 +40,9 @@ init_wall_obstacle PROC PUBLIC USES esi ebx edx, startX : DWORD, startY : DWORD,
 	INVOKE init_game_object, 2
 	mov (GameObject PTR [ecx]).gameObjectType, WALL_OBSTACLE_GAME_OBJECT_ID
 	mov (GameObject PTR [ecx]).pVt, OFFSET WALL_OBSTACLE_GAMEOBJECT_VTABLE
+
+	; // My constructor
+	mov (WallObstacle PTR [ecx]).pNeonPlayer, 0
 		
 	; // Add transform component
 	INVOKE new_transform_component, startX, startY, 0
@@ -80,6 +83,10 @@ new_wall_obstacle ENDP
 wall_obstacle_start PROC stdcall USES eax ebx edx
 	local pThis : DWORD
 	mov pThis, ecx
+
+	; // Initialize pNeonPlayer with the player in the scene
+	mov ecx, (GameObject PTR [ecx]).pParentScene
+	; // TODO find player
 
 	mov ecx, pThis ; // Restore the THIS pointer
 	ret

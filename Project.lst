@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 17:48:14
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 17:54:16
 wall_obstacle.asm					     Page 1 - 1
 
 
@@ -331,7 +331,7 @@ wall_obstacle.asm					     Page 1 - 1
 			      C ENDIF
 			      C 
 			      C 
- 0000001C		      C WallObstacle STRUCT
+ 00000020		      C WallObstacle STRUCT
  00000000  00000000	      C 	baseGameObject GameObject<>
 	   00000000
 	   00000000
@@ -339,6 +339,8 @@ wall_obstacle.asm					     Page 1 - 1
 	   00000000
 	   00000000
 	   00000000
+			      C 
+ 0000001C  00000000	      C 	pNeonPlayer DWORD ?
 			      C WallObstacle ENDS
 			      C 
 			      C init_wall_obstacle	PROTO startX : DWORD, startY : DWORD, height : DWORD
@@ -602,8 +604,8 @@ wall_obstacle.asm					     Page 1 - 1
 			      C 
 
  00000000			.data
- 00000000 00000089 R		WALL_OBSTACLE_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET wall_obstacle_start, OFFSET wall_obstacle_update, OFFSET game_object_exit, OFFSET free_game_object>
-	   0000009D R
+ 00000000 00000090 R		WALL_OBSTACLE_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET wall_obstacle_start, OFFSET wall_obstacle_update, OFFSET game_object_exit, OFFSET free_game_object>
+	   000000A7 R
 	   00000000 E
 	   00000000 E
 
@@ -636,67 +638,71 @@ wall_obstacle.asm					     Page 1 - 1
  00000013  C7 01 00000003		mov (GameObject PTR [ecx]).gameObjectType, WALL_OBSTACLE_GAME_OBJECT_ID
  00000019  C7 41 10			mov (GameObject PTR [ecx]).pVt, OFFSET WALL_OBSTACLE_GAMEOBJECT_VTABLE
 	   00000000 R
+
+					; // My constructor
+ 00000020  C7 41 1C			mov (WallObstacle PTR [ecx]).pNeonPlayer, 0
+	   00000000
 						
 					; // Add transform component
 					INVOKE new_transform_component, startX, startY, 0
- 00000020  6A 00	   *	    push   +000000000h
- 00000022  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
- 00000025  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 00000028  E8 00000000 E   *	    call   new_transform_component
+ 00000027  6A 00	   *	    push   +000000000h
+ 00000029  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
+ 0000002C  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 0000002F  E8 00000000 E   *	    call   new_transform_component
 					INVOKE add_component, pThis, eax
- 0000002D  50		   *	    push   eax
- 0000002E  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
- 00000031  E8 00000000 E   *	    call   add_component
+ 00000034  50		   *	    push   eax
+ 00000035  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
+ 00000038  E8 00000000 E   *	    call   add_component
 
 					; // Add rect component
 					INVOKE new_rect_component, height, 2, 0, 0, 255, 255
- 00000036  68 000000FF	   *	    push   +0000000FFh
- 0000003B  68 000000FF	   *	    push   +0000000FFh
- 00000040  6A 00	   *	    push   +000000000h
- 00000042  6A 00	   *	    push   +000000000h
- 00000044  6A 02	   *	    push   +000000002h
- 00000046  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
- 00000049  E8 00000000 E   *	    call   new_rect_component
+ 0000003D  68 000000FF	   *	    push   +0000000FFh
+ 00000042  68 000000FF	   *	    push   +0000000FFh
+ 00000047  6A 00	   *	    push   +000000000h
+ 00000049  6A 00	   *	    push   +000000000h
+ 0000004B  6A 02	   *	    push   +000000002h
+ 0000004D  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
+ 00000050  E8 00000000 E   *	    call   new_rect_component
 					INVOKE add_component, pThis, eax
- 0000004E  50		   *	    push   eax
- 0000004F  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
- 00000052  E8 00000000 E   *	    call   add_component
+ 00000055  50		   *	    push   eax
+ 00000056  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
+ 00000059  E8 00000000 E   *	    call   add_component
 
- 00000057  8B 45 FC			mov eax, pThis
+ 0000005E  8B 45 FC			mov eax, pThis
 						
 					ret
- 0000005A  5A		   *	    pop    edx
- 0000005B  5B		   *	    pop    ebx
- 0000005C  5E		   *	    pop    esi
- 0000005D  C9		   *	    leave  
- 0000005E  C2 000C	   *	    ret    0000Ch
- 00000061			init_wall_obstacle ENDP
+ 00000061  5A		   *	    pop    edx
+ 00000062  5B		   *	    pop    ebx
+ 00000063  5E		   *	    pop    esi
+ 00000064  C9		   *	    leave  
+ 00000065  C2 000C	   *	    ret    0000Ch
+ 00000068			init_wall_obstacle ENDP
 
 				; // ----------------------------------
 				; // new_wall_obstacle
 				; // Reserves heap space for the Object with parameters calls the initializer method
 				; // ----------------------------------
- 00000061			new_wall_obstacle PROC PUBLIC USES ecx, startX : DWORD, startY : DWORD, height : DWORD
- 00000061  55		   *	    push   ebp
- 00000062  8B EC	   *	    mov    ebp, esp
- 00000064  51		   *	    push   ecx
+ 00000068			new_wall_obstacle PROC PUBLIC USES ecx, startX : DWORD, startY : DWORD, height : DWORD
+ 00000068  55		   *	    push   ebp
+ 00000069  8B EC	   *	    mov    ebp, esp
+ 0000006B  51		   *	    push   ecx
 					INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF WallObstacle
- 00000065  6A 1C	   *	    push   +00000001Ch
- 00000067  6A 04	   *	    push   +000000004h
- 00000069  FF 35 00000000 E *	    push   hHeap
- 0000006F  E8 00000000 E   *	    call   HeapAlloc
- 00000074  8B C8			mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
+ 0000006C  6A 20	   *	    push   +000000020h
+ 0000006E  6A 04	   *	    push   +000000004h
+ 00000070  FF 35 00000000 E *	    push   hHeap
+ 00000076  E8 00000000 E   *	    call   HeapAlloc
+ 0000007B  8B C8			mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
 					INVOKE init_wall_obstacle, startX, startY, height
- 00000076  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
- 00000079  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
- 0000007C  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 0000007F  E8 FFFFFF7C	   *	    call   init_wall_obstacle
+ 0000007D  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
+ 00000080  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
+ 00000083  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000086  E8 FFFFFF75	   *	    call   init_wall_obstacle
 
 					ret ; // Return with the address of the memory block in HeapAlloc
- 00000084  59		   *	    pop    ecx
- 00000085  C9		   *	    leave  
- 00000086  C2 000C	   *	    ret    0000Ch
- 00000089			new_wall_obstacle ENDP
+ 0000008B  59		   *	    pop    ecx
+ 0000008C  C9		   *	    leave  
+ 0000008D  C2 000C	   *	    ret    0000Ch
+ 00000090			new_wall_obstacle ENDP
 
 				; // ********************************************
 				; // Instance methods
@@ -709,24 +715,28 @@ wall_obstacle.asm					     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000089			wall_obstacle_start PROC stdcall USES eax ebx edx
+ 00000090			wall_obstacle_start PROC stdcall USES eax ebx edx
 					local pThis : DWORD
- 00000089  55		   *	    push   ebp
- 0000008A  8B EC	   *	    mov    ebp, esp
- 0000008C  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 0000008F  50		   *	    push   eax
- 00000090  53		   *	    push   ebx
- 00000091  52		   *	    push   edx
- 00000092  89 4D FC			mov pThis, ecx
+ 00000090  55		   *	    push   ebp
+ 00000091  8B EC	   *	    mov    ebp, esp
+ 00000093  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 00000096  50		   *	    push   eax
+ 00000097  53		   *	    push   ebx
+ 00000098  52		   *	    push   edx
+ 00000099  89 4D FC			mov pThis, ecx
 
- 00000095  8B 4D FC			mov ecx, pThis ; // Restore the THIS pointer
+					; // Initialize pNeonPlayer with the player in the scene
+ 0000009C  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
+					; // TODO find player
+
+ 0000009F  8B 4D FC			mov ecx, pThis ; // Restore the THIS pointer
 					ret
- 00000098  5A		   *	    pop    edx
- 00000099  5B		   *	    pop    ebx
- 0000009A  58		   *	    pop    eax
- 0000009B  C9		   *	    leave  
- 0000009C  C3		   *	    ret    00000h
- 0000009D			wall_obstacle_start ENDP
+ 000000A2  5A		   *	    pop    edx
+ 000000A3  5B		   *	    pop    ebx
+ 000000A4  58		   *	    pop    eax
+ 000000A5  C9		   *	    leave  
+ 000000A6  C3		   *	    ret    00000h
+ 000000A7			wall_obstacle_start ENDP
 
 				; // ----------------------------------
 				; // wall_obstacle_update
@@ -735,47 +745,47 @@ wall_obstacle.asm					     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 0000009D			wall_obstacle_update PROC stdcall USES eax ebx edx, deltaTime: REAL4
+ 000000A7			wall_obstacle_update PROC stdcall USES eax ebx edx, deltaTime: REAL4
 					local pThis : DWORD
- 0000009D  55		   *	    push   ebp
- 0000009E  8B EC	   *	    mov    ebp, esp
- 000000A0  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 000000A3  50		   *	    push   eax
- 000000A4  53		   *	    push   ebx
- 000000A5  52		   *	    push   edx
- 000000A6  89 4D FC			mov pThis, ecx
- 000000A9  8B 45 08			mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
+ 000000A7  55		   *	    push   ebp
+ 000000A8  8B EC	   *	    mov    ebp, esp
+ 000000AA  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 000000AD  50		   *	    push   eax
+ 000000AE  53		   *	    push   ebx
+ 000000AF  52		   *	    push   edx
+ 000000B0  89 4D FC			mov pThis, ecx
+ 000000B3  8B 45 08			mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
 
 					; // Now move the player
 					INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID
- 000000AC  6A 03	   *	    push   +000000003h
- 000000AE  E8 00000000 E   *	    call   get_first_component_which_is_a
- 000000B3  83 40 08 FF			add (TransformComponent PTR [eax]).x, -1
+ 000000B6  6A 03	   *	    push   +000000003h
+ 000000B8  E8 00000000 E   *	    call   get_first_component_which_is_a
+ 000000BD  83 40 08 FF			add (TransformComponent PTR [eax]).x, -1
 
 					; // If I'm past the edge of the screen, free me
- 000000B7  8B 58 08			mov ebx, (TransformComponent PTR[eax]).x
+ 000000C1  8B 58 08			mov ebx, (TransformComponent PTR[eax]).x
 					.IF ebx <= 1
- 000000BA  83 FB 01	   *	    cmp    ebx, 001h
- 000000BD  77 0C	   *	    ja	@C0001
- 000000BF  8B 5D FC				mov ebx, pThis
- 000000C2  8B 4B 14				mov ecx, (GameObject PTR [ebx]).pParentScene
+ 000000C4  83 FB 01	   *	    cmp    ebx, 001h
+ 000000C7  77 0C	   *	    ja	@C0001
+ 000000C9  8B 5D FC				mov ebx, pThis
+ 000000CC  8B 4B 14				mov ecx, (GameObject PTR [ebx]).pParentScene
 						INVOKE queue_free_game_object, ebx
- 000000C5  53		   *	    push   ebx
- 000000C6  E8 00000000 E   *	    call   queue_free_game_object
+ 000000CF  53		   *	    push   ebx
+ 000000D0  E8 00000000 E   *	    call   queue_free_game_object
 					.ENDIF
- 000000CB		   *@C0001:
+ 000000D5		   *@C0001:
 						
- 000000CB  8B 4D FC			mov ecx, pThis ; // Restore the THIS pointer
+ 000000D5  8B 4D FC			mov ecx, pThis ; // Restore the THIS pointer
 					ret
- 000000CE  5A		   *	    pop    edx
- 000000CF  5B		   *	    pop    ebx
- 000000D0  58		   *	    pop    eax
- 000000D1  C9		   *	    leave  
- 000000D2  C2 0004	   *	    ret    00004h
- 000000D5			wall_obstacle_update ENDP
+ 000000D8  5A		   *	    pop    edx
+ 000000D9  5B		   *	    pop    ebx
+ 000000DA  58		   *	    pop    eax
+ 000000DB  C9		   *	    leave  
+ 000000DC  C2 0004	   *	    ret    00004h
+ 000000DF			wall_obstacle_update ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 17:48:14
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 17:54:16
 wall_obstacle.asm					     Symbols 2 - 1
 
 
@@ -845,8 +855,9 @@ UnorderedVector  . . . . . . . .	 0000000C
   pData  . . . . . . . . . . . .	 00000000	 DWord
   count  . . . . . . . . . . . .	 00000004	 DWord
   capacity . . . . . . . . . . .	 00000008	 DWord
-WallObstacle . . . . . . . . . .	 0000001C
+WallObstacle . . . . . . . . . .	 00000020
   baseGameObject . . . . . . . .	 00000000	 
+  pNeonPlayer  . . . . . . . . .	 0000001C	 DWord
 
 
 Types:
@@ -866,7 +877,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000010 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000000D5 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000DF DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -901,7 +912,7 @@ init_rect_component  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 init_scene . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_transform_component . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_unordered_vector  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-init_wall_obstacle . . . . . . .	P Near	 00000000 _TEXT	Length= 00000061 Public STDCALL
+init_wall_obstacle . . . . . . .	P Near	 00000000 _TEXT	Length= 00000068 Public STDCALL
   startX . . . . . . . . . . . .	DWord	 bp + 00000008
   startY . . . . . . . . . . . .	DWord	 bp + 0000000C
   height . . . . . . . . . . . .	DWord	 bp + 00000010
@@ -918,7 +929,7 @@ new_rect_component . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 new_scene  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_transform_component  . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_unordered_vector . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-new_wall_obstacle  . . . . . . .	P Near	 00000061 _TEXT	Length= 00000028 Public STDCALL
+new_wall_obstacle  . . . . . . .	P Near	 00000068 _TEXT	Length= 00000028 Public STDCALL
   startX . . . . . . . . . . . .	DWord	 bp + 00000008
   startY . . . . . . . . . . . .	DWord	 bp + 0000000C
   height . . . . . . . . . . . .	DWord	 bp + 00000010
@@ -927,9 +938,9 @@ queue_free_game_object . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 remove_element . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 scene_update . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 updateInput  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-wall_obstacle_start  . . . . . .	P Near	 00000089 _TEXT	Length= 00000014 Private STDCALL
+wall_obstacle_start  . . . . . .	P Near	 00000090 _TEXT	Length= 00000017 Private STDCALL
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
-wall_obstacle_update . . . . . .	P Near	 0000009D _TEXT	Length= 00000038 Private STDCALL
+wall_obstacle_update . . . . . .	P Near	 000000A7 _TEXT	Length= 00000038 Private STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
 

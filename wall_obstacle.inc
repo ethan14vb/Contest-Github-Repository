@@ -12,6 +12,8 @@ INCLUDE game_object.inc
 
 WallObstacle STRUCT
 	baseGameObject GameObject<>
+
+	pNeonPlayer DWORD ?
 WallObstacle ENDS
 
 init_wall_obstacle	PROTO startX : DWORD, startY : DWORD, height : DWORD
