@@ -22,7 +22,7 @@ INCLUDE heap_functions.inc
 
 .data
 NEON_GAME_MANAGER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET neon_game_manager_update, OFFSET game_object_exit, OFFSET free_game_object>
-spawnTime REAL4 0.25
+spawnTime REAL4 0.5
 
 .code
 ; // ********************************************

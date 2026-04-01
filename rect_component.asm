@@ -39,6 +39,10 @@ init_rect_component PROC PUBLIC USES ebx esi, h: DWORD, w : DWORD, r : BYTE, g :
 	mov bl, a
 	mov (RectComponent PTR [ecx]).a, bl
 
+	; // Visible
+	mov esi, 0FFFFFFFFh
+	mov (RectComponent PTR [ecx]).visible, esi
+
 	mov eax, ecx
 	ret
 init_rect_component ENDP
