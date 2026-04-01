@@ -42,6 +42,7 @@
     <None Include="neon_square_player.inc" />
     <None Include="neon_square_scene.inc" />
     <None Include="rectangle_test_scene.inc" />
+    <None Include="renderable_component.inc" />
     <None Include="sprite_component.inc">
       <FileType>Document</FileType>
     </None>
