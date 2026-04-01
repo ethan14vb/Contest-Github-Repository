@@ -17,6 +17,8 @@ INCLUDE default_header.inc
 INCLUDE game_object.inc
 INCLUDE game_object_ids.inc
 INCLUDE component.inc
+INCLUDE transform_component.inc
+INCLUDE rect_component.inc
 INCLUDE component_ids.inc
 INCLUDE heap_functions.inc
 
@@ -49,10 +51,33 @@ add_component ENDP
 ; // later, then this function will become obsolete.
 ; // ----------------------------------
 check_rect_collision PROC PUBLIC USES eax ebx ecx esi edi, pRect1 : DWORD, pTrans1 : DWORD, pRect2 : DWORD, pTrans2
-	mov eax, pRect1
-	mov eax, pTrans1
-	mov eax, pRect2
-	mov eax, pTrans2
+	LOCAL x1 : DWORD, y1 : DWORD, w1 : DWORD, h1 : DWORD
+	LOCAL x2 : DWORD, y2 : DWORD, w2 : DWORD, h2 : DWORD
+
+	; // Initialize local variables
+	mov esi, pTrans1 
+	mov edi, (TransformComponent PTR [esi]).x
+	mov x1, edi
+	mov edi, (TransformComponent PTR [esi]).y
+	mov y1, edi
+
+	mov esi, pRect1 
+	mov edi, (RectComponent PTR [esi]).h
+	mov h1, edi
+	mov edi, (RectComponent PTR [esi]).w
+	mov w1, edi
+
+	mov esi, pTrans2 
+	mov edi, (TransformComponent PTR [esi]).x
+	mov x2, edi
+	mov edi, (TransformComponent PTR [esi]).y
+	mov y2, edi
+
+	mov esi, pRect2 
+	mov edi, (RectComponent PTR [esi]).h
+	mov h2, edi
+	mov edi, (RectComponent PTR [esi]).w
+	mov w2, edi
 	ret
 check_rect_collision ENDP
 
