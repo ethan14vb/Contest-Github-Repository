@@ -37,8 +37,8 @@ new_render_command PROC PUBLIC USES ecx edx, rcType: RC_ENUM, pTransform: DWORD,
 	ret ; // Return with the address of the memory block in HeapAlloc
 new_render_command ENDP
 
-free_render_command PROC PUBLIC, pRenderCommand: DWORD
-	INVOKE HeapFree, hHeap, 0, pRenderCommand
+free_render_command PROC PUBLIC USES ebx ecx edx esi edi
+	INVOKE HeapFree, hHeap, 0, ecx
 	ret
 free_render_command ENDP
 

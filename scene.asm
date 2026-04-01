@@ -193,7 +193,7 @@ scene_update_game_objects PROC PRIVATE USES eax ebx ecx edx esi edi, deltaTime: 
 		; // If the GameObject is pending free, don't update it
 		mov eax, (GameObject PTR [esi]).awaitingFree
 		.IF eax != 0
-			.CONTINUE
+			jmp scene_update_game_objects_loop_exit
 		.ENDIF
 
 		; // call the update() method in the GameObject gameObjects[i]
@@ -201,6 +201,7 @@ scene_update_game_objects PROC PRIVATE USES eax ebx ecx edx esi edi, deltaTime: 
 		mov ecx, esi
 		INVOKE game_object_update_virtual, deltaTime
 
+	scene_update_game_objects_loop_exit:
 		pop eax
 		inc edx
 	.ENDW
@@ -263,6 +264,29 @@ scene_render_frame PROC PRIVATE USES eax ebx edx esi edi
 	mov pThis, ecx
 
 	; // First clear the render list
+	; // Free the render commands
+	lea ecx, (Scene PTR [ecx]).renderCommands
+
+	mov eax, (UnorderedVector PTR [ecx]).pData
+	mov ebx, (UnorderedVector PTR [ecx]).count
+
+	mov ecx, 0 ; // Loop counter (int i = 0)
+	.WHILE ecx < ebx
+		mov edx, [eax + ecx * 4] ; // edx = renderCommands[i]
+
+		; // renderCommands[i]->free()
+		push ecx
+		push eax
+		mov ecx, edx
+		INVOKE free_render_command
+		pop eax
+		pop ecx
+
+		inc ecx ; // i++
+	.ENDW
+
+	; // Now set the size to 0
+	mov ecx, pThis
 	lea ecx, (Scene PTR [ecx]).renderCommands
 	mov (UnorderedVector PTR [ecx]).count, 0
 
@@ -278,13 +302,17 @@ scene_render_frame PROC PRIVATE USES eax ebx edx esi edi
 		; // esi = gameObjects[i]
 		mov esi, [eax + edx * 4]
 
+		push eax
+		push ebx
+		push ecx
+		push edx
+
 		; // If the object is pending free, skip it
 		mov ecx, (GameObject PTR [esi]).awaitingFree
 		.IF ecx != 0
-			.CONTINUE
+			jmp scene_render_frame_loop_exit
 		.ENDIF
 
-		push eax
 		; // If it has a SpriteComponent or a RectComponent, add the render command
 		; // ----------------------------------------------------------------------
 		; // First check if there's a RectComponent
@@ -335,6 +363,9 @@ scene_render_frame PROC PRIVATE USES eax ebx edx esi edi
 
 		scene_render_frame_loop_exit:
 		; // Restore the pointer to pData and continue
+		pop edx
+		pop ecx
+		pop ebx
 		pop eax
 		inc edx ; // i++
 	.ENDW

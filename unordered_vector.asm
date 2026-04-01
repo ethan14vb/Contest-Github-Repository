@@ -97,10 +97,13 @@ push_back PROC PUBLIC USES eax ebx edx edi, element: DWORD
 		shl edx, 2 ; // multiply edx by SIZEOF DWORD (multiply by 4)
 
 		; // ReAlloc the data
+		push ebx
 		push ecx
+		push edx
 		INVOKE HeapReAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, (UnorderedVector PTR [ecx]).pData, edx
+		pop edx
 		pop ecx
-
+		pop ebx
 		mov (UnorderedVector PTR [ecx]).pData, eax
 
 	.ENDIF

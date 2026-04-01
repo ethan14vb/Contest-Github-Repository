@@ -34,6 +34,6 @@ RenderCommand ENDS
 ; // Constructor methods
 init_render_command PROTO rcType: RC_ENUM, pTransform : DWORD, pRenderable : DWORD
 new_render_command PROTO rcType: RC_ENUM, pTransform: DWORD, pRenderable: DWORD
-free_render_command PROTO pRenderCommand: DWORD
+free_render_command PROTO
 
 ENDIF
