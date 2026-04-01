@@ -21,7 +21,8 @@ INCLUDE neon_game_manager.inc
 INCLUDE heap_functions.inc
 
 .data
-NEON_GAME_MANAGER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_object_update, OFFSET game_object_exit, OFFSET free_game_object>
+NEON_GAME_MANAGER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET neon_game_manager_update, OFFSET game_object_exit, OFFSET free_game_object>
+spawnTime REAL4 0.5
 
 .code
 ; // ********************************************
@@ -44,6 +45,12 @@ init_neon_game_manager PROC PUBLIC USES esi ebx edx
 	mov (GameObject PTR [ecx]).gameObjectType, NEON_GAME_MANAGER_GAME_OBJECT_ID
 	mov (GameObject PTR [ecx]).pVt, OFFSET NEON_GAME_MANAGER_GAMEOBJECT_VTABLE
 
+	; // My constructor
+	mov (NeonGameManager PTR [ecx]).timer, 0
+
+	mov esi, spawnTime
+	mov (NeonGameManager PTR [ecx]).spawnTime, esi
+
 	mov eax, pThis
 		
 	ret
@@ -56,9 +63,58 @@ init_neon_game_manager ENDP
 new_neon_game_manager PROC PUBLIC USES ecx
 	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF NeonGameManager
 	mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
-	INVOKE new_neon_game_manager
+	INVOKE init_neon_game_manager
 
 	ret ; // Return with the address of the memory block in HeapAlloc
 new_neon_game_manager ENDP
+
+; // ********************************************
+; // Instance methods
+; // ********************************************
+
+; // ----------------------------------
+; // neon_game_manager_update
+; // Moves the wall to the left of the screen. This function uses FPU instructions
+; // that were not learned in class. These were added to accommodate for deltaTime
+; // being a REAL4.
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+neon_game_manager_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
+	local pThis : DWORD
+	mov pThis, ecx
+
+	; // Update timer
+	fld (NeonGameManager PTR [ecx]).timer
+    fadd deltaTime
+    fst (NeonGameManager PTR [ecx]).timer
+
+	; // Determine if the timer is greater than or equal to spawnTime
+	fcomp (NeonGameManager PTR [ecx]).spawnTime
+
+	; // Get flags
+	fnstsw ax
+	sahf
+
+	jb update_neon_game_manager_skip_spawn
+   
+	; // Set the timer to 0
+    mov (NeonGameManager PTR [ecx]).timer, 0
+    
+	; // Spawn the obstacle
+	mov ecx, pThis
+	mov ecx, (GameObject PTR [ecx]).pParentScene
+
+	INVOKE new_wall_obstacle, SCREEN_WIDTH, 20, 20
+	
+	mov ecx, pThis
+	mov ecx, (GameObject PTR [ecx]).pParentScene
+
+	INVOKE instantiate_game_object, eax
+    
+update_neon_game_manager_skip_spawn:
+	ret
+neon_game_manager_update ENDP
 
 END 

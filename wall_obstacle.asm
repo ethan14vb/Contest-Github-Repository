@@ -88,7 +88,7 @@ wall_obstacle_update PROC stdcall USES eax ebx edx, deltaTime: REAL4
 
 	; // If I'm past the edge of the screen, free me
 	mov ebx, (TransformComponent PTR[eax]).x
-	.IF ebx < 15
+	.IF ebx <= 1
 		mov ebx, pThis
 		mov ecx, (GameObject PTR [ebx]).pParentScene
 		INVOKE queue_free_game_object, ebx

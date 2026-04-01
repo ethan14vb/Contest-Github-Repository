@@ -17,6 +17,8 @@ INCLUDE game_object.inc
 
 NeonGameManager STRUCT
 	baseGameObject GameObject<>
+	timer REAL4 ?
+    spawnTime REAL4 ?
 NeonGameManager ENDS
 
 init_neon_game_manager PROTO

@@ -8,6 +8,7 @@ INCLUDE default_header.inc
 INCLUDE engine_types.inc
 INCLUDE scene.inc
 INCLUDE neon_square_player.inc
+INCLUDE neon_game_manager.inc
 INCLUDE wall_obstacle.inc
 
 .code
@@ -21,8 +22,8 @@ populate_neon_square_scene PROC PUBLIC USES eax ebx edx esi edi, pScene: DWORD
 	mov ecx, pScene
 	INVOKE instantiate_game_object, esi
 
-	; // Wall Obstacle
-	INVOKE new_wall_obstacle, SCREEN_WIDTH, 20, 20
+	; // Neon Game Manager
+	INVOKE new_neon_game_manager
 	mov esi, eax
 
 	mov ecx, pScene
