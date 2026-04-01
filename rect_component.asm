@@ -20,7 +20,7 @@ INCLUDE heap_functions.inc
 ; // ----------------------------------
 init_rect_component PROC PUBLIC USES ebx esi, h: DWORD, w : DWORD, r : BYTE, g : BYTE, b : BYTE, a : BYTE
 	; // Parent constructor
-	INVOKE init_component
+	INVOKE init_renderable_component, 0FFFFFFFFh, 1
 	mov (Component PTR [ecx]).componentType, RECT_COMPONENT_ID
 
 	; // Height & Width
@@ -38,10 +38,6 @@ init_rect_component PROC PUBLIC USES ebx esi, h: DWORD, w : DWORD, r : BYTE, g :
 	mov (RectComponent PTR [ecx]).b, bl
 	mov bl, a
 	mov (RectComponent PTR [ecx]).a, bl
-
-	; // Visible
-	mov esi, 0FFFFFFFFh
-	mov (RectComponent PTR [ecx]).visible, esi
 
 	mov eax, ecx
 	ret

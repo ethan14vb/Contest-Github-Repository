@@ -14,15 +14,7 @@ INCLUDE transform_component.inc
 INCLUDE rect_component.inc
 INCLUDE sprite_component.inc
 
-; // Enumerations
-RC_ENUM TYPEDEF DWORD
-
-RC_RECT = 0 ; // RenderCommand Rectangle
-RC_SPRITE = 1 ; // RenderCommand Sprite NYI
-
 RenderCommand STRUCT
-	rcType RC_ENUM ? ; // Render command type
-
 	; // Pointer to the transform that describes where the object should be rendered
 	pTransform DWORD ?
 
@@ -32,8 +24,8 @@ RenderCommand STRUCT
 RenderCommand ENDS
 
 ; // Constructor methods
-init_render_command PROTO rcType: RC_ENUM, pTransform : DWORD, pRenderable : DWORD
-new_render_command PROTO rcType: RC_ENUM, pTransform: DWORD, pRenderable: DWORD
+init_render_command PROTO pTransform : DWORD, pRenderable : DWORD
+new_render_command PROTO pTransform: DWORD, pRenderable: DWORD
 free_render_command PROTO
 
 ENDIF

@@ -15,6 +15,7 @@ INCLUDE neon_square_player.inc
 INCLUDE heap_functions.inc
 INCLUDE input_manager.inc
 INCLUDE transform_component.inc
+INCLUDE renderable_component.inc
 INCLUDE rect_component.inc
 
 .data
@@ -128,7 +129,7 @@ wall_obstacle_update PROC stdcall USES eax ebx edx, deltaTime: REAL4
 		mov ecx, pThis
 		mov ecx, (WallObstacle PTR [ecx]).pNeonPlayer
 		INVOKE get_first_component_which_is_a, RECT_COMPONENT_ID
-		mov (RectComponent PTR [eax]).visible, 0
+		mov (RenderableComponent PTR [eax]).visible, 0
 	.ENDIF
 
 	mov ecx, pThis

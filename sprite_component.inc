@@ -8,10 +8,10 @@
 IFNDEF SPRITE_COMPONENT_INC
 SPRITE_COMPONENT_INC EQU 1
 
-INCLUDE component.inc
+INCLUDE renderable_component.inc
 
 SpriteComponent STRUCT
-	baseComponent Component <>
+	baseRenderableComponent RenderableComponent <>
 
 	originX DWORD ?
 	originY DWORD ?
@@ -29,7 +29,6 @@ SpriteComponent STRUCT
 	; // *************************
 	flipX DWORD ?
 	flipY DWORD ? 
-	visible DWORD ?
 SpriteComponent ENDS
 
 ENDIF

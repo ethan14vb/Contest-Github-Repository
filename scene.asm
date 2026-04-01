@@ -398,7 +398,7 @@ scene_render_frame PROC PRIVATE USES eax ebx edx esi edi
 
 			mov ecx, esi
 			INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID ; // Get the transform pointer from the GameObject
-			INVOKE new_render_command, RC_RECT, eax, ebx
+			INVOKE new_render_command, eax, ebx
 
 			pop ebx
 
@@ -421,7 +421,7 @@ scene_render_frame PROC PRIVATE USES eax ebx edx esi edi
 
 			mov ebx, eax
 			INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID ; // Get the transform pointer from the GameObject
-			INVOKE new_render_command, RC_SPRITE, eax, eax
+			INVOKE new_render_command, eax, eax
 
 			pop ebx
 

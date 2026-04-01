@@ -9,10 +9,10 @@
 IFNDEF RECT_COMMAND_INC
 RECT_COMMAND_INC EQU 1
 
-INCLUDE component.inc
+INCLUDE renderable_component.inc
 
 RectComponent STRUCT
-	baseComponent Component <>
+	baseRenderableComponent RenderableComponent <>
 
 	h DWORD ? ; // Height
 	w DWORD ? ; // Width
@@ -23,8 +23,6 @@ RectComponent STRUCT
 	g BYTE ?
 	b BYTE ?
 	a BYTE ?
-
-	visible DWORD ?
 RectComponent ENDS
 
 ; // Constructor methods

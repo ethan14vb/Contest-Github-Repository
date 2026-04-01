@@ -307,7 +307,7 @@ drawRect PROC PRIVATE USES esi edi ebx ecx edx, pTrans:DWORD, pRect:DWORD, pCame
 
 	; // skip if not visible
 	mov edi, pRect
-	mov eax, (RectComponent PTR [edi]).visible
+	mov eax, (RenderableComponent PTR [edi]).visible
 	test eax, eax
 	jz drawRect_done
 
@@ -447,7 +447,8 @@ drawSprite PROC PRIVATE USES esi edi ebx ecx edx, pTrans:DWORD, pSprite:DWORD, p
 	local sx:DWORD, sy:DWORD, sw:DWORD, sh:DWORD, pTex:DWORD
 
 	; // skip if not visible
-	mov eax, (SpriteComponent PTR [pSprite]).visible
+	mov edx, pSprite
+	mov eax, (RenderableComponent PTR [edx]).visible
 	test eax, eax
 	jz drawSprite_done
 
@@ -535,11 +536,12 @@ cmd_loop:
 	dec ebx
 
 	mov eax, [esi]
-	mov edx, (RenderCommand PTR [eax]).rcType
+	mov edx, (RenderCommand PTR [eax]).pRenderable
+	mov edx, (Component PTR [edx]).componentType
 
-	.IF edx == RC_RECT
+	.IF edx == RECT_COMPONENT_ID
 		INVOKE drawRect, (RenderCommand PTR [eax]).pTransform, (RenderCommand PTR [eax]).pRenderable, pCamera, pBuffer
-	.ELSEIF edx == RC_SPRITE
+	.ELSEIF edx == SPRITE_COMPONENT_ID
 		INVOKE drawSprite, (RenderCommand PTR [eax]).pTransform, (RenderCommand PTR [eax]).pRenderable, pCamera, pBuffer
 	.ENDIF
 

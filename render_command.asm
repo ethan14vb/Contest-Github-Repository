@@ -19,9 +19,7 @@ INCLUDE heap_functions.inc
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-init_render_command PROC PUBLIC USES esi, rcType: RC_ENUM, pTransform : DWORD, pRenderable : DWORD
-	mov esi, rcType
-	mov (RenderCommand PTR [ecx]).rcType, esi
+init_render_command PROC PUBLIC USES esi, pTransform : DWORD, pRenderable : DWORD
 	mov esi, pTransform
 	mov (RenderCommand PTR [ecx]).pTransform, esi
 	mov esi, pRenderable
@@ -29,10 +27,10 @@ init_render_command PROC PUBLIC USES esi, rcType: RC_ENUM, pTransform : DWORD, p
 	ret
 init_render_command ENDP
 
-new_render_command PROC PUBLIC USES ecx edx, rcType: RC_ENUM, pTransform: DWORD, pRenderable: DWORD
+new_render_command PROC PUBLIC USES ecx edx, pTransform: DWORD, pRenderable: DWORD
 	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF RenderCommand
 	mov ecx, eax ; // Move the memory address to eax so it can function as a "this" pointer
-	INVOKE init_render_command, rcType, pTransform, pRenderable
+	INVOKE init_render_command, pTransform, pRenderable
 
 	ret ; // Return with the address of the memory block in HeapAlloc
 new_render_command ENDP
