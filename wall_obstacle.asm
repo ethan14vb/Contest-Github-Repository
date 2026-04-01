@@ -31,7 +31,7 @@ WALL_OBSTACLE_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFF
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-init_wall_obstacle PROC PUBLIC USES esi ebx edx
+init_wall_obstacle PROC PUBLIC USES esi ebx edx, startX : DWORD, startY : DWORD, height : DWORD
 	local pThis
 	mov pThis, ecx
 
@@ -41,11 +41,11 @@ init_wall_obstacle PROC PUBLIC USES esi ebx edx
 	mov (GameObject PTR [ecx]).pVt, OFFSET WALL_OBSTACLE_GAMEOBJECT_VTABLE
 		
 	; // Add transform component
-	INVOKE new_transform_component, 40, 25, 0
+	INVOKE new_transform_component, startX, startY, 0
 	INVOKE add_component, pThis, eax
 
 	; // Add rect component
-	INVOKE new_rect_component, 2, 2, 0, 0, 255, 255
+	INVOKE new_rect_component, height, 2, 0, 0, 255, 255
 	INVOKE add_component, pThis, eax
 
 	mov eax, pThis
@@ -57,10 +57,10 @@ init_wall_obstacle ENDP
 ; // new_wall_obstacle
 ; // Reserves heap space for the Object with parameters calls the initializer method
 ; // ----------------------------------
-new_wall_obstacle PROC PUBLIC USES ecx
+new_wall_obstacle PROC PUBLIC USES ecx, startX : DWORD, startY : DWORD, height : DWORD
 	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF WallObstacle
 	mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
-	INVOKE init_wall_obstacle
+	INVOKE init_wall_obstacle, startX, startY, height
 
 	ret ; // Return with the address of the memory block in HeapAlloc
 new_wall_obstacle ENDP

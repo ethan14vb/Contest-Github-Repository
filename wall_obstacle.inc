@@ -14,7 +14,7 @@ WallObstacle STRUCT
 	baseGameObject GameObject<>
 WallObstacle ENDS
 
-init_wall_obstacle PROTO
-new_wall_obstacle PROTO
+init_wall_obstacle	PROTO startX : DWORD, startY : DWORD, height : DWORD
+new_wall_obstacle	PROTO startX : DWORD, startY : DWORD, height : DWORD
 
 ENDIF
