@@ -18,7 +18,7 @@ INCLUDE transform_component.inc
 INCLUDE rect_component.inc
 
 .data
-WALL_OBSTACLE_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET wall_obstacle_update, OFFSET game_object_exit, OFFSET free_game_object>
+WALL_OBSTACLE_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET wall_obstacle_start, OFFSET wall_obstacle_update, OFFSET game_object_exit, OFFSET free_game_object>
 
 .code
 ; // ********************************************
@@ -69,6 +69,21 @@ new_wall_obstacle ENDP
 ; // ********************************************
 ; // Instance methods
 ; // ********************************************
+
+; // ----------------------------------
+; // wall_obstacle_start
+; // Initializes the wall obstacle once it is added to the scene
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+wall_obstacle_start PROC stdcall USES eax ebx edx
+	local pThis : DWORD
+	mov pThis, ecx
+
+	mov ecx, pThis ; // Restore the THIS pointer
+	ret
+wall_obstacle_start ENDP
 
 ; // ----------------------------------
 ; // wall_obstacle_update
