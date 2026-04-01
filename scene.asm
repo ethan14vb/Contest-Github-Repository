@@ -105,6 +105,43 @@ instantiate_game_object PROC PUBLIC USES esi, pGameObject: DWORD
 instantiate_game_object ENDP
 
 ; // ----------------------------------
+; // get_first_game_object_which_is_a
+; // Returns a pointer to the first GameObject in the scene's gameObjects
+; // vector that is the type specified, or NULL if it doesn't exist.
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+get_first_game_object_which_is_a PROC PUBLIC USES ecx ebx edx esi, gameObjectType: ENUM_GAME_OBJECT_ID
+	local pThis
+	mov pThis, ecx
+
+	lea ecx, (Scene PTR [ecx]).gameObjects
+	mov ebx, (UnorderedVector PTR [ecx]).count
+	mov eax, (UnorderedVector PTR [ecx]).pData
+	mov edx, 0 ; // int i = 0
+
+	; // Iterate through the GameObjects
+	.WHILE edx < ebx
+		; // esi = gameObjects[i]
+		mov esi, [eax + edx * 4]
+
+		mov ecx, (GameObject PTR [esi]).gameObjectType
+		.IF ecx == gameObjectType
+			mov eax, esi ; // return the pointer to the GameObject
+			jmp exit_get_first_game_object_which_is_a
+		.ENDIF
+
+		inc edx
+	.ENDW
+
+	mov eax, 0 ; // Return NULL if nothing was found
+	exit_get_first_game_object_which_is_a:
+	ret
+get_first_game_object_which_is_a ENDP
+
+
+; // ----------------------------------
 ; // queue_free_game_object
 ; // Queues a GameObject for removal
 ; //
