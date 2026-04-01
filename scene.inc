@@ -12,6 +12,7 @@ IFNDEF SCENE_INC
 SCENE_INC EQU 1
 
 INCLUDE unordered_vector.inc
+INCLUDE game_object_ids.inc
 INCLUDE camera.inc 
 
 Scene STRUCT
@@ -36,8 +37,9 @@ new_scene	PROTO maxGameObjects		: DWORD
 free_scene	PROTO
 
 ; // Instance methods
-instantiate_game_object PROTO pGameObject	:DWORD
-queue_free_game_object	PROTO pGameObject	:DWORD
-scene_update			PROTO deltaTime		:REAL4
+get_first_game_object_which_is_a	PROTO gameObjectType: ENUM_GAME_OBJECT_ID
+instantiate_game_object				PROTO pGameObject	: DWORD
+queue_free_game_object				PROTO pGameObject	: DWORD
+scene_update						PROTO deltaTime		: REAL4
 
 ENDIF

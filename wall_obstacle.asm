@@ -86,7 +86,11 @@ wall_obstacle_start PROC stdcall USES eax ebx edx
 
 	; // Initialize pNeonPlayer with the player in the scene
 	mov ecx, (GameObject PTR [ecx]).pParentScene
-	; // TODO find player
+	INVOKE get_first_game_object_which_is_a, NEON_SQUARE_PLAYER_GAME_OBJECT_ID
+
+	; // This operates by faith alone that there will be a NeonSquarePlayer in the scene before a WallObstacle is created.
+	mov ecx, pThis
+	mov (WallObstacle PTR [ecx]).pNeonPlayer, eax
 
 	mov ecx, pThis ; // Restore the THIS pointer
 	ret
