@@ -18,8 +18,7 @@ RenderCommand STRUCT
 	; // Pointer to the transform that describes where the object should be rendered
 	pTransform DWORD ?
 
-	; // Pointer to the renderable object. Could be a RectComponent, or a SpriteComponent 
-	; // depending on the value of rcType
+	; // Pointer to the RenderableComponent subclass
 	pRenderable DWORD ?
 RenderCommand ENDS
 
