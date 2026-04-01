@@ -18,6 +18,7 @@
     <MASM Include="heap_functions.asm" />
     <MASM Include="input_manager.asm" />
     <MASM Include="main.asm" />
+    <MASM Include="neon_game_manager.asm" />
     <MASM Include="neon_square_player.asm" />
     <MASM Include="neon_square_scene.asm" />
     <MASM Include="rectangle_test_scene.asm" />
