@@ -73,6 +73,35 @@ new_neon_square_player ENDP
 ; // ********************************************
 
 ; // ----------------------------------
+; // neon_square_player_die
+; // Kills the player visually
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+neon_square_player_die PROC stdcall USES eax ebx edx
+	local pThis : DWORD
+	mov pThis, ecx
+
+	mov eax, (NeonSquarePlayer PTR [ecx]).isAlive
+	.IF eax == 0
+		jmp neon_square_player_die_exit
+	.ENDIF
+
+	; // Make myself invisible
+	INVOKE get_first_component_which_is_a, RECT_COMPONENT_ID
+	mov (RenderableComponent PTR [ecx]).visible, 0
+
+	; // Set isAlive to false
+	mov ecx, pThis
+	mov (NeonSquarePlayer PTR [ecx]).isAlive, 0
+
+	mov ecx, pThis ; // Restore the THIS pointer
+neon_square_player_die_exit:
+	ret
+neon_square_player_die ENDP
+
+; // ----------------------------------
 ; // neon_square_player_update
 ; // Moves the player up and down depending on keyboard input.
 ; // 
