@@ -9,6 +9,7 @@ INCLUDE heap_functions.inc
 INCLUDE explosion_game_object.inc
 INCLUDE transform_component.inc
 INCLUDE rect_component.inc
+INCLUDE renderable_component.inc
 
 .data
 EXPLOSION_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET explosion_update, OFFSET game_object_exit, OFFSET free_game_object>
@@ -35,18 +36,17 @@ init_explosion_game_object PROC PUBLIC USES esi ebx edx, x : DWORD, y : DWORD, r
 	mov (GameObject PTR [ecx]).pVt, OFFSET EXPLOSION_GAMEOBJECT_VTABLE
 
 	; // Add transform component
-	mov ebx, radius
-	shl ebx, 2
-	neg ebx
-	add ebx, x; // x = x - (radius / 2)
+	mov ebx, x
 	mov eax, y
-	add eax, ebx ; // x = x - (radius / 2)
+	sub ebx, 4
+	sub eax, 4
 	INVOKE new_transform_component, ebx, eax, 0
 	INVOKE add_component, pThis, eax
 
 	; // Add rect component
 	mov ebx, radius
 	INVOKE new_rect_component, radius, radius, 0, 255, 0, 255
+	mov (RenderableComponent PTR [eax]).layer, 2
 	INVOKE add_component, pThis, eax
 
 	mov eax, pThis

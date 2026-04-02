@@ -12,9 +12,11 @@ INCLUDE engine_types.inc
 INCLUDE scene.inc
 INCLUDE neon_square_player.inc
 INCLUDE heap_functions.inc
+INCLUDE component_ids.inc
 INCLUDE input_manager.inc
 INCLUDE transform_component.inc
 INCLUDE rect_component.inc
+INCLUDE explosion_game_object.inc
 
 .data
 NEON_SQUARE_PLAYER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET neon_square_player_update, OFFSET game_object_exit, OFFSET free_game_object>
@@ -95,6 +97,17 @@ neon_square_player_die PROC stdcall PUBLIC USES eax ebx edx
 	; // Set isAlive to false
 	mov ecx, pThis
 	mov (NeonSquarePlayer PTR [ecx]).isAlive, 0
+
+	; // Spawn explosion
+	mov ecx, pThis
+	INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID
+	mov ebx, (TransformComponent PTR [eax]).x
+	mov edx, (TransformComponent PTR [eax]).y
+
+	INVOKE new_explosion_game_object, ebx, edx, 10
+
+	mov ecx, (GameObject PTR [ecx]).pParentScene
+	INVOKE instantiate_game_object, eax
 
 	mov ecx, pThis ; // Restore the THIS pointer
 neon_square_player_die_exit:
