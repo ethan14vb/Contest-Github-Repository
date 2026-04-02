@@ -25,6 +25,9 @@ BARRIER_STATE_ENUM		= 3
 PAUSE_STATE_ENUM		= 4
 
 
+TRANSITION_TO_STAIR_STATE_ENUM = 100
+
+
 NeonGameManager STRUCT
 	baseGameObject GameObject<>
 

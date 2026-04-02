@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 00:30:04
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 00:43:25
 neon_game_manager.asm					     Page 1 - 1
 
 
@@ -465,6 +465,9 @@ neon_game_manager.asm					     Page 1 - 1
  = 00000004		      C PAUSE_STATE_ENUM		= 4
 			      C 
 			      C 
+ = 00000064		      C TRANSITION_TO_STAIR_STATE_ENUM = 100
+			      C 
+			      C 
  00000028		      C NeonGameManager STRUCT
  00000000  00000000	      C 	baseGameObject GameObject<>
 	   00000000
@@ -530,7 +533,7 @@ neon_game_manager.asm					     Page 1 - 1
 
  00000000			.data
  00000000 00000000 E		NEON_GAME_MANAGER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET neon_game_manager_update, OFFSET game_object_exit, OFFSET free_game_object>
-	   00000314 R
+	   0000032E R
 	   00000000 E
 	   00000000 E
 
@@ -627,118 +630,148 @@ neon_game_manager.asm					     Page 1 - 1
 				; // ********************************************
 
 				; // ----------------------------------
+				; // transition_to_state
+				; // Transitions to the next state
+				; // 
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
+				; // ----------------------------------
+ 00000056			transition_to_state PROC USES eax ebx edx esi edi, state : GAME_MANAGER_STATE_ENUM
+ 00000056  55		   *	    push   ebp
+ 00000057  8B EC	   *	    mov    ebp, esp
+ 00000059  50		   *	    push   eax
+ 0000005A  53		   *	    push   ebx
+ 0000005B  52		   *	    push   edx
+ 0000005C  56		   *	    push   esi
+ 0000005D  57		   *	    push   edi
+ 0000005E  8B 45 08			mov eax, state
+
+					.IF eax == DEFAULT_STATE_ENUM
+ 00000061  0B C0	   *	    or	eax, eax
+ 00000063  75 26	   *	    jne    @C0001
+ 00000065  C7 41 20				mov (NeonGameManager PTR [ecx]).state, DEFAULT_STATE_ENUM
+	   00000000
+ 0000006C  C7 41 1C				mov (NeonGameManager PTR [ecx]).timer, 0
+	   00000000
+						
+						; // Get a random number of objects in this scene
+ 00000073  B8 00000004				mov eax, defaultStateObjectMax
+ 00000078  83 E8 02				sub eax, defaultStateObjectMin
+						
+						INVOKE RandomRange
+ 0000007B  E8 00000000 E   *	    call   RandomRange
+ 00000080  83 C0 02				add eax, defaultStateObjectMin
+
+ 00000083  89 41 24				mov (NeonGameManager PTR [ecx]).stateObjectCounter, eax
+					.ELSEIF eax == TUNNEL_STATE_ENUM
+ 00000086  E9 00000095	   *	    jmp    @C0003
+ 0000008B		   *@C0001:
+ 0000008B  83 F8 01	   *	    cmp    eax, TUNNEL_STATE_ENUM
+ 0000008E  75 23	   *	    jne    @C0004
+ 00000090  C7 41 20				mov (NeonGameManager PTR [ecx]).state, TUNNEL_STATE_ENUM
+	   00000001
+ 00000097  C7 41 1C				mov (NeonGameManager PTR [ecx]).timer, 0
+	   00000000
+						
+						; // Get a random number of objects in this scene
+ 0000009E  B8 00000004				mov eax, tunnelStateObjectMax
+ 000000A3  83 E8 02				sub eax, tunnelStateObjectMin
+						
+						INVOKE RandomRange
+ 000000A6  E8 00000000 E   *	    call   RandomRange
+ 000000AB  83 C0 02				add eax, tunnelStateObjectMin
+							
+ 000000AE  89 41 24				mov (NeonGameManager PTR [ecx]).stateObjectCounter, eax
+					.ELSEIF eax == STAIRCASE_STATE_ENUM
+ 000000B1  EB 6D	   *	    jmp    @C0006
+ 000000B3		   *@C0004:
+ 000000B3  83 F8 02	   *	    cmp    eax, STAIRCASE_STATE_ENUM
+ 000000B6  75 68	   *	    jne    @C0007
+ 000000B8  C7 41 20				mov (NeonGameManager PTR [ecx]).state, STAIRCASE_STATE_ENUM
+	   00000002
+ 000000BF  C7 41 1C				mov (NeonGameManager PTR [ecx]).timer, 0
+	   00000000
+						
+						; // Get a random number of objects in this scene
+ 000000C6  A1 00000024 R			mov eax, stairStateObjectMax
+ 000000CB  2B 05 00000020 R			sub eax, stairStateObjectMin
+						
+						INVOKE RandomRange
+ 000000D1  E8 00000000 E   *	    call   RandomRange
+ 000000D6  03 05 00000020 R			add eax, stairStateObjectMin
+ 000000DC  89 41 24				mov (NeonGameManager PTR [ecx]).stateObjectCounter, eax
+							
+						; // Set a direction
+ 000000DF  B8 00000002				mov eax, 2
+						INVOKE RandomRange
+ 000000E4  E8 00000000 E   *	    call   RandomRange
+						.IF eax == 0
+ 000000E9  0B C0	   *	    or	eax, eax
+ 000000EB  75 16	   *	    jne    @C0009
+							; // Direction = Down
+ 000000ED  C7 05 00000028 R				mov stairDirection, 1 ; // Can be either 0 or 1
+	   00000001
+ 000000F7  C7 05 0000002C R				mov stairSpawnPos, 2
+	   00000002
+
+						.ELSEIF eax == 1
+ 00000101  EB 1D	   *	    jmp    @C000B
+ 00000103		   *@C0009:
+ 00000103  83 F8 01	   *	    cmp    eax, 001h
+ 00000106  75 18	   *	    jne    @C000C
+							; // Direction = Up
+ 00000108  C7 05 00000028 R				mov stairDirection, 0; // Can be either 0 or 1
+	   00000000
+ 00000112  BB 00000032					mov ebx, SCREEN_HEIGHT
+ 00000117  83 EB 0E					sub ebx, 14
+ 0000011A  89 1D 0000002C R				mov stairSpawnPos, ebx
+						.ENDIF
+						
+					.ENDIF
+ 00000120		   *@C000C:
+ 00000120		   *@C000B:
+ 00000120		   *@C0007:
+ 00000120		   *@C0006:
+ 00000120		   *@C0003:
+
+					ret
+ 00000120  5F		   *	    pop    edi
+ 00000121  5E		   *	    pop    esi
+ 00000122  5A		   *	    pop    edx
+ 00000123  5B		   *	    pop    ebx
+ 00000124  58		   *	    pop    eax
+ 00000125  C9		   *	    leave  
+ 00000126  C2 0004	   *	    ret    00004h
+ 00000129			transition_to_state ENDP
+
+				; // ----------------------------------
 				; // transition_state
 				; // Randomly decides what the next state will be
 				; // 
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000056			transition_state PROC USES eax ebx edx esi edi
- 00000056  50		   *	    push   eax
- 00000057  53		   *	    push   ebx
- 00000058  52		   *	    push   edx
- 00000059  56		   *	    push   esi
- 0000005A  57		   *	    push   edi
- 0000005B  B8 00000003			mov eax, 3
+ 00000129			transition_state PROC USES eax ebx edx esi edi
+ 00000129  50		   *	    push   eax
+ 0000012A  53		   *	    push   ebx
+ 0000012B  52		   *	    push   edx
+ 0000012C  56		   *	    push   esi
+ 0000012D  57		   *	    push   edi
+ 0000012E  B8 00000003			mov eax, 3
 					INVOKE RandomRange
- 00000060  E8 00000000 E   *	    call   RandomRange
-
-					.IF eax == DEFAULT_STATE_ENUM
- 00000065  0B C0	   *	    or	eax, eax
- 00000067  75 26	   *	    jne    @C0001
- 00000069  C7 41 20				mov (NeonGameManager PTR [ecx]).state, DEFAULT_STATE_ENUM
-	   00000000
- 00000070  C7 41 1C				mov (NeonGameManager PTR [ecx]).timer, 0
-	   00000000
-						
-						; // Get a random number of objects in this scene
- 00000077  B8 00000004				mov eax, defaultStateObjectMax
- 0000007C  83 E8 02				sub eax, defaultStateObjectMin
-						
-						INVOKE RandomRange
- 0000007F  E8 00000000 E   *	    call   RandomRange
- 00000084  83 C0 02				add eax, defaultStateObjectMin
-
- 00000087  89 41 24				mov (NeonGameManager PTR [ecx]).stateObjectCounter, eax
-					.ELSEIF eax == TUNNEL_STATE_ENUM
- 0000008A  E9 00000095	   *	    jmp    @C0003
- 0000008F		   *@C0001:
- 0000008F  83 F8 01	   *	    cmp    eax, TUNNEL_STATE_ENUM
- 00000092  75 23	   *	    jne    @C0004
- 00000094  C7 41 20				mov (NeonGameManager PTR [ecx]).state, TUNNEL_STATE_ENUM
-	   00000001
- 0000009B  C7 41 1C				mov (NeonGameManager PTR [ecx]).timer, 0
-	   00000000
-						
-						; // Get a random number of objects in this scene
- 000000A2  B8 00000004				mov eax, tunnelStateObjectMax
- 000000A7  83 E8 02				sub eax, tunnelStateObjectMin
-						
-						INVOKE RandomRange
- 000000AA  E8 00000000 E   *	    call   RandomRange
- 000000AF  83 C0 02				add eax, tunnelStateObjectMin
-							
- 000000B2  89 41 24				mov (NeonGameManager PTR [ecx]).stateObjectCounter, eax
-					.ELSEIF eax == STAIRCASE_STATE_ENUM
- 000000B5  EB 6D	   *	    jmp    @C0006
- 000000B7		   *@C0004:
- 000000B7  83 F8 02	   *	    cmp    eax, STAIRCASE_STATE_ENUM
- 000000BA  75 68	   *	    jne    @C0007
- 000000BC  C7 41 20				mov (NeonGameManager PTR [ecx]).state, STAIRCASE_STATE_ENUM
-	   00000002
- 000000C3  C7 41 1C				mov (NeonGameManager PTR [ecx]).timer, 0
-	   00000000
-						
-						; // Get a random number of objects in this scene
- 000000CA  A1 00000024 R			mov eax, stairStateObjectMax
- 000000CF  2B 05 00000020 R			sub eax, stairStateObjectMin
-						
-						INVOKE RandomRange
- 000000D5  E8 00000000 E   *	    call   RandomRange
- 000000DA  03 05 00000020 R			add eax, stairStateObjectMin
- 000000E0  89 41 24				mov (NeonGameManager PTR [ecx]).stateObjectCounter, eax
-							
-						; // Set a direction
- 000000E3  B8 00000002				mov eax, 2
-						INVOKE RandomRange
- 000000E8  E8 00000000 E   *	    call   RandomRange
-						.IF eax == 0
- 000000ED  0B C0	   *	    or	eax, eax
- 000000EF  75 16	   *	    jne    @C0009
-							; // Direction = Down
- 000000F1  C7 05 00000028 R				mov stairDirection, 1 ; // Can be either 0 or 1
-	   00000001
- 000000FB  C7 05 0000002C R				mov stairSpawnPos, 2
-	   00000002
-
-						.ELSEIF eax == 1
- 00000105  EB 1D	   *	    jmp    @C000B
- 00000107		   *@C0009:
- 00000107  83 F8 01	   *	    cmp    eax, 001h
- 0000010A  75 18	   *	    jne    @C000C
-							; // Direction = Up
- 0000010C  C7 05 00000028 R				mov stairDirection, 0; // Can be either 0 or 1
-	   00000000
- 00000116  BB 00000032					mov ebx, SCREEN_HEIGHT
- 0000011B  83 EB 0E					sub ebx, 14
- 0000011E  89 1D 0000002C R				mov stairSpawnPos, ebx
-						.ENDIF
-						
-					.ENDIF
- 00000124		   *@C000C:
- 00000124		   *@C000B:
- 00000124		   *@C0007:
- 00000124		   *@C0006:
- 00000124		   *@C0003:
+ 00000133  E8 00000000 E   *	    call   RandomRange
+					INVOKE transition_to_state, eax
+ 00000138  50		   *	    push   eax
+ 00000139  E8 FFFFFF18	   *	    call   transition_to_state
 
 					ret
- 00000124  5F		   *	    pop    edi
- 00000125  5E		   *	    pop    esi
- 00000126  5A		   *	    pop    edx
- 00000127  5B		   *	    pop    ebx
- 00000128  58		   *	    pop    eax
- 00000129  C3		   *	    ret    00000h
- 0000012A			transition_state ENDP
+ 0000013E  5F		   *	    pop    edi
+ 0000013F  5E		   *	    pop    esi
+ 00000140  5A		   *	    pop    edx
+ 00000141  5B		   *	    pop    ebx
+ 00000142  58		   *	    pop    eax
+ 00000143  C3		   *	    ret    00000h
+ 00000144			transition_state ENDP
 
 				; // ----------------------------------
 				; // default_state_update
@@ -747,81 +780,81 @@ neon_game_manager.asm					     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 0000012A			default_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
+ 00000144			default_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 					local pThis : DWORD
- 0000012A  55		   *	    push   ebp
- 0000012B  8B EC	   *	    mov    ebp, esp
- 0000012D  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 00000130  50		   *	    push   eax
- 00000131  53		   *	    push   ebx
- 00000132  52		   *	    push   edx
- 00000133  56		   *	    push   esi
- 00000134  57		   *	    push   edi
- 00000135  89 4D FC			mov pThis, ecx
+ 00000144  55		   *	    push   ebp
+ 00000145  8B EC	   *	    mov    ebp, esp
+ 00000147  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 0000014A  50		   *	    push   eax
+ 0000014B  53		   *	    push   ebx
+ 0000014C  52		   *	    push   edx
+ 0000014D  56		   *	    push   esi
+ 0000014E  57		   *	    push   edi
+ 0000014F  89 4D FC			mov pThis, ecx
 
 					; // Update timer
- 00000138  D9 41 1C			fld (NeonGameManager PTR [ecx]).timer
- 0000013B  D8 45 08		    fadd deltaTime
- 0000013E  D9 51 1C		    fst (NeonGameManager PTR [ecx]).timer
+ 00000152  D9 41 1C			fld (NeonGameManager PTR [ecx]).timer
+ 00000155  D8 45 08		    fadd deltaTime
+ 00000158  D9 51 1C		    fst (NeonGameManager PTR [ecx]).timer
 
 					; // Determine if the timer is greater than or equal to spawnTime
- 00000141  D8 1D 00000010 R		fcomp defaultSpawnTime
+ 0000015B  D8 1D 00000010 R		fcomp defaultSpawnTime
 
 					; // Get flags
- 00000147  DF E0			fnstsw ax
- 00000149  9E				sahf
+ 00000161  DF E0			fnstsw ax
+ 00000163  9E				sahf
 
- 0000014A  72 42			jb default_state_update_skip_spawn
+ 00000164  72 42			jb default_state_update_skip_spawn
 				   
 					; // Set the timer to 0
- 0000014C  C7 41 1C		    mov (NeonGameManager PTR [ecx]).timer, 0
+ 00000166  C7 41 1C		    mov (NeonGameManager PTR [ecx]).timer, 0
 	   00000000
 				    
 					; // Spawn the obstacle
- 00000153  8B 4D FC			mov ecx, pThis
- 00000156  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
+ 0000016D  8B 4D FC			mov ecx, pThis
+ 00000170  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
 
- 00000159  B8 00000032			mov eax, SCREEN_HEIGHT
- 0000015E  83 E8 14			sub eax, 20
+ 00000173  B8 00000032			mov eax, SCREEN_HEIGHT
+ 00000178  83 E8 14			sub eax, 20
 
 					INVOKE RandomRange
- 00000161  E8 00000000 E   *	    call   RandomRange
+ 0000017B  E8 00000000 E   *	    call   RandomRange
 
 					INVOKE new_wall_obstacle, SCREEN_WIDTH, eax, 20
- 00000166  6A 14	   *	    push   +000000014h
- 00000168  50		   *	    push   eax
- 00000169  6A 50	   *	    push   +000000050h
- 0000016B  E8 00000000 E   *	    call   new_wall_obstacle
+ 00000180  6A 14	   *	    push   +000000014h
+ 00000182  50		   *	    push   eax
+ 00000183  6A 50	   *	    push   +000000050h
+ 00000185  E8 00000000 E   *	    call   new_wall_obstacle
 					
- 00000170  8B 4D FC			mov ecx, pThis
- 00000173  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
+ 0000018A  8B 4D FC			mov ecx, pThis
+ 0000018D  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
 
 					INVOKE instantiate_game_object, eax
- 00000176  50		   *	    push   eax
- 00000177  E8 00000000 E   *	    call   instantiate_game_object
+ 00000190  50		   *	    push   eax
+ 00000191  E8 00000000 E   *	    call   instantiate_game_object
 
- 0000017C  8B 4D FC			mov ecx, pThis
- 0000017F  FF 49 24			dec (NeonGameManager PTR [ecx]).stateObjectCounter
+ 00000196  8B 4D FC			mov ecx, pThis
+ 00000199  FF 49 24			dec (NeonGameManager PTR [ecx]).stateObjectCounter
 
- 00000182  8B 59 24			mov ebx, (NeonGameManager PTR[ecx]).stateObjectCounter
+ 0000019C  8B 59 24			mov ebx, (NeonGameManager PTR[ecx]).stateObjectCounter
 					.IF ebx == 0
- 00000185  0B DB	   *	    or	ebx, ebx
- 00000187  75 05	   *	    jne    @C000E
+ 0000019F  0B DB	   *	    or	ebx, ebx
+ 000001A1  75 05	   *	    jne    @C000E
 						INVOKE transition_state
- 00000189  E8 FFFFFEC8	   *	    call   transition_state
+ 000001A3  E8 FFFFFF81	   *	    call   transition_state
 					.ENDIF
- 0000018E		   *@C000E:
+ 000001A8		   *@C000E:
 				    
- 0000018E			default_state_update_skip_spawn:
+ 000001A8			default_state_update_skip_spawn:
 					ret
- 0000018E  5F		   *	    pop    edi
- 0000018F  5E		   *	    pop    esi
- 00000190  5A		   *	    pop    edx
- 00000191  5B		   *	    pop    ebx
- 00000192  58		   *	    pop    eax
- 00000193  C9		   *	    leave  
- 00000194  C2 0004	   *	    ret    00004h
- 00000197			default_state_update ENDP
+ 000001A8  5F		   *	    pop    edi
+ 000001A9  5E		   *	    pop    esi
+ 000001AA  5A		   *	    pop    edx
+ 000001AB  5B		   *	    pop    ebx
+ 000001AC  58		   *	    pop    eax
+ 000001AD  C9		   *	    leave  
+ 000001AE  C2 0004	   *	    ret    00004h
+ 000001B1			default_state_update ENDP
 
 				; // ----------------------------------
 				; // tunnel_state_update
@@ -830,103 +863,103 @@ neon_game_manager.asm					     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000197			tunnel_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
+ 000001B1			tunnel_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 					local pThis : DWORD
- 00000197  55		   *	    push   ebp
- 00000198  8B EC	   *	    mov    ebp, esp
- 0000019A  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 0000019D  50		   *	    push   eax
- 0000019E  53		   *	    push   ebx
- 0000019F  52		   *	    push   edx
- 000001A0  56		   *	    push   esi
- 000001A1  57		   *	    push   edi
- 000001A2  89 4D FC			mov pThis, ecx
+ 000001B1  55		   *	    push   ebp
+ 000001B2  8B EC	   *	    mov    ebp, esp
+ 000001B4  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 000001B7  50		   *	    push   eax
+ 000001B8  53		   *	    push   ebx
+ 000001B9  52		   *	    push   edx
+ 000001BA  56		   *	    push   esi
+ 000001BB  57		   *	    push   edi
+ 000001BC  89 4D FC			mov pThis, ecx
 
 					; // Update timer
- 000001A5  D9 41 1C			fld (NeonGameManager PTR [ecx]).timer
- 000001A8  D8 45 08		    fadd deltaTime
- 000001AB  D9 51 1C		    fst (NeonGameManager PTR [ecx]).timer
+ 000001BF  D9 41 1C			fld (NeonGameManager PTR [ecx]).timer
+ 000001C2  D8 45 08		    fadd deltaTime
+ 000001C5  D9 51 1C		    fst (NeonGameManager PTR [ecx]).timer
 
 					; // Determine if the timer is greater than or equal to spawnTime
- 000001AE  D8 1D 00000014 R		fcomp tunnelSpawnTime
+ 000001C8  D8 1D 00000014 R		fcomp tunnelSpawnTime
 
 					; // Get flags
- 000001B4  DF E0			fnstsw ax
- 000001B6  9E				sahf
+ 000001CE  DF E0			fnstsw ax
+ 000001D0  9E				sahf
 
- 000001B7  72 66			jb tunnel_state_update_skip_spawn
+ 000001D1  72 66			jb tunnel_state_update_skip_spawn
 				   
 					; // Set the timer to 0
- 000001B9  C7 41 1C		    mov (NeonGameManager PTR [ecx]).timer, 0
+ 000001D3  C7 41 1C		    mov (NeonGameManager PTR [ecx]).timer, 0
 	   00000000
 				    
 					; // Spawn the obstacle
- 000001C0  8B 4D FC			mov ecx, pThis
- 000001C3  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
+ 000001DA  8B 4D FC			mov ecx, pThis
+ 000001DD  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
 
- 000001C6  B8 00000032			mov eax, SCREEN_HEIGHT
- 000001CB  83 E8 12			sub eax, 18
+ 000001E0  B8 00000032			mov eax, SCREEN_HEIGHT
+ 000001E5  83 E8 12			sub eax, 18
 
 					INVOKE RandomRange
- 000001CE  E8 00000000 E   *	    call   RandomRange
- 000001D3  83 C0 01			add eax, 1
+ 000001E8  E8 00000000 E   *	    call   RandomRange
+ 000001ED  83 C0 01			add eax, 1
 
- 000001D6  8B D8			mov ebx, eax ; // Store the random number in ebx
+ 000001F0  8B D8			mov ebx, eax ; // Store the random number in ebx
 
 					; // Spawn the top wall
 					INVOKE new_wall_obstacle, SCREEN_WIDTH, 0, ebx
- 000001D8  53		   *	    push   ebx
- 000001D9  6A 00	   *	    push   +000000000h
- 000001DB  6A 50	   *	    push   +000000050h
- 000001DD  E8 00000000 E   *	    call   new_wall_obstacle
+ 000001F2  53		   *	    push   ebx
+ 000001F3  6A 00	   *	    push   +000000000h
+ 000001F5  6A 50	   *	    push   +000000050h
+ 000001F7  E8 00000000 E   *	    call   new_wall_obstacle
 					
- 000001E2  8B 4D FC			mov ecx, pThis
- 000001E5  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
+ 000001FC  8B 4D FC			mov ecx, pThis
+ 000001FF  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
 
 					INVOKE instantiate_game_object, eax
- 000001E8  50		   *	    push   eax
- 000001E9  E8 00000000 E   *	    call   instantiate_game_object
+ 00000202  50		   *	    push   eax
+ 00000203  E8 00000000 E   *	    call   instantiate_game_object
 
 					; // Now spawn the bottom wall
- 000001EE  83 C3 11			add ebx, 17
- 000001F1  BA 00000050			mov edx, SCREEN_WIDTH
- 000001F6  2B D3			sub edx, ebx
+ 00000208  83 C3 11			add ebx, 17
+ 0000020B  BA 00000050			mov edx, SCREEN_WIDTH
+ 00000210  2B D3			sub edx, ebx
 					INVOKE new_wall_obstacle, SCREEN_WIDTH, ebx, edx
- 000001F8  52		   *	    push   edx
- 000001F9  53		   *	    push   ebx
- 000001FA  6A 50	   *	    push   +000000050h
- 000001FC  E8 00000000 E   *	    call   new_wall_obstacle
+ 00000212  52		   *	    push   edx
+ 00000213  53		   *	    push   ebx
+ 00000214  6A 50	   *	    push   +000000050h
+ 00000216  E8 00000000 E   *	    call   new_wall_obstacle
 
- 00000201  8B 4D FC			mov ecx, pThis
- 00000204  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
+ 0000021B  8B 4D FC			mov ecx, pThis
+ 0000021E  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
 
 					INVOKE instantiate_game_object, eax
- 00000207  50		   *	    push   eax
- 00000208  E8 00000000 E   *	    call   instantiate_game_object
+ 00000221  50		   *	    push   eax
+ 00000222  E8 00000000 E   *	    call   instantiate_game_object
 
 					; // Decrement the amount of objects left to spawn in this state
- 0000020D  8B 4D FC			mov ecx, pThis
- 00000210  FF 49 24			dec (NeonGameManager PTR [ecx]).stateObjectCounter
+ 00000227  8B 4D FC			mov ecx, pThis
+ 0000022A  FF 49 24			dec (NeonGameManager PTR [ecx]).stateObjectCounter
 
- 00000213  8B 59 24			mov ebx, (NeonGameManager PTR[ecx]).stateObjectCounter
+ 0000022D  8B 59 24			mov ebx, (NeonGameManager PTR[ecx]).stateObjectCounter
 					.IF ebx == 0
- 00000216  0B DB	   *	    or	ebx, ebx
- 00000218  75 05	   *	    jne    @C0010
+ 00000230  0B DB	   *	    or	ebx, ebx
+ 00000232  75 05	   *	    jne    @C0010
 						INVOKE transition_state
- 0000021A  E8 FFFFFE37	   *	    call   transition_state
+ 00000234  E8 FFFFFEF0	   *	    call   transition_state
 					.ENDIF
- 0000021F		   *@C0010:
+ 00000239		   *@C0010:
 				    
- 0000021F			tunnel_state_update_skip_spawn:
+ 00000239			tunnel_state_update_skip_spawn:
 					ret
- 0000021F  5F		   *	    pop    edi
- 00000220  5E		   *	    pop    esi
- 00000221  5A		   *	    pop    edx
- 00000222  5B		   *	    pop    ebx
- 00000223  58		   *	    pop    eax
- 00000224  C9		   *	    leave  
- 00000225  C2 0004	   *	    ret    00004h
- 00000228			tunnel_state_update ENDP
+ 00000239  5F		   *	    pop    edi
+ 0000023A  5E		   *	    pop    esi
+ 0000023B  5A		   *	    pop    edx
+ 0000023C  5B		   *	    pop    ebx
+ 0000023D  58		   *	    pop    eax
+ 0000023E  C9		   *	    leave  
+ 0000023F  C2 0004	   *	    ret    00004h
+ 00000242			tunnel_state_update ENDP
 
 				; // ----------------------------------
 				; // pause_state_update
@@ -935,49 +968,49 @@ neon_game_manager.asm					     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000228			pause_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
+ 00000242			pause_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 					local pThis : DWORD
- 00000228  55		   *	    push   ebp
- 00000229  8B EC	   *	    mov    ebp, esp
- 0000022B  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 0000022E  50		   *	    push   eax
- 0000022F  53		   *	    push   ebx
- 00000230  52		   *	    push   edx
- 00000231  56		   *	    push   esi
- 00000232  57		   *	    push   edi
- 00000233  89 4D FC			mov pThis, ecx
+ 00000242  55		   *	    push   ebp
+ 00000243  8B EC	   *	    mov    ebp, esp
+ 00000245  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 00000248  50		   *	    push   eax
+ 00000249  53		   *	    push   ebx
+ 0000024A  52		   *	    push   edx
+ 0000024B  56		   *	    push   esi
+ 0000024C  57		   *	    push   edi
+ 0000024D  89 4D FC			mov pThis, ecx
 
 					; // Update timer
- 00000236  D9 41 1C			fld (NeonGameManager PTR [ecx]).timer
- 00000239  D8 45 08		    fadd deltaTime
- 0000023C  D9 51 1C		    fst (NeonGameManager PTR [ecx]).timer
+ 00000250  D9 41 1C			fld (NeonGameManager PTR [ecx]).timer
+ 00000253  D8 45 08		    fadd deltaTime
+ 00000256  D9 51 1C		    fst (NeonGameManager PTR [ecx]).timer
 
 					; // Determine if the timer is greater than or equal to spawnTime
- 0000023F  D8 1D 00000018 R		fcomp pauseTime
+ 00000259  D8 1D 00000018 R		fcomp pauseTime
 
 					; // Get flags
- 00000245  DF E0			fnstsw ax
- 00000247  9E				sahf
+ 0000025F  DF E0			fnstsw ax
+ 00000261  9E				sahf
 
- 00000248  72 0C			jb pause_state_update_skip_spawn
+ 00000262  72 0C			jb pause_state_update_skip_spawn
 				   
 					; // Set the timer to 0
- 0000024A  C7 41 1C		    mov (NeonGameManager PTR [ecx]).timer, 0
+ 00000264  C7 41 1C		    mov (NeonGameManager PTR [ecx]).timer, 0
 	   00000000
 						
 					INVOKE transition_state
- 00000251  E8 FFFFFE00	   *	    call   transition_state
+ 0000026B  E8 FFFFFEB9	   *	    call   transition_state
 
- 00000256			pause_state_update_skip_spawn:
+ 00000270			pause_state_update_skip_spawn:
 					ret
- 00000256  5F		   *	    pop    edi
- 00000257  5E		   *	    pop    esi
- 00000258  5A		   *	    pop    edx
- 00000259  5B		   *	    pop    ebx
- 0000025A  58		   *	    pop    eax
- 0000025B  C9		   *	    leave  
- 0000025C  C2 0004	   *	    ret    00004h
- 0000025F			pause_state_update ENDP
+ 00000270  5F		   *	    pop    edi
+ 00000271  5E		   *	    pop    esi
+ 00000272  5A		   *	    pop    edx
+ 00000273  5B		   *	    pop    ebx
+ 00000274  58		   *	    pop    eax
+ 00000275  C9		   *	    leave  
+ 00000276  C2 0004	   *	    ret    00004h
+ 00000279			pause_state_update ENDP
 
 				; // ----------------------------------
 				; // stair_state_update
@@ -986,112 +1019,112 @@ neon_game_manager.asm					     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 0000025F			stair_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
+ 00000279			stair_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 					local pThis : DWORD
- 0000025F  55		   *	    push   ebp
- 00000260  8B EC	   *	    mov    ebp, esp
- 00000262  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 00000265  50		   *	    push   eax
- 00000266  53		   *	    push   ebx
- 00000267  52		   *	    push   edx
- 00000268  56		   *	    push   esi
- 00000269  57		   *	    push   edi
- 0000026A  89 4D FC			mov pThis, ecx
+ 00000279  55		   *	    push   ebp
+ 0000027A  8B EC	   *	    mov    ebp, esp
+ 0000027C  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 0000027F  50		   *	    push   eax
+ 00000280  53		   *	    push   ebx
+ 00000281  52		   *	    push   edx
+ 00000282  56		   *	    push   esi
+ 00000283  57		   *	    push   edi
+ 00000284  89 4D FC			mov pThis, ecx
 
 					; // Update timer
- 0000026D  D9 41 1C			fld (NeonGameManager PTR [ecx]).timer
- 00000270  D8 45 08		    fadd deltaTime
- 00000273  D9 51 1C		    fst (NeonGameManager PTR [ecx]).timer
+ 00000287  D9 41 1C			fld (NeonGameManager PTR [ecx]).timer
+ 0000028A  D8 45 08		    fadd deltaTime
+ 0000028D  D9 51 1C		    fst (NeonGameManager PTR [ecx]).timer
 
 					; // Determine if the timer is greater than or equal to spawnTime
- 00000276  D8 1D 0000001C R		fcomp stairSpawnTime
+ 00000290  D8 1D 0000001C R		fcomp stairSpawnTime
 
 					; // Get flags
- 0000027C  DF E0			fnstsw ax
- 0000027E  9E				sahf
+ 00000296  DF E0			fnstsw ax
+ 00000298  9E				sahf
 
- 0000027F  0F 82 00000086		jb stair_state_update_skip_spawn
+ 00000299  0F 82 00000086		jb stair_state_update_skip_spawn
 				   
 					; // Set the timer to 0
- 00000285  C7 41 1C		    mov (NeonGameManager PTR [ecx]).timer, 0
+ 0000029F  C7 41 1C		    mov (NeonGameManager PTR [ecx]).timer, 0
 	   00000000
 				    
 					; // Spawn the obstacle
- 0000028C  8B 4D FC			mov ecx, pThis
- 0000028F  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
+ 000002A6  8B 4D FC			mov ecx, pThis
+ 000002A9  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
 
- 00000292  8B D8			mov ebx, eax ; // Store the random number in ebx
+ 000002AC  8B D8			mov ebx, eax ; // Store the random number in ebx
 
 					; // Spawn the top wall
- 00000294  8B 1D 0000002C R		mov ebx, stairSpawnPos
+ 000002AE  8B 1D 0000002C R		mov ebx, stairSpawnPos
 					INVOKE new_wall_obstacle, SCREEN_WIDTH, 0, ebx
- 0000029A  53		   *	    push   ebx
- 0000029B  6A 00	   *	    push   +000000000h
- 0000029D  6A 50	   *	    push   +000000050h
- 0000029F  E8 00000000 E   *	    call   new_wall_obstacle
+ 000002B4  53		   *	    push   ebx
+ 000002B5  6A 00	   *	    push   +000000000h
+ 000002B7  6A 50	   *	    push   +000000050h
+ 000002B9  E8 00000000 E   *	    call   new_wall_obstacle
 					
- 000002A4  8B 1D 00000028 R		mov ebx, stairDirection
+ 000002BE  8B 1D 00000028 R		mov ebx, stairDirection
 					.IF ebx == 0
- 000002AA  0B DB	   *	    or	ebx, ebx
- 000002AC  75 0E	   *	    jne    @C0012
- 000002AE  FF 0D 0000002C R			dec stairSpawnPos
- 000002B4  FF 0D 0000002C R			dec stairSpawnPos
+ 000002C4  0B DB	   *	    or	ebx, ebx
+ 000002C6  75 0E	   *	    jne    @C0012
+ 000002C8  FF 0D 0000002C R			dec stairSpawnPos
+ 000002CE  FF 0D 0000002C R			dec stairSpawnPos
 					.ELSE
- 000002BA  EB 0C	   *	    jmp    @C0014
- 000002BC		   *@C0012:
- 000002BC  FF 05 0000002C R			inc stairSpawnPos
- 000002C2  FF 05 0000002C R			inc stairSpawnPos
+ 000002D4  EB 0C	   *	    jmp    @C0014
+ 000002D6		   *@C0012:
+ 000002D6  FF 05 0000002C R			inc stairSpawnPos
+ 000002DC  FF 05 0000002C R			inc stairSpawnPos
 					.ENDIF
- 000002C8		   *@C0014:
+ 000002E2		   *@C0014:
 
- 000002C8  8B 4D FC			mov ecx, pThis
- 000002CB  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
+ 000002E2  8B 4D FC			mov ecx, pThis
+ 000002E5  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
 
 					INVOKE instantiate_game_object, eax
- 000002CE  50		   *	    push   eax
- 000002CF  E8 00000000 E   *	    call   instantiate_game_object
+ 000002E8  50		   *	    push   eax
+ 000002E9  E8 00000000 E   *	    call   instantiate_game_object
 
 					; // Now spawn the bottom wall
- 000002D4  8B 1D 0000002C R		mov ebx, stairSpawnPos
- 000002DA  83 C3 11			add ebx, 17
- 000002DD  BA 00000050			mov edx, SCREEN_WIDTH
- 000002E2  2B D3			sub edx, ebx
+ 000002EE  8B 1D 0000002C R		mov ebx, stairSpawnPos
+ 000002F4  83 C3 11			add ebx, 17
+ 000002F7  BA 00000050			mov edx, SCREEN_WIDTH
+ 000002FC  2B D3			sub edx, ebx
 					INVOKE new_wall_obstacle, SCREEN_WIDTH, ebx, edx
- 000002E4  52		   *	    push   edx
- 000002E5  53		   *	    push   ebx
- 000002E6  6A 50	   *	    push   +000000050h
- 000002E8  E8 00000000 E   *	    call   new_wall_obstacle
+ 000002FE  52		   *	    push   edx
+ 000002FF  53		   *	    push   ebx
+ 00000300  6A 50	   *	    push   +000000050h
+ 00000302  E8 00000000 E   *	    call   new_wall_obstacle
 
- 000002ED  8B 4D FC			mov ecx, pThis
- 000002F0  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
+ 00000307  8B 4D FC			mov ecx, pThis
+ 0000030A  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
 
 					INVOKE instantiate_game_object, eax
- 000002F3  50		   *	    push   eax
- 000002F4  E8 00000000 E   *	    call   instantiate_game_object
+ 0000030D  50		   *	    push   eax
+ 0000030E  E8 00000000 E   *	    call   instantiate_game_object
 
 					; // Decrement the amount of objects left to spawn in this state
- 000002F9  8B 4D FC			mov ecx, pThis
- 000002FC  FF 49 24			dec (NeonGameManager PTR [ecx]).stateObjectCounter
+ 00000313  8B 4D FC			mov ecx, pThis
+ 00000316  FF 49 24			dec (NeonGameManager PTR [ecx]).stateObjectCounter
 
- 000002FF  8B 59 24			mov ebx, (NeonGameManager PTR[ecx]).stateObjectCounter
+ 00000319  8B 59 24			mov ebx, (NeonGameManager PTR[ecx]).stateObjectCounter
 					.IF ebx == 0
- 00000302  0B DB	   *	    or	ebx, ebx
- 00000304  75 05	   *	    jne    @C0015
+ 0000031C  0B DB	   *	    or	ebx, ebx
+ 0000031E  75 05	   *	    jne    @C0015
 						INVOKE transition_state
- 00000306  E8 FFFFFD4B	   *	    call   transition_state
+ 00000320  E8 FFFFFE04	   *	    call   transition_state
 					.ENDIF
- 0000030B		   *@C0015:
+ 00000325		   *@C0015:
 				    
- 0000030B			stair_state_update_skip_spawn:
+ 00000325			stair_state_update_skip_spawn:
 					ret
- 0000030B  5F		   *	    pop    edi
- 0000030C  5E		   *	    pop    esi
- 0000030D  5A		   *	    pop    edx
- 0000030E  5B		   *	    pop    ebx
- 0000030F  58		   *	    pop    eax
- 00000310  C9		   *	    leave  
- 00000311  C2 0004	   *	    ret    00004h
- 00000314			stair_state_update ENDP
+ 00000325  5F		   *	    pop    edi
+ 00000326  5E		   *	    pop    esi
+ 00000327  5A		   *	    pop    edx
+ 00000328  5B		   *	    pop    ebx
+ 00000329  58		   *	    pop    eax
+ 0000032A  C9		   *	    leave  
+ 0000032B  C2 0004	   *	    ret    00004h
+ 0000032E			stair_state_update ENDP
 
 				; // ----------------------------------
 				; // neon_game_manager_update
@@ -1102,67 +1135,67 @@ neon_game_manager.asm					     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000314			neon_game_manager_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
+ 0000032E			neon_game_manager_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 					local pThis : DWORD
- 00000314  55		   *	    push   ebp
- 00000315  8B EC	   *	    mov    ebp, esp
- 00000317  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 0000031A  50		   *	    push   eax
- 0000031B  53		   *	    push   ebx
- 0000031C  52		   *	    push   edx
- 0000031D  56		   *	    push   esi
- 0000031E  57		   *	    push   edi
- 0000031F  89 4D FC			mov pThis, ecx
+ 0000032E  55		   *	    push   ebp
+ 0000032F  8B EC	   *	    mov    ebp, esp
+ 00000331  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 00000334  50		   *	    push   eax
+ 00000335  53		   *	    push   ebx
+ 00000336  52		   *	    push   edx
+ 00000337  56		   *	    push   esi
+ 00000338  57		   *	    push   edi
+ 00000339  89 4D FC			mov pThis, ecx
 
- 00000322  8B 59 20			mov ebx, (NeonGameManager PTR[ecx]).state
+ 0000033C  8B 59 20			mov ebx, (NeonGameManager PTR[ecx]).state
 					.IF ebx == DEFAULT_STATE_ENUM
- 00000325  0B DB	   *	    or	ebx, ebx
- 00000327  75 0A	   *	    jne    @C0017
+ 0000033F  0B DB	   *	    or	ebx, ebx
+ 00000341  75 0A	   *	    jne    @C0017
 						INVOKE default_state_update, deltaTime
- 00000329  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 0000032C  E8 FFFFFDF9	   *	    call   default_state_update
+ 00000343  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000346  E8 FFFFFDF9	   *	    call   default_state_update
 					.ELSEIF ebx == TUNNEL_STATE_ENUM
- 00000331  EB 2B	   *	    jmp    @C0019
- 00000333		   *@C0017:
- 00000333  83 FB 01	   *	    cmp    ebx, TUNNEL_STATE_ENUM
- 00000336  75 0A	   *	    jne    @C001A
+ 0000034B  EB 2B	   *	    jmp    @C0019
+ 0000034D		   *@C0017:
+ 0000034D  83 FB 01	   *	    cmp    ebx, TUNNEL_STATE_ENUM
+ 00000350  75 0A	   *	    jne    @C001A
 						INVOKE tunnel_state_update, deltaTime
- 00000338  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 0000033B  E8 FFFFFE57	   *	    call   tunnel_state_update
+ 00000352  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000355  E8 FFFFFE57	   *	    call   tunnel_state_update
 					.ELSEIF ebx == PAUSE_STATE_ENUM
- 00000340  EB 1C	   *	    jmp    @C001C
- 00000342		   *@C001A:
- 00000342  83 FB 04	   *	    cmp    ebx, PAUSE_STATE_ENUM
- 00000345  75 0A	   *	    jne    @C001D
+ 0000035A  EB 1C	   *	    jmp    @C001C
+ 0000035C		   *@C001A:
+ 0000035C  83 FB 04	   *	    cmp    ebx, PAUSE_STATE_ENUM
+ 0000035F  75 0A	   *	    jne    @C001D
 						INVOKE pause_state_update, deltaTime
- 00000347  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 0000034A  E8 FFFFFED9	   *	    call   pause_state_update
+ 00000361  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000364  E8 FFFFFED9	   *	    call   pause_state_update
 					.ELSEIF ebx == STAIRCASE_STATE_ENUM
- 0000034F  EB 0D	   *	    jmp    @C001F
- 00000351		   *@C001D:
- 00000351  83 FB 02	   *	    cmp    ebx, STAIRCASE_STATE_ENUM
- 00000354  75 08	   *	    jne    @C0020
+ 00000369  EB 0D	   *	    jmp    @C001F
+ 0000036B		   *@C001D:
+ 0000036B  83 FB 02	   *	    cmp    ebx, STAIRCASE_STATE_ENUM
+ 0000036E  75 08	   *	    jne    @C0020
 						INVOKE stair_state_update, deltaTime
- 00000356  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 00000359  E8 FFFFFF01	   *	    call   stair_state_update
+ 00000370  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000373  E8 FFFFFF01	   *	    call   stair_state_update
 					.ENDIF
- 0000035E		   *@C0020:
- 0000035E		   *@C001F:
- 0000035E		   *@C001C:
- 0000035E		   *@C0019:
+ 00000378		   *@C0020:
+ 00000378		   *@C001F:
+ 00000378		   *@C001C:
+ 00000378		   *@C0019:
 					
 					ret
- 0000035E  5F		   *	    pop    edi
- 0000035F  5E		   *	    pop    esi
- 00000360  5A		   *	    pop    edx
- 00000361  5B		   *	    pop    ebx
- 00000362  58		   *	    pop    eax
- 00000363  C9		   *	    leave  
- 00000364  C2 0004	   *	    ret    00004h
- 00000367			neon_game_manager_update ENDP
+ 00000378  5F		   *	    pop    edi
+ 00000379  5E		   *	    pop    esi
+ 0000037A  5A		   *	    pop    edx
+ 0000037B  5B		   *	    pop    ebx
+ 0000037C  58		   *	    pop    eax
+ 0000037D  C9		   *	    leave  
+ 0000037E  C2 0004	   *	    ret    00004h
+ 00000381			neon_game_manager_update ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 00:30:04
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 00:43:25
 neon_game_manager.asm					     Symbols 2 - 1
 
 
@@ -1240,7 +1273,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000030 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000367 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000381 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -1255,10 +1288,10 @@ Random32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 RandomRange  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 add_component  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 check_rect_collision . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-default_state_update . . . . . .	P Near	 0000012A _TEXT	Length= 0000006D Private STDCALL
+default_state_update . . . . . .	P Near	 00000144 _TEXT	Length= 0000006D Private STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
-  default_state_update_skip_spawn 	L Near	 0000018E _TEXT	
+  default_state_update_skip_spawn 	L Near	 000001A8 _TEXT	
 free_camera  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_game_object . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_scene . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -1281,7 +1314,7 @@ init_unordered_vector  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 init_wall_obstacle . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 instantiate_game_object  . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-neon_game_manager_update . . . .	P Near	 00000314 _TEXT	Length= 00000053 Private STDCALL
+neon_game_manager_update . . . .	P Near	 0000032E _TEXT	Length= 00000053 Private STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
 new_camera . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -1291,23 +1324,25 @@ new_neon_square_player . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 new_scene  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_unordered_vector . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_wall_obstacle  . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-pause_state_update . . . . . . .	P Near	 00000228 _TEXT	Length= 00000037 Private STDCALL
+pause_state_update . . . . . . .	P Near	 00000242 _TEXT	Length= 00000037 Private STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
-  pause_state_update_skip_spawn 	L Near	 00000256 _TEXT	
+  pause_state_update_skip_spawn 	L Near	 00000270 _TEXT	
 push_back  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 queue_free_game_object . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 remove_element . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 scene_update . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-stair_state_update . . . . . . .	P Near	 0000025F _TEXT	Length= 000000B5 Private STDCALL
+stair_state_update . . . . . . .	P Near	 00000279 _TEXT	Length= 000000B5 Private STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
-  stair_state_update_skip_spawn 	L Near	 0000030B _TEXT	
-transition_state . . . . . . . .	P Near	 00000056 _TEXT	Length= 000000D4 Private STDCALL
-tunnel_state_update  . . . . . .	P Near	 00000197 _TEXT	Length= 00000091 Private STDCALL
+  stair_state_update_skip_spawn 	L Near	 00000325 _TEXT	
+transition_state . . . . . . . .	P Near	 00000129 _TEXT	Length= 0000001B Private STDCALL
+transition_to_state  . . . . . .	P Near	 00000056 _TEXT	Length= 000000D3 Private STDCALL
+  state  . . . . . . . . . . . .	DWord	 bp + 00000008
+tunnel_state_update  . . . . . .	P Near	 000001B1 _TEXT	Length= 00000091 Private STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
-  tunnel_state_update_skip_spawn .	L Near	 0000021F _TEXT	
+  tunnel_state_update_skip_spawn .	L Near	 00000239 _TEXT	
 
 
 Symbols:
@@ -1352,6 +1387,7 @@ SCREEN_WIDTH . . . . . . . . . .	Number	 00000050h
 SPRITE_COMPONENT_ID  . . . . . .	Number	 00000002h   
 STAIRCASE_STATE_ENUM . . . . . .	Number	 00000002h   
 TRANSFORM_COMPONENT_ID . . . . .	Number	 00000003h   
+TRANSITION_TO_STAIR_STATE_ENUM .	Number	 00000064h   
 TUNNEL_STATE_ENUM  . . . . . . .	Number	 00000001h   
 UNORDERED_VECTOR_INC . . . . . .	Number	 00000001h   
 WALL_OBSTACLE_GAME_OBJECT_ID . .	Number	 00000003h   

@@ -95,15 +95,14 @@ new_neon_game_manager ENDP
 ; // ********************************************
 
 ; // ----------------------------------
-; // transition_state
-; // Randomly decides what the next state will be
+; // transition_to_state
+; // Transitions to the next state
 ; // 
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-transition_state PROC USES eax ebx edx esi edi
-	mov eax, 3
-	INVOKE RandomRange
+transition_to_state PROC USES eax ebx edx esi edi, state : GAME_MANAGER_STATE_ENUM
+	mov eax, state
 
 	.IF eax == DEFAULT_STATE_ENUM
 		mov (NeonGameManager PTR [ecx]).state, DEFAULT_STATE_ENUM
@@ -158,6 +157,21 @@ transition_state PROC USES eax ebx edx esi edi
 		.ENDIF
 		
 	.ENDIF
+
+	ret
+transition_to_state ENDP
+
+; // ----------------------------------
+; // transition_state
+; // Randomly decides what the next state will be
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+transition_state PROC USES eax ebx edx esi edi
+	mov eax, 3
+	INVOKE RandomRange
+	INVOKE transition_to_state, eax
 
 	ret
 transition_state ENDP
