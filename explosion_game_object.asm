@@ -11,7 +11,7 @@ INCLUDE transform_component.inc
 INCLUDE rect_component.inc
 
 .data
-EXPLOSION_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_object_update, OFFSET game_object_exit, OFFSET free_game_object>
+EXPLOSION_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET explosion_update, OFFSET game_object_exit, OFFSET free_game_object>
 
 .code
 ; // ********************************************
@@ -58,5 +58,24 @@ new_explosion_game_object PROC PUBLIC USES ecx
 
 	ret ; // Return with the address of the memory block in HeapAlloc
 new_explosion_game_object ENDP
+
+
+; // ********************************************
+; // Instance methods
+; // ********************************************
+
+; // ----------------------------------
+; // explosion_update
+; // Moves the player up and down depending on keyboard input.
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+explosion_update PROC stdcall USES eax ebx edx, deltaTime: REAL4
+	local pThis : DWORD
+	mov pThis, ecx
+	mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
+	ret
+explosion_update ENDP
 
 END

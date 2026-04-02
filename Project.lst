@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:24:08
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:25:43
 explosion_game_object.asm				     Page 1 - 1
 
 
@@ -398,8 +398,8 @@ explosion_game_object.asm				     Page 1 - 1
 			      C 
 
  00000000			.data
- 00000000 00000000 E		EXPLOSION_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_object_update, OFFSET game_object_exit, OFFSET free_game_object>
-	   00000000 E
+ 00000000 00000000 E		EXPLOSION_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET explosion_update, OFFSET game_object_exit, OFFSET free_game_object>
+	   00000075 R
 	   00000000 E
 	   00000000 E
 
@@ -488,8 +488,38 @@ explosion_game_object.asm				     Page 1 - 1
  00000074  C3		   *	    ret    00000h
  00000075			new_explosion_game_object ENDP
 
+
+				; // ********************************************
+				; // Instance methods
+				; // ********************************************
+
+				; // ----------------------------------
+				; // explosion_update
+				; // Moves the player up and down depending on keyboard input.
+				; // 
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
+				; // ----------------------------------
+ 00000075			explosion_update PROC stdcall USES eax ebx edx, deltaTime: REAL4
+					local pThis : DWORD
+ 00000075  55		   *	    push   ebp
+ 00000076  8B EC	   *	    mov    ebp, esp
+ 00000078  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 0000007B  50		   *	    push   eax
+ 0000007C  53		   *	    push   ebx
+ 0000007D  52		   *	    push   edx
+ 0000007E  89 4D FC			mov pThis, ecx
+ 00000081  8B 45 08			mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
+					ret
+ 00000084  5A		   *	    pop    edx
+ 00000085  5B		   *	    pop    ebx
+ 00000086  58		   *	    pop    eax
+ 00000087  C9		   *	    leave  
+ 00000088  C2 0004	   *	    ret    00004h
+ 0000008B			explosion_update ENDP
+
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:24:08
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:25:43
 explosion_game_object.asm				     Symbols 2 - 1
 
 
@@ -564,7 +594,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000010 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000075 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000008B DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -577,6 +607,9 @@ HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 add_component  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 check_rect_collision . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+explosion_update . . . . . . . .	P Near	 00000075 _TEXT	Length= 00000016 Private STDCALL
+  deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
+  pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
 free_component_virtual . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_component . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_game_object . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
