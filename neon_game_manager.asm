@@ -185,7 +185,7 @@ tunnel_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 	INVOKE instantiate_game_object, eax
 
 	; // Now spawn the bottom wall
-	add ebx, 15
+	add ebx, 17
 	mov edx, SCREEN_WIDTH
 	sub edx, ebx
 	INVOKE new_wall_obstacle, SCREEN_WIDTH, ebx, edx
@@ -208,6 +208,17 @@ tunnel_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 tunnel_state_update_skip_spawn:
 	ret
 tunnel_state_update ENDP
+
+; // ----------------------------------
+; // transition_state
+; // Randomly decides what the next state will be
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+transition_state PROC
+	ret
+transition_state ENDP
 
 ; // ----------------------------------
 ; // neon_game_manager_update

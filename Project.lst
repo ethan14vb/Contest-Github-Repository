@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 22:54:50
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 23:00:18
 neon_game_manager.asm					     Page 1 - 1
 
 
@@ -528,7 +528,7 @@ neon_game_manager.asm					     Page 1 - 1
 
  00000000			.data
  00000000 00000000 E		NEON_GAME_MANAGER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET neon_game_manager_update, OFFSET game_object_exit, OFFSET free_game_object>
-	   00000158 R
+	   00000159 R
 	   00000000 E
 	   00000000 E
 
@@ -758,7 +758,7 @@ neon_game_manager.asm					     Page 1 - 1
  00000117  E8 00000000 E   *	    call   instantiate_game_object
 				
 					; // Now spawn the bottom wall
- 0000011C  83 C3 0F			add ebx, 15
+ 0000011C  83 C3 11			add ebx, 17
  0000011F  BA 00000050			mov edx, SCREEN_WIDTH
  00000124  2B D3			sub edx, ebx
 					INVOKE new_wall_obstacle, SCREEN_WIDTH, ebx, edx
@@ -800,6 +800,17 @@ neon_game_manager.asm					     Page 1 - 1
  00000158			tunnel_state_update ENDP
 
 				; // ----------------------------------
+				; // transition_state
+				; // Randomly decides what the next state will be
+				; // 
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
+				; // ----------------------------------
+ 00000158			transition_state PROC
+ 00000158  C3				ret
+ 00000159			transition_state ENDP
+
+				; // ----------------------------------
 				; // neon_game_manager_update
 				; // Moves the wall to the left of the screen. This function uses FPU instructions
 				; // that were not learned in class. These were added to accommodate for deltaTime
@@ -808,49 +819,49 @@ neon_game_manager.asm					     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000158			neon_game_manager_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
+ 00000159			neon_game_manager_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 					local pThis : DWORD
- 00000158  55		   *	    push   ebp
- 00000159  8B EC	   *	    mov    ebp, esp
- 0000015B  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 0000015E  50		   *	    push   eax
- 0000015F  53		   *	    push   ebx
- 00000160  52		   *	    push   edx
- 00000161  56		   *	    push   esi
- 00000162  57		   *	    push   edi
- 00000163  89 4D FC			mov pThis, ecx
+ 00000159  55		   *	    push   ebp
+ 0000015A  8B EC	   *	    mov    ebp, esp
+ 0000015C  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 0000015F  50		   *	    push   eax
+ 00000160  53		   *	    push   ebx
+ 00000161  52		   *	    push   edx
+ 00000162  56		   *	    push   esi
+ 00000163  57		   *	    push   edi
+ 00000164  89 4D FC			mov pThis, ecx
 
- 00000166  8B 59 20			mov ebx, (NeonGameManager PTR[ecx]).state
+ 00000167  8B 59 20			mov ebx, (NeonGameManager PTR[ecx]).state
 					.IF ebx == DEFAULT_STATE_ENUM
- 00000169  0B DB	   *	    or	ebx, ebx
- 0000016B  75 0A	   *	    jne    @C0005
+ 0000016A  0B DB	   *	    or	ebx, ebx
+ 0000016C  75 0A	   *	    jne    @C0005
 						INVOKE default_state_update, deltaTime
- 0000016D  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 00000170  E8 FFFFFEE1	   *	    call   default_state_update
+ 0000016E  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000171  E8 FFFFFEE0	   *	    call   default_state_update
 					.ELSEIF ebx == TUNNEL_STATE_ENUM
- 00000175  EB 0D	   *	    jmp    @C0007
- 00000177		   *@C0005:
- 00000177  83 FB 01	   *	    cmp    ebx, TUNNEL_STATE_ENUM
- 0000017A  75 08	   *	    jne    @C0008
+ 00000176  EB 0D	   *	    jmp    @C0007
+ 00000178		   *@C0005:
+ 00000178  83 FB 01	   *	    cmp    ebx, TUNNEL_STATE_ENUM
+ 0000017B  75 08	   *	    jne    @C0008
 						INVOKE tunnel_state_update, deltaTime
- 0000017C  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 0000017F  E8 FFFFFF41	   *	    call   tunnel_state_update
+ 0000017D  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 00000180  E8 FFFFFF40	   *	    call   tunnel_state_update
 					.ENDIF
- 00000184		   *@C0008:
- 00000184		   *@C0007:
+ 00000185		   *@C0008:
+ 00000185		   *@C0007:
 					
 					ret
- 00000184  5F		   *	    pop    edi
- 00000185  5E		   *	    pop    esi
- 00000186  5A		   *	    pop    edx
- 00000187  5B		   *	    pop    ebx
- 00000188  58		   *	    pop    eax
- 00000189  C9		   *	    leave  
- 0000018A  C2 0004	   *	    ret    00004h
- 0000018D			neon_game_manager_update ENDP
+ 00000185  5F		   *	    pop    edi
+ 00000186  5E		   *	    pop    esi
+ 00000187  5A		   *	    pop    edx
+ 00000188  5B		   *	    pop    ebx
+ 00000189  58		   *	    pop    eax
+ 0000018A  C9		   *	    leave  
+ 0000018B  C2 0004	   *	    ret    00004h
+ 0000018E			neon_game_manager_update ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 22:54:50
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 23:00:18
 neon_game_manager.asm					     Symbols 2 - 1
 
 
@@ -928,7 +939,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000014 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000018D DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000018E DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -969,7 +980,7 @@ init_unordered_vector  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 init_wall_obstacle . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 instantiate_game_object  . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-neon_game_manager_update . . . .	P Near	 00000158 _TEXT	Length= 00000035 Private STDCALL
+neon_game_manager_update . . . .	P Near	 00000159 _TEXT	Length= 00000035 Private STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
 new_camera . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -983,6 +994,7 @@ push_back  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 queue_free_game_object . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 remove_element . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 scene_update . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+transition_state . . . . . . . .	P Near	 00000158 _TEXT	Length= 00000001 Private STDCALL
 tunnel_state_update  . . . . . .	P Near	 000000C5 _TEXT	Length= 00000093 Private STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
