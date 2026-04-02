@@ -11,10 +11,11 @@ INCLUDE background_rect_game_object.inc
 INCLUDE heap_functions.inc
 INCLUDE transform_component.inc
 INCLUDE rect_component.inc
+INCLUDE scene.inc
 INCLUDE renderable_component.inc
 
 .data
-BACKGROUND_RECT_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_object_update, OFFSET game_object_exit, OFFSET free_game_object>
+BACKGROUND_RECT_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET background_rect_update, OFFSET game_object_exit, OFFSET free_game_object>
 
 .code
 ; // ********************************************
@@ -83,7 +84,18 @@ background_rect_update PROC stdcall USES eax ebx edx esi, deltaTime: REAL4
 	; // Move myself
 	INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID
 	add (TransformComponent PTR [eax]).x, esi
-		
+
+	mov ecx, pThis
+	INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID
+	; // If I'm past the edge of the screen, free me
+	mov ebx, (TransformComponent PTR [eax]).x
+	cmp ebx, 0
+	jg background_rect_update_skip_free
+	mov ebx, pThis
+	mov ecx, (GameObject PTR [ebx]).pParentScene
+	INVOKE queue_free_game_object, ebx
+
+background_rect_update_skip_free:
 	mov ecx, pThis ; // Restore the THIS pointer
 	ret
 background_rect_update ENDP

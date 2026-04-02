@@ -51,6 +51,7 @@ init_wall_obstacle PROC PUBLIC USES esi ebx edx, startX : DWORD, startY : DWORD,
 
 	; // Add rect component
 	INVOKE new_rect_component, height, 2, 0, 0, 255, 255
+	mov (RenderableComponent PTR [eax]).layer, 2
 	INVOKE add_component, pThis, eax
 
 	mov eax, pThis

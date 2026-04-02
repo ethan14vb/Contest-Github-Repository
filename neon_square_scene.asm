@@ -9,6 +9,7 @@ INCLUDE engine_types.inc
 INCLUDE scene.inc
 INCLUDE neon_square_player.inc
 INCLUDE neon_game_manager.inc
+INCLUDE camera_mover_game_object.inc
 INCLUDE wall_obstacle.inc
 
 .code

@@ -34,7 +34,7 @@ init_camera_mover_game_object PROC PUBLIC USES esi ebx edx
 	mov (GameObject PTR [ecx]).gameObjectType, CAMERA_MOVER_GAME_OBJECT_ID
 	mov (GameObject PTR [ecx]).pVt, OFFSET CAMERA_MOVER_GAMEOBJECT_VTABLE
 
-	mov (CameraMoverGameObject PTR [ecx]).moveSpeed, 1
+	mov (CameraMoverGameObject PTR [ecx]).moveSpeed, 2
 		
 	ret
 init_camera_mover_game_object ENDP
@@ -90,8 +90,10 @@ camera_mover_update PROC stdcall USES eax, deltaTime: REAL4
 	lea ecx, (Scene PTR [ecx]).camera
 
 	mov eax, xMov
+	shl eax, 2
 	add (Camera PTR [ecx]).x, eax
 	mov eax, yMov
+	shl eax, 2
 	add (Camera PTR [ecx]).y, eax
 
 	mov ecx, pThis ; // Restore the THIS pointer

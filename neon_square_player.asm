@@ -17,6 +17,7 @@ INCLUDE input_manager.inc
 INCLUDE transform_component.inc
 INCLUDE rect_component.inc
 INCLUDE explosion_game_object.inc
+INCLUDE renderable_component.inc
 
 .data
 NEON_SQUARE_PLAYER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET neon_square_player_update, OFFSET game_object_exit, OFFSET free_game_object>
@@ -51,6 +52,7 @@ init_neon_square_player PROC PUBLIC USES esi ebx edx
 
 	; // Add rect component
 	INVOKE new_rect_component, 2, 2, 0, 255, 0, 255
+	mov (RenderableComponent PTR [eax]).layer, 3
 	INVOKE add_component, pThis, eax
 
 	mov eax, pThis

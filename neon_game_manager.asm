@@ -29,7 +29,7 @@ Random32 PROTO
 NEON_GAME_MANAGER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET neon_game_manager_update, OFFSET game_object_exit, OFFSET free_game_object>
 
 ; // Background objects values
-backgroundObjectSpawnTime REAL4 0.25
+backgroundObjectSpawnTime REAL4 0.01
 backgroundObjectTimer REAL4 0.0
 
 ; // Default state values
@@ -461,12 +461,26 @@ create_background_objects PROC stdcall USES eax ebx edx esi edi, deltaTime : REA
    
 	; // Set the timer to 0
     mov backgroundObjectTimer, 0
+
+	mov eax, SCREEN_HEIGHT
+	sub eax, 20
+
+	INVOKE RandomRange
+
+	mov ebx, eax
+
+	mov eax, 2
+	INVOKE RandomRange
+	inc eax
+	inc eax
 		
 	; // Create the background object
-	INVOKE new_background_rect_game_object, SCREEN_WIDTH, 0, 10, 10, 0, 0, 255, 100, 1, 2
+	INVOKE new_background_rect_game_object, SCREEN_WIDTH, ebx, 20, 20, 0, 0, 255, 10, 1, eax
 	mov ecx, pThis
 	mov ecx, (GameObject PTR [ecx]).pParentScene
 	INVOKE instantiate_game_object, eax
+
+	mov ecx, pThis
 
 create_background_objects_skip_spawn:
 	ret
@@ -484,6 +498,8 @@ create_background_objects ENDP
 neon_game_manager_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 	local pThis : DWORD
 	mov pThis, ecx
+
+	INVOKE create_background_objects, deltaTime
 
 	mov ebx, (NeonGameManager PTR[ecx]).state
 	.IF ebx == DEFAULT_STATE_ENUM
