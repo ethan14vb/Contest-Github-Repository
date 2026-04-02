@@ -79,6 +79,13 @@ new_neon_game_manager ENDP
 ; // Instance methods
 ; // ********************************************
 
+; // ----------------------------------
+; // default_state_update
+; // Spawns walls in random positions
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
 default_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 	local pThis : DWORD
 	mov pThis, ecx
@@ -129,6 +136,13 @@ default_state_update_skip_spawn:
 	ret
 default_state_update ENDP
 
+; // ----------------------------------
+; // tunnel_state_update
+; // Spawns walls in tunnels
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
 tunnel_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 	local pThis : DWORD
 	mov pThis, ecx

@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 22:52:00
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 22:54:50
 neon_game_manager.asm					     Page 1 - 1
 
 
@@ -609,6 +609,13 @@ neon_game_manager.asm					     Page 1 - 1
 				; // Instance methods
 				; // ********************************************
 
+				; // ----------------------------------
+				; // default_state_update
+				; // Spawns walls in random positions
+				; // 
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
+				; // ----------------------------------
  00000056			default_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 					local pThis : DWORD
  00000056  55		   *	    push   ebp
@@ -686,6 +693,13 @@ neon_game_manager.asm					     Page 1 - 1
  000000C2  C2 0004	   *	    ret    00004h
  000000C5			default_state_update ENDP
 
+				; // ----------------------------------
+				; // tunnel_state_update
+				; // Spawns walls in tunnels
+				; // 
+				; // Register Parameters: 
+				; //	ecx - THIS pointer
+				; // ----------------------------------
  000000C5			tunnel_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 					local pThis : DWORD
  000000C5  55		   *	    push   ebp
@@ -836,7 +850,7 @@ neon_game_manager.asm					     Page 1 - 1
  0000018D			neon_game_manager_update ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 22:52:00
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 22:54:50
 neon_game_manager.asm					     Symbols 2 - 1
 
 
