@@ -13,8 +13,8 @@ INCLUDE component.inc
 TransformComponent STRUCT
 	baseComponent Component <>
 
-	x DWORD ?
-	y DWORD ?
+	x SDWORD ?
+	y SDWORD ?
 
 	; // Whether to ignore the camera offset when rendering.
 	; // Used for drawing UI items

@@ -8,6 +8,7 @@
 INCLUDE default_header.inc
 INCLUDE game_object.inc
 INCLUDE game_object_ids.inc
+INCLUDE engine_types.inc
 INCLUDE scene.inc
 INCLUDE neon_square_player.inc
 INCLUDE heap_functions.inc
@@ -76,7 +77,7 @@ new_neon_square_player ENDP
 ; //	ecx - THIS pointer
 ; // ----------------------------------
 neon_square_player_update PROC stdcall USES eax ebx edx, deltaTime: REAL4
-	local pThis : DWORD, yMov : SDWORD
+	local pThis : DWORD, yMov : SDWORD, pTransform : DWORD, pRect : DWORD
 	mov pThis, ecx
 	mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
 
@@ -84,33 +85,55 @@ neon_square_player_update PROC stdcall USES eax ebx edx, deltaTime: REAL4
 
 	; // Check if any of the keys are pressed
 	INVOKE isKeyPressed, VK_GAMEPAD_LEFT_THUMBSTICK_UP
-	mov edx, eax
-	INVOKE isKeyPressed, VK_GAMEPAD_DPAD_UP
 	mov ebx, eax
+	INVOKE isKeyPressed, VK_GAMEPAD_DPAD_UP
+	or ebx, eax
 	INVOKE isKeyPressed, VK_UP
-	or eax, ebx
-	or eax, edx
-	neg eax
-	shl eax, 1 ; // Multiply the movement by 2 to speed things up
-	add yMov, eax
+	or ebx, eax
+	neg ebx
+	shl ebx, 1 ; // Multiply the movement by 2 to speed things up
+	add yMov, ebx
 		 
 	INVOKE isKeyPressed, VK_GAMEPAD_LEFT_THUMBSTICK_DOWN
-	mov edx, eax
-	INVOKE isKeyPressed, VK_DOWN
 	mov ebx, eax
+	INVOKE isKeyPressed, VK_DOWN
+	or ebx, eax
 	INVOKE isKeyPressed, VK_GAMEPAD_DPAD_DOWN
-	or eax, ebx
-	or eax, edx
-	shl eax, 1 ; // Multiply the movement by 2 to speed things up
-	add yMov, eax
+	or ebx, eax
+	shl ebx, 1 ; // Multiply the movement by 2 to speed things up
+	add yMov, ebx
 
 	; // Now move the player
+	mov ecx, pThis
 	INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID
+	mov pTransform, eax
 
 	mov ebx, yMov
 	add (TransformComponent PTR [eax]).y, ebx
 
+	; // If I'm above the top of the screen, reset me to the top
+	mov ebx, (TransformComponent PTR [eax]).y
+	cmp ebx, 0
+	jge neon_square_player_update_not_above_screen
+	mov (TransformComponent PTR [eax]).y, 0
+neon_square_player_update_not_above_screen:
+
+	
+	; // If I'm below the bottom of the screen, reset me to the bottom
+	mov edx, eax
+	mov ecx, pThis
+	INVOKE get_first_component_which_is_a, RECT_COMPONENT_ID
+	mov pRect, eax
+
+	mov ebx, (TransformComponent PTR [edx]).y
+	mov ecx, SCREEN_HEIGHT
+	sub ecx, (RectComponent PTR [eax]).h
+	.IF ebx > ecx
+		mov (TransformComponent PTR [edx]).y, ecx
+	.ENDIF
+
 	mov ecx, pThis ; // Restore the THIS pointer
+	mov eax, deltaTime
 	ret
 neon_square_player_update ENDP
 
