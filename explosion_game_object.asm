@@ -82,6 +82,18 @@ explosion_update PROC stdcall USES eax ebx edx, deltaTime: REAL4
 	local pThis : DWORD
 	mov pThis, ecx
 	mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
+
+	INVOKE get_first_component_which_is_a, RECT_COMPONENT_ID
+
+	mov bl, (RectComponent PTR[eax]).a
+	.IF bl > 20
+		sub (RectComponent PTR [eax]).a, 20
+
+	.ELSE
+		mov (RectComponent PTR [eax]).a, 0
+	.ENDIF
+
+	mov ecx, pThis
 	ret
 explosion_update ENDP
 

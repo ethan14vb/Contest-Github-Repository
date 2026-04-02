@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:40:17
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:46:45
 explosion_game_object.asm				     Page 1 - 1
 
 
@@ -535,16 +535,35 @@ explosion_game_object.asm				     Page 1 - 1
  000000A4  52		   *	    push   edx
  000000A5  89 4D FC			mov pThis, ecx
  000000A8  8B 45 08			mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
+
+					INVOKE get_first_component_which_is_a, RECT_COMPONENT_ID
+ 000000AB  6A 01	   *	    push   +000000001h
+ 000000AD  E8 00000000 E   *	    call   get_first_component_which_is_a
+
+ 000000B2  8A 58 1B			mov bl, (RectComponent PTR[eax]).a
+					.IF bl > 20
+ 000000B5  80 FB 14	   *	    cmp    bl, 014h
+ 000000B8  76 06	   *	    jbe    @C0001
+ 000000BA  80 68 1B 14				sub (RectComponent PTR [eax]).a, 20
+
+					.ELSE
+ 000000BE  EB 04	   *	    jmp    @C0003
+ 000000C0		   *@C0001:
+ 000000C0  C6 40 1B 00				mov (RectComponent PTR [eax]).a, 0
+					.ENDIF
+ 000000C4		   *@C0003:
+
+ 000000C4  8B 4D FC			mov ecx, pThis
 					ret
- 000000AB  5A		   *	    pop    edx
- 000000AC  5B		   *	    pop    ebx
- 000000AD  58		   *	    pop    eax
- 000000AE  C9		   *	    leave  
- 000000AF  C2 0004	   *	    ret    00004h
- 000000B2			explosion_update ENDP
+ 000000C7  5A		   *	    pop    edx
+ 000000C8  5B		   *	    pop    ebx
+ 000000C9  58		   *	    pop    eax
+ 000000CA  C9		   *	    leave  
+ 000000CB  C2 0004	   *	    ret    00004h
+ 000000CE			explosion_update ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:40:17
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:46:45
 explosion_game_object.asm				     Symbols 2 - 1
 
 
@@ -619,7 +638,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000010 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000000B2 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000CE DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -632,7 +651,7 @@ HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 add_component  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 check_rect_collision . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-explosion_update . . . . . . . .	P Near	 0000009C _TEXT	Length= 00000016 Private STDCALL
+explosion_update . . . . . . . .	P Near	 0000009C _TEXT	Length= 00000032 Private STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
 free_component_virtual . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
