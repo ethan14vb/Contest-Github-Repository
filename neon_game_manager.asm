@@ -19,6 +19,7 @@ INCLUDE wall_obstacle.inc
 INCLUDE neon_square_player.inc
 INCLUDE neon_game_manager.inc
 INCLUDE heap_functions.inc
+INCLUDE background_rect_game_object.inc
 
 ; // Irvine32 functions
 RandomRange PROTO
@@ -26,6 +27,10 @@ Random32 PROTO
 
 .data
 NEON_GAME_MANAGER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET neon_game_manager_update, OFFSET game_object_exit, OFFSET free_game_object>
+
+; // Background objects values
+backgroundObjectSpawnTime REAL4 0.25
+backgroundObjectTimer REAL4 0.0
 
 ; // Default state values
 defaultSpawnTime REAL4 0.25
@@ -437,7 +442,33 @@ stair_state_update ENDP
 ; //	ecx - THIS pointer
 ; // ----------------------------------
 create_background_objects PROC stdcall USES eax ebx edx esi edi, deltaTime : REAL4
-	mov eax, deltaTime
+	local pThis : DWORD
+	mov pThis, ecx
+
+	; // Update timer
+	fld backgroundObjectTimer
+    fadd deltaTime
+    fst backgroundObjectTimer
+
+	; // Determine if the timer is greater than or equal to spawnTime
+	fcomp backgroundObjectSpawnTime
+
+	; // Get flags
+	fnstsw ax
+	sahf
+
+	jb create_background_objects_skip_spawn
+   
+	; // Set the timer to 0
+    mov backgroundObjectTimer, 0
+		
+	; // Create the background object
+	INVOKE new_background_rect_game_object, SCREEN_WIDTH, 0, 10, 10, 0, 0, 255, 100, 1, 2
+	mov ecx, pThis
+	mov ecx, (GameObject PTR [ecx]).pParentScene
+	INVOKE instantiate_game_object, eax
+
+create_background_objects_skip_spawn:
 	ret
 create_background_objects ENDP
 
