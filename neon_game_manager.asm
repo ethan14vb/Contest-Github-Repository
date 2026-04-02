@@ -430,8 +430,20 @@ stair_state_update_skip_spawn:
 stair_state_update ENDP
 
 ; // ----------------------------------
+; // create_background_objects
+; // Creates background objects every once in awhile
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+create_background_objects PROC stdcall USES eax ebx edx esi edi, deltaTime : REAL4
+	mov eax, deltaTime
+	ret
+create_background_objects ENDP
+
+; // ----------------------------------
 ; // neon_game_manager_update
-; // Moves the wall to the left of the screen. This function uses FPU instructions
+; // Calls state functions based on the current state. This function uses FPU instructions
 ; // that were not learned in class. These were added to accommodate for deltaTime
 ; // being a REAL4.
 ; // 
