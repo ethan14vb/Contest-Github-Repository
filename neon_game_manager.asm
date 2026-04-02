@@ -51,6 +51,7 @@ init_neon_game_manager PROC PUBLIC USES esi ebx edx
 
 	; // My constructor
 	mov (NeonGameManager PTR [ecx]).timer, 0
+	mov (NeonGameManager PTR [ecx]).state, DEFAULT_STATE_ENUM
 
 	mov esi, spawnTime
 	mov (NeonGameManager PTR [ecx]).spawnTime, esi

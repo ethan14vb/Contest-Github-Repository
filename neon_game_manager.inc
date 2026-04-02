@@ -15,12 +15,22 @@ NEON_GAME_MANAGER_INC EQU 1
 
 INCLUDE game_object.inc
 
+; // State enums
+GAME_MANAGER_STATE_ENUM typedef DWORD
+
+DEFAULT_STATE_ENUM		= 0
+TUNNEL_STATE_ENUM		= 1
+STAIRCASE_STATE_ENUM	= 2
+BARRIER_STATE_ENUM		= 3
+
 NeonGameManager STRUCT
 	baseGameObject GameObject<>
 	timer REAL4 ?
     spawnTime REAL4 ?
+	state GAME_MANAGER_STATE_ENUM ?
 NeonGameManager ENDS
 
+; // Protos
 init_neon_game_manager PROTO
 new_neon_game_manager PROTO
 
