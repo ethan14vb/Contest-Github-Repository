@@ -25,7 +25,7 @@ EXPLOSION_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET 
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-init_explosion_game_object PROC PUBLIC USES esi ebx edx
+init_explosion_game_object PROC PUBLIC USES esi ebx edx, x : DWORD, y : DWORD, radius : DWORD
 	local pThis
 	mov pThis, ecx
 
@@ -35,11 +35,18 @@ init_explosion_game_object PROC PUBLIC USES esi ebx edx
 	mov (GameObject PTR [ecx]).pVt, OFFSET EXPLOSION_GAMEOBJECT_VTABLE
 
 	; // Add transform component
-	INVOKE new_transform_component, 20, 25, 0
+	mov ebx, radius
+	shl ebx, 2
+	neg ebx
+	add ebx, x; // x = x - (radius / 2)
+	mov eax, y
+	add eax, ebx ; // x = x - (radius / 2)
+	INVOKE new_transform_component, ebx, eax, 0
 	INVOKE add_component, pThis, eax
 
 	; // Add rect component
-	INVOKE new_rect_component, 2, 2, 0, 255, 0, 255
+	mov ebx, radius
+	INVOKE new_rect_component, radius, radius, 0, 255, 0, 255
 	INVOKE add_component, pThis, eax
 
 	mov eax, pThis
@@ -51,10 +58,10 @@ init_explosion_game_object ENDP
 ; // new_explosion_game_object
 ; // Reserves heap space for the Object with parameters calls the initializer method
 ; // ----------------------------------
-new_explosion_game_object PROC PUBLIC USES ecx
+new_explosion_game_object PROC PUBLIC USES ecx, x: DWORD, y: DWORD, radius: DWORD
 	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF Explosion
 	mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
-	INVOKE init_explosion_game_object
+	INVOKE init_explosion_game_object, x, y, radius
 
 	ret ; // Return with the address of the memory block in HeapAlloc
 new_explosion_game_object ENDP

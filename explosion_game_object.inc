@@ -13,7 +13,7 @@ Explosion STRUCT
 	baseGameObject GameObject<>
 Explosion ENDS
 
-init_explosion_game_object PROTO
-new_explosion_game_object PROTO
+init_explosion_game_object PROTO x: DWORD, y: DWORD, radius: DWORD
+new_explosion_game_object PROTO x: DWORD, y: DWORD, radius: DWORD
 
 ENDIF

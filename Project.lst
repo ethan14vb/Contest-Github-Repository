@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:25:43
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:32:34
 explosion_game_object.asm				     Page 1 - 1
 
 
@@ -227,8 +227,8 @@ explosion_game_object.asm				     Page 1 - 1
 	   00000000
 			      C Explosion ENDS
 			      C 
-			      C init_explosion_game_object PROTO
-			      C new_explosion_game_object PROTO
+			      C init_explosion_game_object PROTO x: DWORD, y: DWORD, radius: DWORD
+			      C new_explosion_game_object PROTO x: DWORD, y: DWORD, radius: DWORD
 			      C 
 			      C ENDIF
 			      C 
@@ -399,7 +399,7 @@ explosion_game_object.asm				     Page 1 - 1
 
  00000000			.data
  00000000 00000000 E		EXPLOSION_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET explosion_update, OFFSET game_object_exit, OFFSET free_game_object>
-	   00000075 R
+	   00000099 R
 	   00000000 E
 	   00000000 E
 
@@ -415,7 +415,7 @@ explosion_game_object.asm				     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000000			init_explosion_game_object PROC PUBLIC USES esi ebx edx
+ 00000000			init_explosion_game_object PROC PUBLIC USES esi ebx edx, x : DWORD, y : DWORD, radius : DWORD
 					local pThis
  00000000  55		   *	    push   ebp
  00000001  8B EC	   *	    mov    ebp, esp
@@ -434,59 +434,72 @@ explosion_game_object.asm				     Page 1 - 1
 	   00000000 R
 
 					; // Add transform component
-					INVOKE new_transform_component, 20, 25, 0
- 00000020  6A 00	   *	    push   +000000000h
- 00000022  6A 19	   *	    push   +000000019h
- 00000024  6A 14	   *	    push   +000000014h
- 00000026  E8 00000000 E   *	    call   new_transform_component
+ 00000020  8B 5D 10			mov ebx, radius
+ 00000023  C1 E3 02			shl ebx, 2
+ 00000026  F7 DB			neg ebx
+ 00000028  03 5D 08			add ebx, x; // x = x - (radius / 2)
+ 0000002B  8B 45 0C			mov eax, y
+ 0000002E  03 C3			add eax, ebx ; // x = x - (radius / 2)
+					INVOKE new_transform_component, ebx, eax, 0
+ 00000030  6A 00	   *	    push   +000000000h
+ 00000032  50		   *	    push   eax
+ 00000033  53		   *	    push   ebx
+ 00000034  E8 00000000 E   *	    call   new_transform_component
 					INVOKE add_component, pThis, eax
- 0000002B  50		   *	    push   eax
- 0000002C  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
- 0000002F  E8 00000000 E   *	    call   add_component
+ 00000039  50		   *	    push   eax
+ 0000003A  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
+ 0000003D  E8 00000000 E   *	    call   add_component
 
 					; // Add rect component
-					INVOKE new_rect_component, 2, 2, 0, 255, 0, 255
- 00000034  68 000000FF	   *	    push   +0000000FFh
- 00000039  6A 00	   *	    push   +000000000h
- 0000003B  68 000000FF	   *	    push   +0000000FFh
- 00000040  6A 00	   *	    push   +000000000h
- 00000042  6A 02	   *	    push   +000000002h
- 00000044  6A 02	   *	    push   +000000002h
- 00000046  E8 00000000 E   *	    call   new_rect_component
+ 00000042  8B 5D 10			mov ebx, radius
+					INVOKE new_rect_component, radius, radius, 0, 255, 0, 255
+ 00000045  68 000000FF	   *	    push   +0000000FFh
+ 0000004A  6A 00	   *	    push   +000000000h
+ 0000004C  68 000000FF	   *	    push   +0000000FFh
+ 00000051  6A 00	   *	    push   +000000000h
+ 00000053  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
+ 00000056  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
+ 00000059  E8 00000000 E   *	    call   new_rect_component
 					INVOKE add_component, pThis, eax
- 0000004B  50		   *	    push   eax
- 0000004C  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
- 0000004F  E8 00000000 E   *	    call   add_component
+ 0000005E  50		   *	    push   eax
+ 0000005F  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
+ 00000062  E8 00000000 E   *	    call   add_component
 
- 00000054  8B 45 FC			mov eax, pThis
+ 00000067  8B 45 FC			mov eax, pThis
 						
 					ret
- 00000057  5A		   *	    pop    edx
- 00000058  5B		   *	    pop    ebx
- 00000059  5E		   *	    pop    esi
- 0000005A  C9		   *	    leave  
- 0000005B  C3		   *	    ret    00000h
- 0000005C			init_explosion_game_object ENDP
+ 0000006A  5A		   *	    pop    edx
+ 0000006B  5B		   *	    pop    ebx
+ 0000006C  5E		   *	    pop    esi
+ 0000006D  C9		   *	    leave  
+ 0000006E  C2 000C	   *	    ret    0000Ch
+ 00000071			init_explosion_game_object ENDP
 
 				; // ----------------------------------
 				; // new_explosion_game_object
 				; // Reserves heap space for the Object with parameters calls the initializer method
 				; // ----------------------------------
- 0000005C			new_explosion_game_object PROC PUBLIC USES ecx
- 0000005C  51		   *	    push   ecx
+ 00000071			new_explosion_game_object PROC PUBLIC USES ecx, x: DWORD, y: DWORD, radius: DWORD
+ 00000071  55		   *	    push   ebp
+ 00000072  8B EC	   *	    mov    ebp, esp
+ 00000074  51		   *	    push   ecx
 					INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF Explosion
- 0000005D  6A 1C	   *	    push   +00000001Ch
- 0000005F  6A 04	   *	    push   +000000004h
- 00000061  FF 35 00000000 E *	    push   hHeap
- 00000067  E8 00000000 E   *	    call   HeapAlloc
- 0000006C  8B C8			mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
-					INVOKE init_explosion_game_object
- 0000006E  E8 FFFFFF8D	   *	    call   init_explosion_game_object
+ 00000075  6A 1C	   *	    push   +00000001Ch
+ 00000077  6A 04	   *	    push   +000000004h
+ 00000079  FF 35 00000000 E *	    push   hHeap
+ 0000007F  E8 00000000 E   *	    call   HeapAlloc
+ 00000084  8B C8			mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
+					INVOKE init_explosion_game_object, x, y, radius
+ 00000086  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
+ 00000089  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
+ 0000008C  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 0000008F  E8 FFFFFF6C	   *	    call   init_explosion_game_object
 
 					ret ; // Return with the address of the memory block in HeapAlloc
- 00000073  59		   *	    pop    ecx
- 00000074  C3		   *	    ret    00000h
- 00000075			new_explosion_game_object ENDP
+ 00000094  59		   *	    pop    ecx
+ 00000095  C9		   *	    leave  
+ 00000096  C2 000C	   *	    ret    0000Ch
+ 00000099			new_explosion_game_object ENDP
 
 
 				; // ********************************************
@@ -500,26 +513,26 @@ explosion_game_object.asm				     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000075			explosion_update PROC stdcall USES eax ebx edx, deltaTime: REAL4
+ 00000099			explosion_update PROC stdcall USES eax ebx edx, deltaTime: REAL4
 					local pThis : DWORD
- 00000075  55		   *	    push   ebp
- 00000076  8B EC	   *	    mov    ebp, esp
- 00000078  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 0000007B  50		   *	    push   eax
- 0000007C  53		   *	    push   ebx
- 0000007D  52		   *	    push   edx
- 0000007E  89 4D FC			mov pThis, ecx
- 00000081  8B 45 08			mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
+ 00000099  55		   *	    push   ebp
+ 0000009A  8B EC	   *	    mov    ebp, esp
+ 0000009C  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 0000009F  50		   *	    push   eax
+ 000000A0  53		   *	    push   ebx
+ 000000A1  52		   *	    push   edx
+ 000000A2  89 4D FC			mov pThis, ecx
+ 000000A5  8B 45 08			mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
 					ret
- 00000084  5A		   *	    pop    edx
- 00000085  5B		   *	    pop    ebx
- 00000086  58		   *	    pop    eax
- 00000087  C9		   *	    leave  
- 00000088  C2 0004	   *	    ret    00004h
- 0000008B			explosion_update ENDP
+ 000000A8  5A		   *	    pop    edx
+ 000000A9  5B		   *	    pop    ebx
+ 000000AA  58		   *	    pop    eax
+ 000000AB  C9		   *	    leave  
+ 000000AC  C2 0004	   *	    ret    00004h
+ 000000AF			explosion_update ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:25:43
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:32:34
 explosion_game_object.asm				     Symbols 2 - 1
 
 
@@ -594,7 +607,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000010 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000008B DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000AF DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -607,7 +620,7 @@ HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 add_component  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 check_rect_collision . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-explosion_update . . . . . . . .	P Near	 00000075 _TEXT	Length= 00000016 Private STDCALL
+explosion_update . . . . . . . .	P Near	 00000099 _TEXT	Length= 00000016 Private STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
 free_component_virtual . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -624,7 +637,10 @@ game_object_update_virtual . . .	P Near	 00000000 FLAT	Length= 00000000 External
 game_object_update . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 get_first_component_which_is_a .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_component . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-init_explosion_game_object . . .	P Near	 00000000 _TEXT	Length= 0000005C Public STDCALL
+init_explosion_game_object . . .	P Near	 00000000 _TEXT	Length= 00000071 Public STDCALL
+  x  . . . . . . . . . . . . . .	DWord	 bp + 00000008
+  y  . . . . . . . . . . . . . .	DWord	 bp + 0000000C
+  radius . . . . . . . . . . . .	DWord	 bp + 00000010
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
 init_game_object . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_rect_component  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -633,7 +649,10 @@ init_transform_component . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 init_unordered_vector  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_component  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-new_explosion_game_object  . . .	P Near	 0000005C _TEXT	Length= 00000019 Public STDCALL
+new_explosion_game_object  . . .	P Near	 00000071 _TEXT	Length= 00000028 Public STDCALL
+  x  . . . . . . . . . . . . . .	DWord	 bp + 00000008
+  y  . . . . . . . . . . . . . .	DWord	 bp + 0000000C
+  radius . . . . . . . . . . . .	DWord	 bp + 00000010
 new_game_object  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_rect_component . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_transform_component  . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
