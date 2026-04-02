@@ -32,6 +32,11 @@ defaultSpawnTime REAL4 0.25
 defaultStateObjectMin = 15
 defaultStateObjectMax = 30
 
+; // Tunnel state values
+tunnelSpawnTime REAL4 0.25
+tunnelStateObjectMin = 15
+tunnelStateObjectMax = 30
+
 .code
 ; // ********************************************
 ; // Constructor Methods
@@ -55,7 +60,7 @@ init_neon_game_manager PROC PUBLIC USES esi ebx edx
 
 	; // My constructor
 	mov (NeonGameManager PTR [ecx]).timer, 0
-	mov (NeonGameManager PTR [ecx]).state, TUNNEL_STATE_ENUM
+	mov (NeonGameManager PTR [ecx]).state, DEFAULT_STATE_ENUM
 	mov (NeonGameManager PTR [ecx]).stateObjectCounter, defaultStateObjectMin
 		
 	mov eax, pThis
@@ -78,6 +83,36 @@ new_neon_game_manager ENDP
 ; // ********************************************
 ; // Instance methods
 ; // ********************************************
+
+; // ----------------------------------
+; // transition_state
+; // Randomly decides what the next state will be
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+transition_state PROC USES eax ebx edx esi edi
+	mov eax, 1
+	INVOKE RandomRange
+
+	.IF eax == DEFAULT_STATE_ENUM
+		mov (NeonGameManager PTR [ecx]).state, DEFAULT_STATE_ENUM
+		mov (NeonGameManager PTR [ecx]).timer, 0
+		
+		; // Get a random number of objects in this scene
+		mov eax, defaultStateObjectMax
+		sub eax, defaultStateObjectMin
+		
+		INVOKE RandomRange
+		add eax, defaultStateObjectMin
+
+		mov (NeonGameManager PTR [ecx]).stateObjectCounter, eax
+	.ELSEIF eax == TUNNEL_STATE_ENUM
+
+	.ENDIF
+
+	ret
+transition_state ENDP
 
 ; // ----------------------------------
 ; // default_state_update
@@ -128,8 +163,7 @@ default_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 
 	mov ebx, (NeonGameManager PTR[ecx]).stateObjectCounter
 	.IF ebx == 0
-		; // Transition state logic would go here
-		mov (NeonGameManager PTR[ecx]).stateObjectCounter, defaultStateObjectMin
+		INVOKE transition_state
 	.ENDIF
     
 default_state_update_skip_spawn:
@@ -201,24 +235,14 @@ tunnel_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 
 	mov ebx, (NeonGameManager PTR[ecx]).stateObjectCounter
 	.IF ebx == 0
-		; // Transition state logic would go here
-		mov (NeonGameManager PTR[ecx]).stateObjectCounter, defaultStateObjectMin
+		INVOKE transition_state
 	.ENDIF
     
-tunnel_state_update_skip_spawn:
+	tunnel_state_update_skip_spawn:
+	
+
 	ret
 tunnel_state_update ENDP
-
-; // ----------------------------------
-; // transition_state
-; // Randomly decides what the next state will be
-; // 
-; // Register Parameters: 
-; //	ecx - THIS pointer
-; // ----------------------------------
-transition_state PROC
-	ret
-transition_state ENDP
 
 ; // ----------------------------------
 ; // neon_game_manager_update
