@@ -61,6 +61,10 @@ new_background_rect_game_object PROC PUBLIC USES ecx, x: DWORD, y: DWORD, h: DWO
 	ret ; // Return with the address of the memory block in HeapAlloc
 new_background_rect_game_object ENDP
 
+; // ********************************************
+; // Instance methods
+; // ********************************************
+
 ; // ----------------------------------
 ; // background_rect_update
 ; // Moves the rect to the left of the screen
