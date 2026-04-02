@@ -298,6 +298,30 @@ initializeRenderer PROC PUBLIC USES eax
 initializeRenderer ENDP
 
 ; // ----------------------------------
+; // blendColor
+; // Private helper. Blends two colors together based on the alpha value of the foreground.
+; // ----------------------------------
+blendColor PROC USES ebx ecx edx esi edi, fgColor : DWORD, bgColor : DWORD
+	mov eax, fgColor
+	shr eax, 24 ; // Shift eax right 3 bytes to get alpha by itself
+
+	; // If the fgColor is opaque, return the fgColor
+	.IF eax == 0FFh
+		mov eax, fgColor
+		jmp blendColor_exit
+	.ENDIF
+
+	; // If the fgColor is fully transparent, return the bgColor
+	.IF eax == 0
+		mov eax, bgColor
+		jmp blendColor_exit
+	.ENDIF
+
+blendColor_exit:
+	ret
+blendColor ENDP
+
+; // ----------------------------------
 ; // drawRect
 ; // Private helper. Draws a filled rectangle to the buffer.
 ; // Position is relative to camera (unless ignoreCamera set).
@@ -424,6 +448,10 @@ yloop_rect:
 	mov ecx, rw
 xloop_rect:
 	mov eax, color
+	mov ebx, [edi] ; // Grab the color underneath
+
+	INVOKE blendColor, eax, ebx
+
 	mov [edi], eax
 	add edi, 4
 	dec ecx
