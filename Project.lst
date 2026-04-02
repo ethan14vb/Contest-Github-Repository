@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 21:11:27
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 21:12:08
 music_player.asm					     Page 1 - 1
 
 
@@ -15,13 +15,56 @@ music_player.asm					     Page 1 - 1
 			      C .stack 4096
 			      C OPTION PROC : PRIVATE
 			      C 
+				INCLUDE music_player.inc
+			      C ; // ==================================
+			      C ; // music_player.asm
+			      C ; // ----------------------------------
+			      C ; // Plays .wav files using win32 functions.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF MUSIC_PLAYER_INC
+ = 00000001		      C MUSIC_PLAYER_INC EQU 1
+			      C 
+			      C playMusic PROTO
+			      C 
+			      C ENDIF
+			      C 
+
+				; // Win32 PlaySound function from learn.microsoft.com/en-us/previous-versions/dd743680(v=vs.85)
+				; // This function was used because of its pure ease of usage
+				PlaySound PROTO, pszSound : PTR BYTE, hmod : DWORD, fdwSound : DWORD
+				INCLUDELIB Winmm.lib
+
+ 00000000			.data
+ = 00000001			    SND_ASYNC    = 1 ; // The sound should play asynchronously
+ = 00000008			    SND_LOOP     = 8 ; // The sound should loop when it is finished
+ = 00020000			    SND_FILENAME = 20000h ; // The pszSound parameter points to a filename
+				
+ 00000000 75 73 65 66 75		wavFile BYTE "usefulpix-retro-synthwave-background-soundtrack-341853.wav", 0
+	   6C 70 69 78 2D
+	   72 65 74 72 6F
+	   2D 73 79 6E 74
+	   68 77 61 76 65
+	   2D 62 61 63 6B
+	   67 72 6F 75 6E
+	   64 2D 73 6F 75
+	   6E 64 74 72 61
+	   63 6B 2D 33 34
+	   31 38 35 33 2E
+	   77 61 76 00
 
  00000000			.code
  00000000			playMusic PROC PUBLIC
- 00000000  C3				ret
- 00000001			playMusic ENDP
+					INVOKE PlaySound, OFFSET wavFile, 0, SND_ASYNC OR SND_LOOP OR SND_FILENAME
+ 00000000  68 00020009	   *	    push   +000020009h
+ 00000005  6A 00	   *	    push   +000000000h
+ 00000007  68 00000000 R   *	    push   dword  ptr OFFSET FLAT: wavFile
+ 0000000C  E8 00000000 E   *	    call   PlaySound
+ 00000011  C3				ret
+ 00000012			playMusic ENDP
+
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 21:11:27
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 21:12:08
 music_player.asm					     Symbols 2 - 1
 
 
@@ -33,15 +76,16 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000001 DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000003B DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000012 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
-playMusic  . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000001 Public STDCALL
+PlaySound  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+playMusic  . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000012 Public STDCALL
 
 
 Symbols:
@@ -57,6 +101,11 @@ Symbols:
 @fardata?  . . . . . . . . . . .	Text   	 FLAT
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
+MUSIC_PLAYER_INC . . . . . . . .	Number	 00000001h   
+SND_ASYNC  . . . . . . . . . . .	Number	 00000001h   
+SND_FILENAME . . . . . . . . . .	Number	 00020000h   
+SND_LOOP . . . . . . . . . . . .	Number	 00000008h   
+wavFile  . . . . . . . . . . . .	Byte	 00000000 _DATA	
 
 	   0 Warnings
 	   0 Errors
