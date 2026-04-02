@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 23:10:09
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 23:13:23
 neon_game_manager.asm					     Page 1 - 1
 
 
@@ -627,7 +627,7 @@ neon_game_manager.asm					     Page 1 - 1
  00000058  52		   *	    push   edx
  00000059  56		   *	    push   esi
  0000005A  57		   *	    push   edi
- 0000005B  B8 00000001			mov eax, 1
+ 0000005B  B8 00000002			mov eax, 2
 					INVOKE RandomRange
  00000060  E8 00000000 E   *	    call   RandomRange
 
@@ -921,7 +921,7 @@ neon_game_manager.asm					     Page 1 - 1
  000001EB			neon_game_manager_update ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 23:10:09
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 23:13:23
 neon_game_manager.asm					     Symbols 2 - 1
 
 

@@ -92,7 +92,7 @@ new_neon_game_manager ENDP
 ; //	ecx - THIS pointer
 ; // ----------------------------------
 transition_state PROC USES eax ebx edx esi edi
-	mov eax, 1
+	mov eax, 2
 	INVOKE RandomRange
 
 	.IF eax == DEFAULT_STATE_ENUM
