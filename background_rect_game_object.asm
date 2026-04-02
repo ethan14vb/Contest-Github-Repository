@@ -61,4 +61,27 @@ new_background_rect_game_object PROC PUBLIC USES ecx, x: DWORD, y: DWORD, h: DWO
 	ret ; // Return with the address of the memory block in HeapAlloc
 new_background_rect_game_object ENDP
 
+; // ----------------------------------
+; // background_rect_update
+; // Moves the rect to the left of the screen
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+background_rect_update PROC stdcall USES eax ebx edx esi, deltaTime: REAL4
+	local pThis : DWORD
+	mov pThis, ecx
+	mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
+
+	mov esi, (BackgroundRect PTR [ecx]).speed
+	neg esi
+
+	; // Move myself
+	INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID
+	add (TransformComponent PTR [eax]).x, esi
+		
+	mov ecx, pThis ; // Restore the THIS pointer
+	ret
+background_rect_update ENDP
+
 END 
