@@ -29,16 +29,16 @@ NEON_GAME_MANAGER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start,
 
 ; // Default state values
 defaultSpawnTime REAL4 0.25
-defaultStateObjectMin = 2
-defaultStateObjectMax = 4
+defaultStateObjectMin = 8
+defaultStateObjectMax = 20
 
 ; // Tunnel state values
 tunnelSpawnTime REAL4 0.25
-tunnelStateObjectMin = 2
-tunnelStateObjectMax = 4
+tunnelStateObjectMin = 8
+tunnelStateObjectMax = 20
 
 ; // Pause state values
-pauseTime REAL4 0.5
+pauseTime REAL4 0.2
 
 ; // Staircase state values
 stairSpawnTime REAL4 0.05
@@ -155,7 +155,12 @@ transition_to_state PROC USES eax ebx edx esi edi, state : GAME_MANAGER_STATE_EN
 			sub ebx, 14
 			mov stairSpawnPos, ebx
 		.ENDIF
-		
+	.ELSEIF eax == PAUSE_STATE_ENUM
+		mov (NeonGameManager PTR [ecx]).state, PAUSE_STATE_ENUM
+		mov (NeonGameManager PTR [ecx]).timer, 0
+	.ELSEIF eax == TRANSITION_TO_STAIR_STATE_ENUM
+		mov (NeonGameManager PTR [ecx]).state, TRANSITION_TO_STAIR_STATE_ENUM
+		mov (NeonGameManager PTR [ecx]).timer, 0
 	.ENDIF
 
 	ret
@@ -171,6 +176,8 @@ transition_to_state ENDP
 transition_state PROC USES eax ebx edx esi edi
 	mov eax, 3
 	INVOKE RandomRange
+	inc eax
+	
 	INVOKE transition_to_state, eax
 
 	ret
@@ -306,12 +313,13 @@ tunnel_state_update ENDP
 
 ; // ----------------------------------
 ; // pause_state_update
-; // Waits for a little while
-; // 
+; // Waits for a little while. If nextState is nonzero, pause will transition to that state after finishing
+; // Otherwise the next state will be random
+; //
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-pause_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
+pause_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4, nextState: GAME_MANAGER_STATE_ENUM
 	local pThis : DWORD
 	mov pThis, ecx
 
@@ -332,7 +340,13 @@ pause_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 	; // Set the timer to 0
     mov (NeonGameManager PTR [ecx]).timer, 0
 		
-	INVOKE transition_state
+	mov ebx, nextState
+	.IF ebx == 0 ; // If no next state was given, go to a random state
+		INVOKE transition_state
+	.ELSE
+		INVOKE transition_to_state, nextState
+	.ENDIF
+	
 
 pause_state_update_skip_spawn:
 	ret
@@ -408,7 +422,7 @@ stair_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 
 	mov ebx, (NeonGameManager PTR[ecx]).stateObjectCounter
 	.IF ebx == 0
-		INVOKE transition_state
+		INVOKE transition_to_state, PAUSE_STATE_ENUM
 	.ENDIF
     
 stair_state_update_skip_spawn:
@@ -431,12 +445,19 @@ neon_game_manager_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 	mov ebx, (NeonGameManager PTR[ecx]).state
 	.IF ebx == DEFAULT_STATE_ENUM
 		INVOKE default_state_update, deltaTime
+
 	.ELSEIF ebx == TUNNEL_STATE_ENUM
 		INVOKE tunnel_state_update, deltaTime
+
 	.ELSEIF ebx == PAUSE_STATE_ENUM
-		INVOKE pause_state_update, deltaTime
+		INVOKE pause_state_update, deltaTime, 0
+
+	.ELSEIF ebx == TRANSITION_TO_STAIR_STATE_ENUM
+		INVOKE pause_state_update, deltaTime, STAIRCASE_STATE_ENUM
+
 	.ELSEIF ebx == STAIRCASE_STATE_ENUM
 		INVOKE stair_state_update, deltaTime
+
 	.ENDIF
 	
 	ret
