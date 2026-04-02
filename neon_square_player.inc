@@ -17,5 +17,6 @@ NeonSquarePlayer ENDS
 
 init_neon_square_player PROTO
 new_neon_square_player PROTO
+neon_square_player_die PROTO
 
 ENDIF

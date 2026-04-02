@@ -128,8 +128,7 @@ wall_obstacle_update PROC stdcall USES eax ebx edx, deltaTime: REAL4
 		; // Make the player invisible
 		mov ecx, pThis
 		mov ecx, (WallObstacle PTR [ecx]).pNeonPlayer
-		INVOKE get_first_component_which_is_a, RECT_COMPONENT_ID
-		mov (RenderableComponent PTR [eax]).visible, 0
+		INVOKE neon_square_player_die
 	.ENDIF
 
 	mov ecx, pThis

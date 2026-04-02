@@ -79,7 +79,7 @@ new_neon_square_player ENDP
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
 ; // ----------------------------------
-neon_square_player_die PROC stdcall USES eax ebx edx
+neon_square_player_die PROC stdcall PUBLIC USES eax ebx edx
 	local pThis : DWORD
 	mov pThis, ecx
 
@@ -90,7 +90,7 @@ neon_square_player_die PROC stdcall USES eax ebx edx
 
 	; // Make myself invisible
 	INVOKE get_first_component_which_is_a, RECT_COMPONENT_ID
-	mov (RenderableComponent PTR [ecx]).visible, 0
+	mov (RenderableComponent PTR [eax]).visible, 0
 
 	; // Set isAlive to false
 	mov ecx, pThis

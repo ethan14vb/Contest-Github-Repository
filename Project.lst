@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:10:26
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:16:49
 neon_square_player.asm					     Page 1 - 1
 
 
@@ -364,6 +364,7 @@ neon_square_player.asm					     Page 1 - 1
 			      C 
 			      C init_neon_square_player PROTO
 			      C new_neon_square_player PROTO
+			      C neon_square_player_die PROTO
 			      C 
 			      C ENDIF
 			      C 
@@ -708,7 +709,7 @@ neon_square_player.asm					     Page 1 - 1
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 0000007C			neon_square_player_die PROC stdcall USES eax ebx edx
+ 0000007C			neon_square_player_die PROC stdcall PUBLIC USES eax ebx edx
 					local pThis : DWORD
  0000007C  55		   *	    push   ebp
  0000007D  8B EC	   *	    mov    ebp, esp
@@ -730,7 +731,7 @@ neon_square_player.asm					     Page 1 - 1
 					INVOKE get_first_component_which_is_a, RECT_COMPONENT_ID
  00000091  6A 01	   *	    push   +000000001h
  00000093  E8 00000000 E   *	    call   get_first_component_which_is_a
- 00000098  C7 41 08			mov (RenderableComponent PTR [ecx]).visible, 0
+ 00000098  C7 40 08			mov (RenderableComponent PTR [eax]).visible, 0
 	   00000000
 
 					; // Set isAlive to false
@@ -849,7 +850,7 @@ neon_square_player.asm					     Page 1 - 1
  00000165			neon_square_player_update ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:10:26
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:16:49
 neon_square_player.asm					     Symbols 2 - 1
 
 
@@ -985,7 +986,7 @@ initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 instantiate_game_object  . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 isKeyJustPressed . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 isKeyPressed . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-neon_square_player_die . . . . .	P Near	 0000007C _TEXT	Length= 00000035 Private STDCALL
+neon_square_player_die . . . . .	P Near	 0000007C _TEXT	Length= 00000035 Public STDCALL
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
   neon_square_player_die_exit  .	L Near	 000000AC _TEXT	
 neon_square_player_update  . . .	P Near	 000000B1 _TEXT	Length= 000000B4 Private STDCALL
