@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <MASM Include="background_rect_game_object.asm" />
     <MASM Include="camera.asm" />
     <MASM Include="camera_mover_game_object.asm" />
     <MASM Include="component.asm" />

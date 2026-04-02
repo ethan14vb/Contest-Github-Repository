@@ -171,5 +171,8 @@
     <MASM Include="explosion_game_object.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
+    <MASM Include="background_rect_game_object.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
   </ItemGroup>
 </Project>
