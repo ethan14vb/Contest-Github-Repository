@@ -37,6 +37,9 @@ tunnelSpawnTime REAL4 0.25
 tunnelStateObjectMin = 15
 tunnelStateObjectMax = 30
 
+; // Pause state values
+pauseTime REAL4 0.5
+
 .code
 ; // ********************************************
 ; // Constructor Methods
@@ -92,7 +95,7 @@ new_neon_game_manager ENDP
 ; //	ecx - THIS pointer
 ; // ----------------------------------
 transition_state PROC USES eax ebx edx esi edi
-	mov eax, 2
+	mov eax, 3
 	INVOKE RandomRange
 
 	.IF eax == DEFAULT_STATE_ENUM
@@ -255,6 +258,40 @@ tunnel_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 tunnel_state_update ENDP
 
 ; // ----------------------------------
+; // pause_state_update
+; // Waits for a little while
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+pause_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
+	local pThis : DWORD
+	mov pThis, ecx
+
+	; // Update timer
+	fld (NeonGameManager PTR [ecx]).timer
+    fadd deltaTime
+    fst (NeonGameManager PTR [ecx]).timer
+
+	; // Determine if the timer is greater than or equal to spawnTime
+	fcomp pauseTime
+
+	; // Get flags
+	fnstsw ax
+	sahf
+
+	jb pause_state_update_skip_spawn
+   
+	; // Set the timer to 0
+    mov (NeonGameManager PTR [ecx]).timer, 0
+		
+	INVOKE transition_state
+
+pause_state_update_skip_spawn:
+	ret
+pause_state_update ENDP
+
+; // ----------------------------------
 ; // neon_game_manager_update
 ; // Moves the wall to the left of the screen. This function uses FPU instructions
 ; // that were not learned in class. These were added to accommodate for deltaTime
@@ -272,6 +309,8 @@ neon_game_manager_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 		INVOKE default_state_update, deltaTime
 	.ELSEIF ebx == TUNNEL_STATE_ENUM
 		INVOKE tunnel_state_update, deltaTime
+	.ELSEIF ebx == PAUSE_STATE_ENUM
+		INVOKE pause_state_update, deltaTime
 	.ENDIF
 	
 	ret
