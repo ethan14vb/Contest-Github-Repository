@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:22:50
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:24:08
 explosion_game_object.asm				     Page 1 - 1
 
 
@@ -14,6 +14,42 @@ explosion_game_object.asm				     Page 1 - 1
 			      C option casemap : none
 			      C .stack 4096
 			      C OPTION PROC : PRIVATE
+			      C 
+				INCLUDE heap_functions.inc
+			      C ; // ==================================
+			      C ; // heap_functions.inc
+			      C ; // ----------------------------------
+			      C ; // Functions used for dynamic memory management. This file was
+			      C ; // added before we learned about heap memory management in class
+			      C ; // so we could have easy memory management. My resource for this 
+			      C ; // was the windows API reference and the class ch11 slides.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF HEAP_FUNCTIONS_INC
+ = 00000001		      C HEAP_FUNCTIONS_INC EQU 1
+			      C 
+			      C ; // Constants
+ = 00000008		      C HEAP_ZERO_MEMORY          equ 00000008h
+ = 00000004		      C HEAP_GENERATE_EXCEPTIONS  equ 00000004h
+ = 00000001		      C HEAP_NO_SERIALIZE         equ 00000001h
+			      C 
+ = 00000000		      C NULL   EQU 0
+			      C 
+			      C ; // Types
+			      C HANDLE TYPEDEF DWORD
+			      C 
+			      C ; // Protos
+			      C GetProcessHeap	PROTO
+			      C HeapAlloc		PROTO,	hHeap:DWORD, dwFlags:DWORD, dwBytes:DWORD
+			      C HeapFree		PROTO,	hHeap:DWORD, dwFlags:DWORD, lpMem:DWORD
+			      C HeapReAlloc		PROTO,	hHeap:DWORD, dwFlags:DWORD, lpMem:DWORD,	dwBytes:DWORD
+			      C 
+			      C initialize_heap PROTO ; // This function is from heap_functions.asm. It gets the handle to the process heap and stores in hHeap
+			      C 
+			      C ; // Data
+			      C EXTERNDEF hHeap:HANDLE ; // the heap handle is defined in heap_functions.asm
+			      C 
+			      C ENDIF
 			      C 
 				INCLUDE explosion_game_object.inc
 			      C ; // ==================================
@@ -373,8 +409,8 @@ explosion_game_object.asm				     Page 1 - 1
 				; // ********************************************
 
 				; // ----------------------------------
-				; // init_neon_square_player
-				; // Initializes memory with the contents of a NeonSquarePlayer
+				; // init_explosion_game_object
+				; // Initializes memory with the contents of an Explosion
 				; // 
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
@@ -432,8 +468,28 @@ explosion_game_object.asm				     Page 1 - 1
  0000005B  C3		   *	    ret    00000h
  0000005C			init_explosion_game_object ENDP
 
+				; // ----------------------------------
+				; // new_explosion_game_object
+				; // Reserves heap space for the Object with parameters calls the initializer method
+				; // ----------------------------------
+ 0000005C			new_explosion_game_object PROC PUBLIC USES ecx
+ 0000005C  51		   *	    push   ecx
+					INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF Explosion
+ 0000005D  6A 1C	   *	    push   +00000001Ch
+ 0000005F  6A 04	   *	    push   +000000004h
+ 00000061  FF 35 00000000 E *	    push   hHeap
+ 00000067  E8 00000000 E   *	    call   HeapAlloc
+ 0000006C  8B C8			mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
+					INVOKE init_explosion_game_object
+ 0000006E  E8 FFFFFF8D	   *	    call   init_explosion_game_object
+
+					ret ; // Return with the address of the memory block in HeapAlloc
+ 00000073  59		   *	    pop    ecx
+ 00000074  C3		   *	    ret    00000h
+ 00000075			new_explosion_game_object ENDP
+
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:22:50
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:24:08
 explosion_game_object.asm				     Symbols 2 - 1
 
 
@@ -498,6 +554,7 @@ Types:
 
 ENUM_COMPONENT_ID  . . . . . . .	 00000004     DWord
 ENUM_GAME_OBJECT_ID  . . . . . .	 00000004     DWord
+HANDLE . . . . . . . . . . . . .	 00000004     DWord
 
 
 Segments and Groups:
@@ -507,13 +564,17 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000010 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000005C DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000075 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
+GetProcessHeap . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+HeapAlloc  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 add_component  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 check_rect_collision . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_component_virtual . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -537,8 +598,9 @@ init_rect_component  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 init_renderable_component  . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_transform_component . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_unordered_vector  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_component  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-new_explosion_game_object  . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+new_explosion_game_object  . . .	P Near	 0000005C _TEXT	Length= 00000019 Public STDCALL
 new_game_object  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_rect_component . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_transform_component  . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -570,8 +632,13 @@ EXPLOSION_GAME_OBJECT_ID . . . .	Number	 00000005h
 EXPLOSION_GAME_OBJECT_INC  . . .	Number	 00000001h   
 GAME_OBJECT_IDS_INC  . . . . . .	Number	 00000001h   
 GAME_OBJECT_INC  . . . . . . . .	Number	 00000001h   
+HEAP_FUNCTIONS_INC . . . . . . .	Number	 00000001h   
+HEAP_GENERATE_EXCEPTIONS . . . .	Number	 00000004h   
+HEAP_NO_SERIALIZE  . . . . . . .	Number	 00000001h   
+HEAP_ZERO_MEMORY . . . . . . . .	Number	 00000008h   
 NEON_GAME_MANAGER_GAME_OBJECT_ID .	Number	 00000004h   
 NEON_SQUARE_PLAYER_GAME_OBJECT_ID 	Number	 00000002h   
+NULL . . . . . . . . . . . . . .	Number	 00000000h   
 RECT_COMMAND_INC . . . . . . . .	Number	 00000001h   
 RECT_COMPONENT_ID  . . . . . . .	Number	 00000001h   
 RENDERABLE_COMPONENT_ID  . . . .	Number	 00000004h   
@@ -582,6 +649,7 @@ TRANSFORM_COMPONENT_INC  . . . .	Number	 00000001h
 UNORDERED_VECTOR_INC . . . . . .	Number	 00000001h   
 WALL_OBSTACLE_GAME_OBJECT_ID . .	Number	 00000003h   
 enumId . . . . . . . . . . . . .	Number	 00000005h   
+hHeap  . . . . . . . . . . . . .	DWord	 00000000 FLAT	External STDCALL
 
 	   0 Warnings
 	   0 Errors

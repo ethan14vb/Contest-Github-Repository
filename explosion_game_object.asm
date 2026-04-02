@@ -5,6 +5,7 @@
 ; // ==================================
 
 INCLUDE default_header.inc
+INCLUDE heap_functions.inc
 INCLUDE explosion_game_object.inc
 INCLUDE transform_component.inc
 INCLUDE rect_component.inc
@@ -18,8 +19,8 @@ EXPLOSION_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET 
 ; // ********************************************
 
 ; // ----------------------------------
-; // init_neon_square_player
-; // Initializes memory with the contents of a NeonSquarePlayer
+; // init_explosion_game_object
+; // Initializes memory with the contents of an Explosion
 ; // 
 ; // Register Parameters: 
 ; //	ecx - THIS pointer
@@ -45,5 +46,17 @@ init_explosion_game_object PROC PUBLIC USES esi ebx edx
 		
 	ret
 init_explosion_game_object ENDP
+
+; // ----------------------------------
+; // new_explosion_game_object
+; // Reserves heap space for the Object with parameters calls the initializer method
+; // ----------------------------------
+new_explosion_game_object PROC PUBLIC USES ecx
+	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF Explosion
+	mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
+	INVOKE init_explosion_game_object
+
+	ret ; // Return with the address of the memory block in HeapAlloc
+new_explosion_game_object ENDP
 
 END
