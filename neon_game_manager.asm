@@ -40,6 +40,13 @@ tunnelStateObjectMax = 30
 ; // Pause state values
 pauseTime REAL4 0.5
 
+; // Staircase state values
+stairSpawnTime REAL4 0.05
+stairStateObjectMin = 15
+stairStateObjectMax = 30
+stairDirection = 0 ; // Can be either 0 or 1
+stairSpawnPos = 0
+
 .code
 ; // ********************************************
 ; // Constructor Methods
@@ -95,7 +102,7 @@ new_neon_game_manager ENDP
 ; //	ecx - THIS pointer
 ; // ----------------------------------
 transition_state PROC USES eax ebx edx esi edi
-	mov eax, 3
+	mov eax, 2
 	INVOKE RandomRange
 
 	.IF eax == DEFAULT_STATE_ENUM
@@ -290,6 +297,21 @@ pause_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 pause_state_update_skip_spawn:
 	ret
 pause_state_update ENDP
+
+; // ----------------------------------
+; // stair_state_update
+; // Spawns stairs in a descending or ascending pattern
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+stair_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
+	local pThis : DWORD
+	mov pThis, ecx
+
+	mov eax, deltaTime
+	ret
+stair_state_update ENDP
 
 ; // ----------------------------------
 ; // neon_game_manager_update
