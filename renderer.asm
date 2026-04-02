@@ -302,8 +302,9 @@ initializeRenderer ENDP
 ; // Private helper. Blends two colors together based on the alpha value of the foreground.
 ; // ----------------------------------
 blendColor PROC USES ebx ecx edx esi edi, fgColor : DWORD, bgColor : DWORD
-	mov eax, fgColor
-	shr eax, 24 ; // Shift eax right 3 bytes to get alpha by itself
+local finalColor : DWORD, fgAlpha : DWORD
+	mov esi, fgColor
+	shr esi, 24 ; // Shift eax right 3 bytes to get alpha by itself
 
 	; // If the fgColor is opaque, return the fgColor
 	.IF eax == 0FFh
@@ -317,6 +318,28 @@ blendColor PROC USES ebx ecx edx esi edi, fgColor : DWORD, bgColor : DWORD
 		jmp blendColor_exit
 	.ENDIF
 
+	; // None of the jump conditions apply, so we must do the blending logic
+	; // The formula is (fgColor * fgAlpha + bgColor * (255 - fgAlpha)) / 255
+	mov fgAlpha, esi
+	mov edi, 255
+	sub edi, esi ; // 255 - fgAlpha
+
+	mov edx, 0
+
+	; // Red
+	mov eax, fgColor
+	and eax, 0FFh
+	imul eax, esi
+
+	mov ebx, bgColor
+	and ebx, 0FFh
+	imul ebx, edi ; // Multiply the background color by 255 - fgAlpha
+
+	add eax, ebx
+	shr eax, 8  ; // Divide by 256 instead of 255 for speed
+	or edx, eax
+
+	
 blendColor_exit:
 	ret
 blendColor ENDP
