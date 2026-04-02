@@ -29,6 +29,8 @@ NeonGameManager STRUCT
 	timer REAL4 ?
 
 	state GAME_MANAGER_STATE_ENUM ?
+
+	stateObjectCounter DWORD ?
 NeonGameManager ENDS
 
 ; // Protos

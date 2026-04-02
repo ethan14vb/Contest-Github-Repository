@@ -26,7 +26,11 @@ Random32 PROTO
 
 .data
 NEON_GAME_MANAGER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET neon_game_manager_update, OFFSET game_object_exit, OFFSET free_game_object>
+
+; // Default state values
 defaultSpawnTime REAL4 0.25
+defaultStateObjectMin = 15
+defaultStateObjectMax = 30
 
 .code
 ; // ********************************************
@@ -52,6 +56,7 @@ init_neon_game_manager PROC PUBLIC USES esi ebx edx
 	; // My constructor
 	mov (NeonGameManager PTR [ecx]).timer, 0
 	mov (NeonGameManager PTR [ecx]).state, DEFAULT_STATE_ENUM
+	mov (NeonGameManager PTR [ecx]).stateObjectCounter, defaultStateObjectMin
 		
 	mov eax, pThis
 		
@@ -110,6 +115,15 @@ default_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 	mov ecx, (GameObject PTR [ecx]).pParentScene
 
 	INVOKE instantiate_game_object, eax
+
+	mov ecx, pThis
+	dec (NeonGameManager PTR [ecx]).stateObjectCounter
+
+	mov ebx, (NeonGameManager PTR[ecx]).stateObjectCounter
+	.IF ebx == 0
+		; // Transition state logic would go here
+		mov (NeonGameManager PTR[ecx]).stateObjectCounter, defaultStateObjectMin
+	.ENDIF
     
 update_neon_game_manager_skip_spawn:
 	ret
