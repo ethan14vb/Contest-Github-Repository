@@ -55,7 +55,7 @@ init_neon_game_manager PROC PUBLIC USES esi ebx edx
 
 	; // My constructor
 	mov (NeonGameManager PTR [ecx]).timer, 0
-	mov (NeonGameManager PTR [ecx]).state, DEFAULT_STATE_ENUM
+	mov (NeonGameManager PTR [ecx]).state, TUNNEL_STATE_ENUM
 	mov (NeonGameManager PTR [ecx]).stateObjectCounter, defaultStateObjectMin
 		
 	mov eax, pThis
@@ -95,7 +95,7 @@ default_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 	fnstsw ax
 	sahf
 
-	jb update_neon_game_manager_skip_spawn
+	jb default_state_update_skip_spawn
    
 	; // Set the timer to 0
     mov (NeonGameManager PTR [ecx]).timer, 0
@@ -125,9 +125,75 @@ default_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 		mov (NeonGameManager PTR[ecx]).stateObjectCounter, defaultStateObjectMin
 	.ENDIF
     
-update_neon_game_manager_skip_spawn:
+default_state_update_skip_spawn:
 	ret
 default_state_update ENDP
+
+tunnel_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
+	local pThis : DWORD
+	mov pThis, ecx
+
+	; // Update timer
+	fld (NeonGameManager PTR [ecx]).timer
+    fadd deltaTime
+    fst (NeonGameManager PTR [ecx]).timer
+
+	; // Determine if the timer is greater than or equal to spawnTime
+	fcomp defaultSpawnTime
+
+	; // Get flags
+	fnstsw ax
+	sahf
+
+	jb tunnel_state_update_skip_spawn
+   
+	; // Set the timer to 0
+    mov (NeonGameManager PTR [ecx]).timer, 0
+    
+	; // Spawn the obstacle
+	mov ecx, pThis
+	mov ecx, (GameObject PTR [ecx]).pParentScene
+
+	mov eax, SCREEN_HEIGHT
+	sub eax, 18
+
+	INVOKE RandomRange
+	add eax, 1
+
+	mov ebx, eax ; // Store the random number in ebx
+
+	; // Spawn the top wall
+	INVOKE new_wall_obstacle, SCREEN_WIDTH, 0, ebx
+	
+	mov ecx, pThis
+	mov ecx, (GameObject PTR [ecx]).pParentScene
+
+	INVOKE instantiate_game_object, eax
+
+	; // Now spawn the bottom wall
+	add ebx, 15
+	mov edx, SCREEN_WIDTH
+	sub edx, ebx
+	INVOKE new_wall_obstacle, SCREEN_WIDTH, ebx, edx
+
+	mov ecx, pThis
+	mov ecx, (GameObject PTR [ecx]).pParentScene
+
+	INVOKE instantiate_game_object, eax
+
+	; // Decrement the amount of objects left to spawn in this state
+	mov ecx, pThis
+	dec (NeonGameManager PTR [ecx]).stateObjectCounter
+
+	mov ebx, (NeonGameManager PTR[ecx]).stateObjectCounter
+	.IF ebx == 0
+		; // Transition state logic would go here
+		mov (NeonGameManager PTR[ecx]).stateObjectCounter, defaultStateObjectMin
+	.ENDIF
+    
+tunnel_state_update_skip_spawn:
+	ret
+tunnel_state_update ENDP
 
 ; // ----------------------------------
 ; // neon_game_manager_update
@@ -145,8 +211,10 @@ neon_game_manager_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 	mov ebx, (NeonGameManager PTR[ecx]).state
 	.IF ebx == DEFAULT_STATE_ENUM
 		INVOKE default_state_update, deltaTime
+	.ELSEIF ebx == TUNNEL_STATE_ENUM
+		INVOKE tunnel_state_update, deltaTime
 	.ENDIF
-
+	
 	ret
 neon_game_manager_update ENDP
 
