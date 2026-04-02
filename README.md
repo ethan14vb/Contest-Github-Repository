@@ -1,0 +1,1 @@
+To compile the project, open the Project.sln in Visual Studio and use Build > Clean Solution. After this, build it with Build > Build Solution and then run with Debug > Start Without Debugging. Use the up and down arrow keys to move and avoid hitting obstacles in the game. Have fun!
