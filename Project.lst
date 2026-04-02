@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 08:36:57
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 08:40:32
 background_rect_game_object.asm				     Page 1 - 1
 
 
@@ -186,6 +186,228 @@ background_rect_game_object.asm				     Page 1 - 1
 			      C IFNDEF GAME_OBJECT_IDS_INC
 			      C ENDIF
 			      C 
+				INCLUDE background_rect_game_object.inc
+			      C ; // ==================================
+			      C ; // background_rect_game_object.inc
+			      C ; // ----------------------------------
+			      C ; // Rectangles that move in the background at different speeds
+			      C ; // ==================================
+			      C 
+			      C IFNDEF BACKGROUND_RECT_GAME_OBJECT_INC
+ = 00000001		      C BACKGROUND_RECT_GAME_OBJECT_INC EQU 1
+			      C 
+			      C INCLUDE game_object.inc
+			      C ; // ==================================
+			      C ; // GameObject
+			      C ; // ----------------------------------
+			      C ; //	GameObjects are the core elements of a scene
+			      C ; // that contain gameplay logic and anything the player
+			      C ; // will see.
+			      C ; //	This STRUCT is intended to be 'subclassed' by 
+			      C ; // overriding the virtual function table.
+			      C ; //	GameObjects contain a list of components that
+			      C ; // define utility behavior such as sprites to render
+			      C ; // or animation states. These componenets are updated
+			      C ; // by the scene_update to keep their auxillary functionality
+			      C ; // separate from main game logic.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF GAME_OBJECT_INC
+			      C ENDIF
+			      C 
+			      C 
+ 00000020		      C BackgroundRect STRUCT
+ 00000000  00000000	      C 	baseGameObject GameObject<>
+	   00000000
+	   00000000
+	   00000000
+	   00000000
+	   00000000
+	   00000000
+ 0000001C  00000000	      C 	speed DWORD ?
+			      C BackgroundRect ENDS
+			      C 
+			      C init_background_rect_game_object	PROTO x: DWORD, y: DWORD, h: DWORD, w: DWORD, r: BYTE, g: BYTE, b: BYTE, a: BYTE, layer: DWORD, speed: DWORD
+			      C init_background_rect_game_object	PROTO x: DWORD, y: DWORD, h: DWORD, w: DWORD, r: BYTE, g: BYTE, b: BYTE, a: BYTE, layer: DWORD
+			      C 
+			      C ENDIF
+			      C 
+				INCLUDE transform_component.inc
+			      C ; // ==================================
+			      C ; // TransformComponent
+			      C ; // ----------------------------------
+			      C ; // Defines where in space a GameObject should be
+			      C ; // represented.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF TRANSFORM_COMPONENT_INC
+ = 00000001		      C TRANSFORM_COMPONENT_INC EQU 1
+			      C 
+			      C INCLUDE component.inc
+			      C ; // ==================================
+			      C ; // component.inc
+			      C ; // ----------------------------------
+			      C ; //	Components are utility helpers to GameObjects that
+			      C ; // allow for easy adding of features and a composition
+			      C ; // structure for them (HasA vs IsA). 
+			      C ; //	Some examples of components are SpriteComponents
+			      C ; // that describe what a GameObject should look like or
+			      C ; // TransformComponents that describe where a GameObject
+			      C ; // is located spatially. 
+			      C ; //	This is the generic component STRUCT that
+			      C ; // all components inherit from.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF COMPONENT_INC
+ = 00000001		      C COMPONENT_INC EQU 1
+			      C 
+			      C INCLUDE component_ids.inc
+			      C ; // ==================================
+			      C ; // component_ids.inc
+			      C ; // ----------------------------------
+			      C ; // A set of "enum" style macros that identify component types 
+			      C ; // for the data definition and parsing of a scene's data.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF COMPONENT_IDS_INC
+			      C ENDIF
+			      C 
+			      C 
+ 00000004		      C Component_vtable STRUCT
+ 00000000  00000000	      C 	pFree DWORD ?
+			      C Component_vtable ENDS
+			      C 
+ 00000008		      C Component STRUCT
+ 00000000  00000000	      C 	componentType ENUM_COMPONENT_ID DEFAULT_COMPONENT_ID
+ 00000004  00000000	      C 	pVt DWORD ?
+			      C Component ENDS
+			      C 
+			      C ; // Constructor protos
+			      C init_component PROTO
+			      C new_component PROTO
+			      C free_component PROTO
+			      C free_component_virtual PROTO
+			      C 
+			      C ENDIF
+			      C 
+			      C 
+ 00000014		      C TransformComponent STRUCT
+ 00000000  00000000	      C 	baseComponent Component <>
+	   00000000
+			      C 
+ 00000008  00000000	      C 	x SDWORD ?
+ 0000000C  00000000	      C 	y SDWORD ?
+			      C 
+			      C 	; // Whether to ignore the camera offset when rendering.
+			      C 	; // Used for drawing UI items
+ 00000010  00000000	      C 	ignoreCamera DWORD ?
+			      C 
+			      C 	; // Out of scope for this project
+			      C 	; // rotation DWORD ?
+			      C 	; // scaleX DWORD ?
+			      C 	; // scaleY DWORD ?
+			      C TransformComponent ENDS
+			      C 
+			      C ; // Constructor methods
+			      C init_transform_component PROTO x: DWORD, y : DWORD, ignoreCamera : DWORD
+			      C new_transform_component PROTO x: DWORD, y: DWORD, ignoreCamera: DWORD
+			      C free_transform_component PROTO
+			      C 
+			      C ENDIF
+			      C 
+				INCLUDE rect_component.inc
+			      C ; // ==================================
+			      C ; // rect_component.inc
+			      C ; // ----------------------------------
+			      C ; // Defines how a GameObject should appear using a rectangle.
+			      C ; // Should be used with a transform for proper functionality.
+			      C ; // The origin is defined by a transform.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF RECT_COMMAND_INC
+ = 00000001		      C RECT_COMMAND_INC EQU 1
+			      C 
+			      C INCLUDE renderable_component.inc
+			      C ; // ==================================
+			      C ; // renderable_component.inc
+			      C ; // ----------------------------------
+			      C ; // A subclass of component that provides
+			      C ; // fields for the RenderableComponents which
+			      C ; // are RectComponents and SpriteComponents
+			      C ; // ==================================
+			      C 
+			      C IFNDEF RENDERABLE_COMPONENT_INC
+ = 00000001		      C RENDERABLE_COMPONENT_INC EQU 1
+			      C 
+			      C INCLUDE component.inc
+			      C ; // ==================================
+			      C ; // component.inc
+			      C ; // ----------------------------------
+			      C ; //	Components are utility helpers to GameObjects that
+			      C ; // allow for easy adding of features and a composition
+			      C ; // structure for them (HasA vs IsA). 
+			      C ; //	Some examples of components are SpriteComponents
+			      C ; // that describe what a GameObject should look like or
+			      C ; // TransformComponents that describe where a GameObject
+			      C ; // is located spatially. 
+			      C ; //	This is the generic component STRUCT that
+			      C ; // all components inherit from.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF COMPONENT_INC
+			      C ENDIF
+			      C 
+			      C 
+ 00000010		      C RenderableComponent STRUCT
+ 00000000  00000000	      C 	baseComponent Component <>
+	   00000000
+			      C 
+ 00000008  00000000	      C 	visible DWORD ?
+ 0000000C  00000000	      C 	layer DWORD ?
+			      C RenderableComponent ENDS
+			      C 
+			      C ; // Constructor protos
+			      C init_renderable_component PROTO visible : DWORD, layer : DWORD
+			      C 
+			      C ENDIF
+			      C 
+			      C 
+ 0000001C		      C RectComponent STRUCT
+ 00000000  00000000	      C 	baseRenderableComponent RenderableComponent <>
+	   00000000
+	   00000000
+	   00000000
+			      C 
+ 00000010  00000000	      C 	h DWORD ? ; // Height
+ 00000014  00000000	      C 	w DWORD ? ; // Width
+			      C 
+			      C 	; // Color (For future development, this should be an RGBA object)
+			      C 	; // For simplicity reasons, it is 4 bytes for now. 
+ 00000018  00		      C 	r BYTE ?
+ 00000019  00		      C 	g BYTE ?
+ 0000001A  00		      C 	b BYTE ?
+ 0000001B  00		      C 	a BYTE ?
+			      C RectComponent ENDS
+			      C 
+			      C ; // Constructor methods
+			      C init_rect_component PROTO h: DWORD, w : DWORD, r : BYTE, g : BYTE, b : BYTE, a : BYTE
+			      C new_rect_component PROTO h: DWORD, w: DWORD, r: BYTE, g: BYTE, b:  BYTE, a: BYTE
+			      C free_rect_component PROTO
+			      C 
+			      C ENDIF
+			      C 
+				INCLUDE renderable_component.inc
+			      C ; // ==================================
+			      C ; // renderable_component.inc
+			      C ; // ----------------------------------
+			      C ; // A subclass of component that provides
+			      C ; // fields for the RenderableComponents which
+			      C ; // are RectComponents and SpriteComponents
+			      C ; // ==================================
+			      C 
+			      C IFNDEF RENDERABLE_COMPONENT_INC
+			      C ENDIF
+			      C 
 
  00000000			.data
  00000000 00000000 E		BACKGROUND_RECT_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET game_object_update, OFFSET game_object_exit, OFFSET free_game_object>
@@ -198,7 +420,7 @@ background_rect_game_object.asm				     Page 1 - 1
 				; // Constructor Methods
 				; // ********************************************
 
- 00000000			init_background_rect_game_object PROC PUBLIC USES esi ebx edx
+ 00000000			init_background_rect_game_object PROC PUBLIC USES esi ebx edx, x : DWORD, y : DWORD, h : DWORD, w : DWORD, r : BYTE, g : BYTE, b : BYTE, a : BYTE, layer : DWORD, speed : DWORD
 					local pThis
  00000000  55		   *	    push   ebp
  00000001  8B EC	   *	    mov    ebp, esp
@@ -216,18 +438,53 @@ background_rect_game_object.asm				     Page 1 - 1
  00000019  C7 41 10			mov (GameObject PTR [ecx]).pVt, OFFSET BACKGROUND_RECT_GAMEOBJECT_VTABLE
 	   00000000 R
 
- 00000020  8B 45 FC			mov eax, pThis
+					; // My constructor
+ 00000020  8B 75 2C			mov esi, speed
+ 00000023  89 71 1C			mov (BackgroundRect PTR [ecx]).speed, esi
+						
+					; // Add transform component
+					INVOKE new_transform_component, x, y, 0
+ 00000026  6A 00	   *	    push   +000000000h
+ 00000028  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
+ 0000002B  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
+ 0000002E  E8 00000000 E   *	    call   new_transform_component
+					INVOKE add_component, pThis, eax
+ 00000033  50		   *	    push   eax
+ 00000034  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
+ 00000037  E8 00000000 E   *	    call   add_component
+
+					; // Add rect component
+					INVOKE new_rect_component, h, w, r, g, b, a
+ 0000003C  8A 45 24	   *	    mov    al, byte  ptr ss:[ebp]+024h
+ 0000003F  50		   *	    push   eax
+ 00000040  8A 45 20	   *	    mov    al, byte  ptr ss:[ebp]+020h
+ 00000043  50		   *	    push   eax
+ 00000044  8A 45 1C	   *	    mov    al, byte  ptr ss:[ebp]+01Ch
+ 00000047  50		   *	    push   eax
+ 00000048  8A 45 18	   *	    mov    al, byte  ptr ss:[ebp]+018h
+ 0000004B  50		   *	    push   eax
+ 0000004C  FF 75 14	   *	    push   dword  ptr ss:[ebp]+000000014h
+ 0000004F  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
+ 00000052  E8 00000000 E   *	    call   new_rect_component
+ 00000057  8B 75 28			mov esi, layer
+ 0000005A  89 70 0C			mov (RenderableComponent PTR [eax]).layer, esi
+					INVOKE add_component, pThis, eax
+ 0000005D  50		   *	    push   eax
+ 0000005E  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
+ 00000061  E8 00000000 E   *	    call   add_component
+
+ 00000066  8B 45 FC			mov eax, pThis
 						
 					ret
- 00000023  5A		   *	    pop    edx
- 00000024  5B		   *	    pop    ebx
- 00000025  5E		   *	    pop    esi
- 00000026  C9		   *	    leave  
- 00000027  C3		   *	    ret    00000h
- 00000028			init_background_rect_game_object ENDP
+ 00000069  5A		   *	    pop    edx
+ 0000006A  5B		   *	    pop    ebx
+ 0000006B  5E		   *	    pop    esi
+ 0000006C  C9		   *	    leave  
+ 0000006D  C2 0028	   *	    ret    00028h
+ 00000070			init_background_rect_game_object ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 08:36:57
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 08:40:32
 background_rect_game_object.asm				     Symbols 2 - 1
 
 
@@ -245,6 +502,14 @@ Structures and Unions:
                 N a m e                  Size
                                          Offset      Type
 
+BackgroundRect . . . . . . . . .	 00000020
+  baseGameObject . . . . . . . .	 00000000	 
+  speed  . . . . . . . . . . . .	 0000001C	 DWord
+Component_vtable . . . . . . . .	 00000004
+  pFree  . . . . . . . . . . . .	 00000000	 DWord
+Component  . . . . . . . . . . .	 00000008
+  componentType  . . . . . . . .	 00000000	 DWord
+  pVt  . . . . . . . . . . . . .	 00000004	 DWord
 GameObject_vtable  . . . . . . .	 00000010
   pStart . . . . . . . . . . . .	 00000000	 DWord
   pUpdate  . . . . . . . . . . .	 00000004	 DWord
@@ -256,6 +521,23 @@ GameObject . . . . . . . . . . .	 0000001C
   pVt  . . . . . . . . . . . . .	 00000010	 DWord
   pParentScene . . . . . . . . .	 00000014	 DWord
   awaitingFree . . . . . . . . .	 00000018	 DWord
+RectComponent  . . . . . . . . .	 0000001C
+  baseRenderableComponent  . . .	 00000000	 XmmWord
+  h  . . . . . . . . . . . . . .	 00000010	 DWord
+  w  . . . . . . . . . . . . . .	 00000014	 DWord
+  r  . . . . . . . . . . . . . .	 00000018	 Byte
+  g  . . . . . . . . . . . . . .	 00000019	 Byte
+  b  . . . . . . . . . . . . . .	 0000001A	 Byte
+  a  . . . . . . . . . . . . . .	 0000001B	 Byte
+RenderableComponent  . . . . . .	 00000010
+  baseComponent  . . . . . . . .	 00000000	 QWord
+  visible  . . . . . . . . . . .	 00000008	 DWord
+  layer  . . . . . . . . . . . .	 0000000C	 DWord
+TransformComponent . . . . . . .	 00000014
+  baseComponent  . . . . . . . .	 00000000	 QWord
+  x  . . . . . . . . . . . . . .	 00000008	 DWord
+  y  . . . . . . . . . . . . . .	 0000000C	 DWord
+  ignoreCamera . . . . . . . . .	 00000010	 DWord
 UnorderedVector  . . . . . . . .	 0000000C
   pData  . . . . . . . . . . . .	 00000000	 DWord
   count  . . . . . . . . . . . .	 00000004	 DWord
@@ -277,7 +559,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000010 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000028 DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000070 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -286,7 +568,11 @@ Procedures, parameters, and locals:
 
 add_component  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 check_rect_collision . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+free_component_virtual . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+free_component . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_game_object . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+free_rect_component  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+free_transform_component . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_unordered_vector  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 game_object_exit . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 game_object_free_virtual . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -295,11 +581,28 @@ game_object_start  . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 game_object_update_virtual . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 game_object_update . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 get_first_component_which_is_a .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-init_background_rect_game_object .	P Near	 00000000 _TEXT	Length= 00000028 Public STDCALL
+init_background_rect_game_object .	P Near	 00000000 _TEXT	Length= 00000070 Public STDCALL
+  x  . . . . . . . . . . . . . .	DWord	 bp + 00000008
+  y  . . . . . . . . . . . . . .	DWord	 bp + 0000000C
+  h  . . . . . . . . . . . . . .	DWord	 bp + 00000010
+  w  . . . . . . . . . . . . . .	DWord	 bp + 00000014
+  r  . . . . . . . . . . . . . .	Byte	 bp + 00000018
+  g  . . . . . . . . . . . . . .	Byte	 bp + 0000001C
+  b  . . . . . . . . . . . . . .	Byte	 bp + 00000020
+  a  . . . . . . . . . . . . . .	Byte	 bp + 00000024
+  layer  . . . . . . . . . . . .	DWord	 bp + 00000028
+  speed  . . . . . . . . . . . .	DWord	 bp + 0000002C
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
+init_component . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_game_object . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+init_rect_component  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+init_renderable_component  . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+init_transform_component . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_unordered_vector  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+new_component  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_game_object  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+new_rect_component . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+new_transform_component  . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_unordered_vector . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 push_back  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 remove_element . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -320,8 +623,10 @@ Symbols:
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 BACKGROUND_RECT_GAMEOBJECT_VTABLE 	GameObject_vtable  00000000 _DATA	
 BACKGROUND_RECT_GAME_OBJECT_ID .	Number	 00000006h   
+BACKGROUND_RECT_GAME_OBJECT_INC 	Number	 00000001h   
 CAMERA_MOVER_GAME_OBJECT_ID  . .	Number	 00000001h   
 COMPONENT_IDS_INC  . . . . . . .	Number	 00000001h   
+COMPONENT_INC  . . . . . . . . .	Number	 00000001h   
 DEFAULT_COMPONENT_ID . . . . . .	Number	 00000000h   
 DEFAULT_GAME_OBJECT_ID . . . . .	Number	 00000000h   
 EXPLOSION_GAME_OBJECT_ID . . . .	Number	 00000005h   
@@ -329,10 +634,13 @@ GAME_OBJECT_IDS_INC  . . . . . .	Number	 00000001h
 GAME_OBJECT_INC  . . . . . . . .	Number	 00000001h   
 NEON_GAME_MANAGER_GAME_OBJECT_ID .	Number	 00000004h   
 NEON_SQUARE_PLAYER_GAME_OBJECT_ID 	Number	 00000002h   
+RECT_COMMAND_INC . . . . . . . .	Number	 00000001h   
 RECT_COMPONENT_ID  . . . . . . .	Number	 00000001h   
 RENDERABLE_COMPONENT_ID  . . . .	Number	 00000004h   
+RENDERABLE_COMPONENT_INC . . . .	Number	 00000001h   
 SPRITE_COMPONENT_ID  . . . . . .	Number	 00000002h   
 TRANSFORM_COMPONENT_ID . . . . .	Number	 00000003h   
+TRANSFORM_COMPONENT_INC  . . . .	Number	 00000001h   
 UNORDERED_VECTOR_INC . . . . . .	Number	 00000001h   
 WALL_OBSTACLE_GAME_OBJECT_ID . .	Number	 00000003h   
 enumId . . . . . . . . . . . . .	Number	 00000005h   

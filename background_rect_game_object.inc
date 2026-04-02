@@ -14,7 +14,7 @@ BackgroundRect STRUCT
 	speed DWORD ?
 BackgroundRect ENDS
 
-init_background_rect_game_object	PROTO x: DWORD, y: DWORD, h: DWORD, w: DWORD, r: BYTE, g: BYTE, b: BYTE, a: BYTE, layer: DWORD
+init_background_rect_game_object	PROTO x: DWORD, y: DWORD, h: DWORD, w: DWORD, r: BYTE, g: BYTE, b: BYTE, a: BYTE, layer: DWORD, speed: DWORD
 init_background_rect_game_object	PROTO x: DWORD, y: DWORD, h: DWORD, w: DWORD, r: BYTE, g: BYTE, b: BYTE, a: BYTE, layer: DWORD
 
 ENDIF
