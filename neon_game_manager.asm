@@ -29,23 +29,23 @@ NEON_GAME_MANAGER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start,
 
 ; // Default state values
 defaultSpawnTime REAL4 0.25
-defaultStateObjectMin = 15
-defaultStateObjectMax = 30
+defaultStateObjectMin = 2
+defaultStateObjectMax = 4
 
 ; // Tunnel state values
 tunnelSpawnTime REAL4 0.25
-tunnelStateObjectMin = 15
-tunnelStateObjectMax = 30
+tunnelStateObjectMin = 2
+tunnelStateObjectMax = 4
 
 ; // Pause state values
 pauseTime REAL4 0.5
 
 ; // Staircase state values
 stairSpawnTime REAL4 0.05
-stairStateObjectMin = 15
-stairStateObjectMax = 30
-stairDirection = 0 ; // Can be either 0 or 1
-stairSpawnPos = 0
+stairStateObjectMin DWORD 15
+stairStateObjectMax DWORD 20
+stairDirection DWORD 0 ; // Can be either 0 or 1
+stairSpawnPos DWORD 0
 
 .code
 ; // ********************************************
@@ -102,7 +102,7 @@ new_neon_game_manager ENDP
 ; //	ecx - THIS pointer
 ; // ----------------------------------
 transition_state PROC USES eax ebx edx esi edi
-	mov eax, 2
+	mov eax, 3
 	INVOKE RandomRange
 
 	.IF eax == DEFAULT_STATE_ENUM
@@ -129,6 +129,34 @@ transition_state PROC USES eax ebx edx esi edi
 		add eax, tunnelStateObjectMin
 			
 		mov (NeonGameManager PTR [ecx]).stateObjectCounter, eax
+	.ELSEIF eax == STAIRCASE_STATE_ENUM
+		mov (NeonGameManager PTR [ecx]).state, STAIRCASE_STATE_ENUM
+		mov (NeonGameManager PTR [ecx]).timer, 0
+		
+		; // Get a random number of objects in this scene
+		mov eax, stairStateObjectMax
+		sub eax, stairStateObjectMin
+		
+		INVOKE RandomRange
+		add eax, stairStateObjectMin
+		mov (NeonGameManager PTR [ecx]).stateObjectCounter, eax
+			
+		; // Set a direction
+		mov eax, 2
+		INVOKE RandomRange
+		.IF eax == 0
+			; // Direction = Down
+			mov stairDirection, 1 ; // Can be either 0 or 1
+			mov stairSpawnPos, 2
+
+		.ELSEIF eax == 1
+			; // Direction = Up
+			mov stairDirection, 0; // Can be either 0 or 1
+			mov ebx, SCREEN_HEIGHT
+			sub ebx, 14
+			mov stairSpawnPos, ebx
+		.ENDIF
+		
 	.ENDIF
 
 	ret
@@ -258,9 +286,7 @@ tunnel_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 		INVOKE transition_state
 	.ENDIF
     
-	tunnel_state_update_skip_spawn:
-	
-
+tunnel_state_update_skip_spawn:
 	ret
 tunnel_state_update ENDP
 
@@ -309,7 +335,69 @@ stair_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 	local pThis : DWORD
 	mov pThis, ecx
 
-	mov eax, deltaTime
+	; // Update timer
+	fld (NeonGameManager PTR [ecx]).timer
+    fadd deltaTime
+    fst (NeonGameManager PTR [ecx]).timer
+
+	; // Determine if the timer is greater than or equal to spawnTime
+	fcomp stairSpawnTime
+
+	; // Get flags
+	fnstsw ax
+	sahf
+
+	jb stair_state_update_skip_spawn
+   
+	; // Set the timer to 0
+    mov (NeonGameManager PTR [ecx]).timer, 0
+    
+	; // Spawn the obstacle
+	mov ecx, pThis
+	mov ecx, (GameObject PTR [ecx]).pParentScene
+
+	mov ebx, eax ; // Store the random number in ebx
+
+	; // Spawn the top wall
+	mov ebx, stairSpawnPos
+	INVOKE new_wall_obstacle, SCREEN_WIDTH, 0, ebx
+	
+	mov ebx, stairDirection
+	.IF ebx == 0
+		dec stairSpawnPos
+		dec stairSpawnPos
+	.ELSE
+		inc stairSpawnPos
+		inc stairSpawnPos
+	.ENDIF
+
+	mov ecx, pThis
+	mov ecx, (GameObject PTR [ecx]).pParentScene
+
+	INVOKE instantiate_game_object, eax
+
+	; // Now spawn the bottom wall
+	mov ebx, stairSpawnPos
+	add ebx, 17
+	mov edx, SCREEN_WIDTH
+	sub edx, ebx
+	INVOKE new_wall_obstacle, SCREEN_WIDTH, ebx, edx
+
+	mov ecx, pThis
+	mov ecx, (GameObject PTR [ecx]).pParentScene
+
+	INVOKE instantiate_game_object, eax
+
+	; // Decrement the amount of objects left to spawn in this state
+	mov ecx, pThis
+	dec (NeonGameManager PTR [ecx]).stateObjectCounter
+
+	mov ebx, (NeonGameManager PTR[ecx]).stateObjectCounter
+	.IF ebx == 0
+		INVOKE transition_state
+	.ENDIF
+    
+stair_state_update_skip_spawn:
 	ret
 stair_state_update ENDP
 
@@ -333,6 +421,8 @@ neon_game_manager_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 		INVOKE tunnel_state_update, deltaTime
 	.ELSEIF ebx == PAUSE_STATE_ENUM
 		INVOKE pause_state_update, deltaTime
+	.ELSEIF ebx == STAIRCASE_STATE_ENUM
+		INVOKE stair_state_update, deltaTime
 	.ENDIF
 	
 	ret
