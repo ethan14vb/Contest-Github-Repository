@@ -10,6 +10,7 @@ INCLUDE default_header.inc
 INCLUDE heap_functions.inc
 INCLUDE neon_square_scene.inc
 INCLUDE scene.inc
+INCLUDE music_player.inc
 
 ; // Irvine32 protos
 Randomize PROTO
@@ -27,6 +28,8 @@ main PROC PUBLIC
 
 	INVOKE Randomize
 	INVOKE initialize_heap
+
+	INVOKE playMusic
 
 	INVOKE new_scene, 2
 	mov pScene, eax
