@@ -32,6 +32,45 @@
     <None Include="heap_functions.inc">
       <Filter>Include\Engine</Filter>
     </None>
+    <None Include="rectangle_test_scene.inc">
+      <Filter>Resource\Scenes</Filter>
+    </None>
+    <None Include="component_ids.inc">
+      <Filter>Include\Resource</Filter>
+    </None>
+    <None Include="game_object_ids.inc">
+      <Filter>Include\Resource</Filter>
+    </None>
+    <None Include="component.inc">
+      <Filter>Include\Engine</Filter>
+    </None>
+    <None Include="unordered_vector.inc">
+      <Filter>Include\Engine</Filter>
+    </None>
+    <None Include="input_manager.inc">
+      <Filter>Include\Engine</Filter>
+    </None>
+    <None Include="camera_mover_game_object.inc">
+      <Filter>Include\Engine</Filter>
+    </None>
+    <None Include="neon_square_scene.inc">
+      <Filter>Resource\Scenes</Filter>
+    </None>
+    <None Include="neon_square_player.inc">
+      <Filter>Include\Engine</Filter>
+    </None>
+    <None Include="wall_obstacle.inc">
+      <Filter>Include\Engine</Filter>
+    </None>
+    <None Include="neon_game_manager.inc">
+      <Filter>Include\Engine</Filter>
+    </None>
+    <None Include="renderable_component.inc">
+      <Filter>Include\Engine</Filter>
+    </None>
+    <None Include="music_player.inc">
+      <Filter>Include\Engine</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">
@@ -55,6 +94,12 @@
     <Filter Include="Source\Rendering">
       <UniqueIdentifier>{1a5080f9-bf19-4c04-a1ad-c215501bcfbb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource\Scenes">
+      <UniqueIdentifier>{107099d3-5bbe-4f80-b2ee-4de45e966fb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Resource">
+      <UniqueIdentifier>{c9047129-f14e-414e-b0b7-b5e9be8e34a0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <MASM Include="scene.asm">
@@ -69,7 +114,52 @@
     <MASM Include="heap_functions.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
+    <MASM Include="rect_component.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
+    <MASM Include="game_object.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
+    <MASM Include="render_command.asm">
+      <Filter>Source\Rendering</Filter>
+    </MASM>
+    <MASM Include="rectangle_test_scene.asm">
+      <Filter>Resource\Scenes</Filter>
+    </MASM>
+    <MASM Include="component.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
+    <MASM Include="unordered_vector.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
+    <MASM Include="camera.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
+    <MASM Include="input_manager.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
+    <MASM Include="camera_mover_game_object.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
     <MASM Include="main.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
+    <MASM Include="neon_square_scene.asm">
+      <Filter>Resource\Scenes</Filter>
+    </MASM>
+    <MASM Include="neon_square_player.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
+    <MASM Include="wall_obstacle.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
+    <MASM Include="neon_game_manager.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
+    <MASM Include="renderable_component.asm">
+      <Filter>Source\Engine</Filter>
+    </MASM>
+    <MASM Include="music_player.asm">
       <Filter>Source\Engine</Filter>
     </MASM>
   </ItemGroup>

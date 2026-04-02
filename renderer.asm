@@ -21,13 +21,26 @@ SetConsoleOutputCP PROTO STDCALL : DWORD ; // Used to change the output format t
 GetConsoleMode     PROTO STDCALL : DWORD, : DWORD
 SetConsoleMode     PROTO STDCALL : DWORD, : DWORD
 
+; // ConsoleCursorInfo STRUCT used by the GetConsoleCursorInfo and SetConsoleCursorInfo functions
+CONSOLE_CURSOR_INFO STRUCT
+	dwSize      DWORD ?
+	bVisible    DWORD ?
+CONSOLE_CURSOR_INFO ENDS
+
+; // Used to disable the blinking cursor
+GetConsoleCursorInfo PROTO STDCALL : DWORD, : DWORD
+SetConsoleCursorInfo PROTO STDCALL : DWORD, : DWORD
+
 ; // Windows functions for displaying the text buffer of RGB data.
 ; //	WriteConsoleA was chosen instead of the Irvine library functions because of its
 ; //	support for things like virtual terminal processing and greater flexibility.
 GetStdHandle       PROTO STDCALL : DWORD
 WriteConsoleA      PROTO STDCALL : DWORD, : DWORD, : DWORD, : DWORD, : DWORD
+SetConsoleCursorPosition PROTO STDCALL : DWORD, : DWORD
 
 .data
+rendererInitialized DWORD 0; // True / False whether the renderer has been initialized where 0 = False
+
 ; // Windows function data
 STD_OUTPUT_HANDLE = -11
 ENABLE_VIRTUAL_TERMINAL_PROCESSING = 4
@@ -35,6 +48,8 @@ ENABLE_VIRTUAL_TERMINAL_PROCESSING = 4
 ConsoleMode DD ?
 hConsoleOutput DD ?
 bytesWritten DD 0
+
+consoleCursorInfo CONSOLE_CURSOR_INFO <>
 
 ; // Constants
 CR = 13 ; // Carriage return
@@ -105,6 +120,8 @@ writeByteInDecimal ENDP
 ; // ----------------------------------
 displayBuffer PROC PUBLIC USES esi edi ecx ebx, pBuffer:DWORD
 	mov edi, OFFSET outputTextBuffer ; // move destination text buffer to edi
+
+	INVOKE SetConsoleCursorPosition, hConsoleOutput, 0
 
 	xor ebx, ebx ; // y_index = 0
 
@@ -272,6 +289,11 @@ initializeRenderer PROC PUBLIC USES eax
 	or ConsoleMode, ENABLE_VIRTUAL_TERMINAL_PROCESSING
 	INVOKE SetConsoleMode, hConsoleOutput, ConsoleMode
 
+	; // Disable the blinking cursor
+	INVOKE GetConsoleCursorInfo, hConsoleOutput, OFFSET consoleCursorInfo
+	mov consoleCursorInfo.bVisible, 0
+	INVOKE SetConsoleCursorInfo, hConsoleOutput, OFFSET consoleCursorInfo
+
 	ret
 initializeRenderer ENDP
 
@@ -279,41 +301,109 @@ initializeRenderer ENDP
 ; // drawRect
 ; // Private helper. Draws a filled rectangle to the buffer.
 ; // Position is relative to camera (unless ignoreCamera set).
-; // No clipping.
 ; // ----------------------------------
 drawRect PROC PRIVATE USES esi edi ebx ecx edx, pTrans:DWORD, pRect:DWORD, pCamera:DWORD, pBuffer:DWORD
 	local sx:DWORD, sy:DWORD, rw:DWORD, rh:DWORD, color:DWORD
 
 	; // skip if not visible
-	mov eax, (RectComponent PTR [pRect]).visible
+	mov edi, pRect
+	mov eax, (RenderableComponent PTR [edi]).visible
 	test eax, eax
 	jz drawRect_done
 
+	; // check w > 0 and h > 0
+	mov eax, (RectComponent PTR [edi]).w
+	cmp eax, 0
+	jle drawRect_done
+	mov rw, eax
+
+	mov eax, (RectComponent PTR [edi]).h
+	cmp eax, 0
+	jle drawRect_done
+	mov rh, eax
+
 	; // screen position
-	mov eax, (TransformComponent PTR [pTrans]).x
-	mov edx, (TransformComponent PTR [pTrans]).y
-	.IF (TransformComponent PTR [pTrans]).ignoreCamera == 0
-		sub eax, (Camera PTR [pCamera]).x
-		sub edx, (Camera PTR [pCamera]).y
+	mov ebx, pTrans
+	mov eax, (TransformComponent PTR [ebx]).x
+	mov edx, (TransformComponent PTR [ebx]).y
+
+	mov ebx, pTrans
+	.IF [ebx].TransformComponent.ignoreCamera == 0
+		mov esi, pCamera
+		sub eax, (Camera PTR [esi]).x
+		sub edx, (Camera PTR [esi]).y
 	.ENDIF
+
 	mov sx, eax
 	mov sy, edx
 
-	; // size
-	mov eax, (RectComponent PTR [pRect]).w
-	mov rw, eax
-	mov eax, (RectComponent PTR [pRect]).h
-	mov rh, eax
+	; // clipping logic (set bounds)
+
+	; // check that left edge isn't past the left of the screen
+	; //	if it is, clamp it to 0
+	mov eax, sx
+	mov ecx, sx
+	add ecx, rw
+
+	cmp eax, 0
+	jge check_x_end
+	mov eax, 0
+
+	; // check that right edge isn't past the right of the screen
+	; //	if it is, clamp it to SCREEN_WIDTH
+check_x_end:
+	cmp ecx, SCREEN_WIDTH
+	jle set_x_bounds
+	mov ecx, SCREEN_WIDTH
+
+	; // Check if the left is offscreen
+	; //	if it is, don't draw the Rect
+set_x_bounds:
+	cmp eax, ecx
+	jge drawRect_done
+
+	; // Clamp X bounds
+	sub ecx, eax
+	mov sx, eax
+	mov rw, ecx
+
+	; // check that top edge isn't before the bottom of the screen
+	; //	if it is, clamp it to 0
+	mov esi, sy
+	mov edx, sy
+	add edx, rh
+
+	cmp esi, 0
+	jge check_y_end
+	mov esi, 0
+
+	; // check that bottom edge isn't past the bottom of the screen
+	; //	if it is, clamp it to SCREEN_HEIGHT
+check_y_end:
+	cmp edx, SCREEN_HEIGHT
+	jle set_y_bounds
+	mov edx, SCREEN_HEIGHT
+
+	; // Check if the top is offscreen
+	; //	if it is, don't draw the Rect
+set_y_bounds:
+	cmp esi, edx
+	jge drawRect_done
+	
+	; // Clamp Y bounds
+	sub edx, esi
+	mov sy, esi
+	mov rh, edx
 
 	; // build pixel dword (r g b a)
-	movzx eax, (RectComponent PTR [pRect]).r
-	movzx ebx, (RectComponent PTR [pRect]).g
+	movzx eax, (RectComponent PTR [edi]).r
+	movzx ebx, (RectComponent PTR [edi]).g
 	shl ebx, 8
 	or eax, ebx
-	movzx ebx, (RectComponent PTR [pRect]).b
+	movzx ebx, (RectComponent PTR [edi]).b
 	shl ebx, 16
 	or eax, ebx
-	movzx ebx, (RectComponent PTR [pRect]).a
+	movzx ebx, (RectComponent PTR [edi]).a
 	shl ebx, 24
 	or eax, ebx
 	mov color, eax
@@ -357,14 +447,17 @@ drawSprite PROC PRIVATE USES esi edi ebx ecx edx, pTrans:DWORD, pSprite:DWORD, p
 	local sx:DWORD, sy:DWORD, sw:DWORD, sh:DWORD, pTex:DWORD
 
 	; // skip if not visible
-	mov eax, (SpriteComponent PTR [pSprite]).visible
+	mov edx, pSprite
+	mov eax, (RenderableComponent PTR [edx]).visible
 	test eax, eax
 	jz drawSprite_done
 
 	; // screen position
-	mov eax, (TransformComponent PTR [pTrans]).x
-	mov edx, (TransformComponent PTR [pTrans]).y
-	.IF (TransformComponent PTR [pTrans]).ignoreCamera == 0
+	mov ebx, pTrans
+	mov eax, (TransformComponent PTR [ebx]).x
+	mov edx, (TransformComponent PTR [ebx]).y
+
+	.IF [ebx].TransformComponent.ignoreCamera == 0
 		sub eax, (Camera PTR [pCamera]).x
 		sub edx, (Camera PTR [pCamera]).y
 	.ENDIF
@@ -425,7 +518,9 @@ drawSprite ENDP
 ; // clears the RGB buffer to black, then draws every
 ; // sprite (and rect) to create the frame.
 ; // ----------------------------------
-renderCommands PROC PUBLIC USES esi ecx edx, pRenderCommands:DWORD, numCommands:DWORD, pCamera:DWORD, pBuffer:DWORD
+renderCommands PROC PUBLIC USES esi ecx edi ebx, pRenderCommands:DWORD, numCommands:DWORD, pCamera:DWORD
+	local pBuffer: DWORD
+	mov pBuffer, OFFSET screenBuffer
 	; // clear buffer to black (r=0,g=0,b=0,a=255)
 	mov ecx, SCREEN_WIDTH * SCREEN_HEIGHT
 	mov edi, pBuffer
@@ -434,20 +529,31 @@ renderCommands PROC PUBLIC USES esi ecx edx, pRenderCommands:DWORD, numCommands:
 
 	; // process each command
 	mov esi, pRenderCommands
-	mov ecx, numCommands
+	mov ebx, numCommands
 cmd_loop:
-	cmp ecx, 0
+	cmp ebx, 0
 	je render_done
-	dec ecx
-	mov edx, (RenderCommand PTR [esi]).rcType
-	.IF edx == RC_RECT
-		INVOKE drawRect, (RenderCommand PTR [esi]).pTransform, (RenderCommand PTR [esi]).pRenderable, pCamera, pBuffer
-	.ELSEIF edx == RC_SPRITE
-		INVOKE drawSprite, (RenderCommand PTR [esi]).pTransform, (RenderCommand PTR [esi]).pRenderable, pCamera, pBuffer
+	dec ebx
+
+	mov eax, [esi]
+	mov edx, (RenderCommand PTR [eax]).pRenderable
+	mov edx, (Component PTR [edx]).componentType
+
+	.IF edx == RECT_COMPONENT_ID
+		INVOKE drawRect, (RenderCommand PTR [eax]).pTransform, (RenderCommand PTR [eax]).pRenderable, pCamera, pBuffer
+	.ELSEIF edx == SPRITE_COMPONENT_ID
+		INVOKE drawSprite, (RenderCommand PTR [eax]).pTransform, (RenderCommand PTR [eax]).pRenderable, pCamera, pBuffer
 	.ENDIF
-	add esi, SIZEOF RenderCommand
+
+	add esi, TYPE DWORD
 	jmp cmd_loop
 render_done:
+	.IF rendererInitialized == 0 
+		INVOKE initializeRenderer
+		mov rendererInitialized, 0FFFFFFFFh
+	.ENDIF
+
+	INVOKE displayBuffer, pBuffer
 	ret
 renderCommands ENDP
 

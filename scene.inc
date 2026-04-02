@@ -11,10 +11,35 @@
 IFNDEF SCENE_INC
 SCENE_INC EQU 1
 
+INCLUDE unordered_vector.inc
+INCLUDE game_object_ids.inc
+INCLUDE camera.inc 
+
 Scene STRUCT
-	numGameObjects DWORD ?
-	maxGameObjects DWORD ? ; // Maximum size of the game objects list
-	pGameObjects DWORD ? ; // List containing game objects
+	camera Camera<>
+
+	; // The list of GameObjects in this Scene instance.
+	gameObjects UnorderedVector<>
+	
+	; // The start queue is a list of GameObjects created by the add_gameobject method
+	startQueue UnorderedVector<>
+
+	; // The free queue is a list of GameObjects to free at the end of the frame
+	freeQueue UnorderedVector<>
+
+	; // The list of renderCommands that is built at the end of each frame
+	renderCommands UnorderedVector<>
 Scene ENDS
+
+; // Constructors
+init_scene	PROTO maxGameObjects		: DWORD
+new_scene	PROTO maxGameObjects		: DWORD
+free_scene	PROTO
+
+; // Instance methods
+get_first_game_object_which_is_a	PROTO gameObjectType: ENUM_GAME_OBJECT_ID
+instantiate_game_object				PROTO pGameObject	: DWORD
+queue_free_game_object				PROTO pGameObject	: DWORD
+scene_update						PROTO deltaTime		: REAL4
 
 ENDIF

@@ -8,9 +8,13 @@
 IFNDEF TRANSFORM_COMPONENT_INC
 TRANSFORM_COMPONENT_INC EQU 1
 
+INCLUDE component.inc
+
 TransformComponent STRUCT
-	x DWORD ?
-	y DWORD ?
+	baseComponent Component <>
+
+	x SDWORD ?
+	y SDWORD ?
 
 	; // Whether to ignore the camera offset when rendering.
 	; // Used for drawing UI items
@@ -22,7 +26,9 @@ TransformComponent STRUCT
 	; // scaleY DWORD ?
 TransformComponent ENDS
 
+; // Constructor methods
+init_transform_component PROTO x: DWORD, y : DWORD, ignoreCamera : DWORD
 new_transform_component PROTO x: DWORD, y: DWORD, ignoreCamera: DWORD
-free_transform_component PROTO pTransform: DWORD
+free_transform_component PROTO
 
 ENDIF

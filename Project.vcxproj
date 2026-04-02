@@ -11,18 +11,46 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <MASM Include="camera.asm" />
+    <MASM Include="camera_mover_game_object.asm" />
+    <MASM Include="component.asm" />
+    <MASM Include="game_object.asm" />
     <MASM Include="heap_functions.asm" />
+    <MASM Include="input_manager.asm" />
     <MASM Include="main.asm" />
+    <MASM Include="music_player.asm" />
+    <MASM Include="neon_game_manager.asm" />
+    <MASM Include="neon_square_player.asm" />
+    <MASM Include="neon_square_scene.asm" />
+    <MASM Include="rectangle_test_scene.asm" />
+    <MASM Include="rect_component.asm" />
+    <MASM Include="renderable_component.asm" />
+    <MASM Include="render_command.asm" />
     <MASM Include="transform_component.asm" />
+    <MASM Include="unordered_vector.asm" />
+    <MASM Include="wall_obstacle.asm" />
+    <None Include="camera_mover_game_object.inc" />
+    <None Include="component.inc" />
+    <None Include="component_ids.inc" />
     <None Include="game_object.inc">
       <FileType>Document</FileType>
     </None>
     <MASM Include="renderer.asm" />
     <MASM Include="scene.asm" />
+    <None Include="game_object_ids.inc" />
     <None Include="heap_functions.inc" />
+    <None Include="input_manager.inc" />
+    <None Include="music_player.inc" />
+    <None Include="neon_game_manager.inc" />
+    <None Include="neon_square_player.inc" />
+    <None Include="neon_square_scene.inc" />
+    <None Include="rectangle_test_scene.inc" />
+    <None Include="renderable_component.inc" />
     <None Include="sprite_component.inc">
       <FileType>Document</FileType>
     </None>
+    <None Include="unordered_vector.inc" />
+    <None Include="wall_obstacle.inc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="camera.inc" />

@@ -1,5 +1,5 @@
 ; // ==================================
-; // RectComponent
+; // rect_component.inc
 ; // ----------------------------------
 ; // Defines how a GameObject should appear using a rectangle.
 ; // Should be used with a transform for proper functionality.
@@ -9,7 +9,11 @@
 IFNDEF RECT_COMMAND_INC
 RECT_COMMAND_INC EQU 1
 
+INCLUDE renderable_component.inc
+
 RectComponent STRUCT
+	baseRenderableComponent RenderableComponent <>
+
 	h DWORD ? ; // Height
 	w DWORD ? ; // Width
 
@@ -19,8 +23,11 @@ RectComponent STRUCT
 	g BYTE ?
 	b BYTE ?
 	a BYTE ?
-
-	visible DWORD ?
 RectComponent ENDS
+
+; // Constructor methods
+init_rect_component PROTO h: DWORD, w : DWORD, r : BYTE, g : BYTE, b : BYTE, a : BYTE
+new_rect_component PROTO h: DWORD, w: DWORD, r: BYTE, g: BYTE, b:  BYTE, a: BYTE
+free_rect_component PROTO
 
 ENDIF
