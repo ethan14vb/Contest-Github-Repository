@@ -8,6 +8,7 @@ INCLUDE default_header.inc
 INCLUDE game_object.inc
 INCLUDE game_object_ids.inc
 INCLUDE background_rect_game_object.inc
+INCLUDE heap_functions.inc
 INCLUDE transform_component.inc
 INCLUDE rect_component.inc
 INCLUDE renderable_component.inc
@@ -47,5 +48,17 @@ init_background_rect_game_object PROC PUBLIC USES esi ebx edx, x : DWORD, y : DW
 		
 	ret
 init_background_rect_game_object ENDP
+
+; // ----------------------------------
+; // new_background_rect_game_object
+; // Reserves heap space for the Object with parameters calls the initializer method
+; // ----------------------------------
+new_background_rect_game_object PROC PUBLIC USES ecx, x: DWORD, y: DWORD, h: DWORD, w: DWORD, r: BYTE, g: BYTE, b: BYTE, a: BYTE, layer: DWORD, speed: DWORD
+	INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF BackgroundRect
+	mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
+	INVOKE init_background_rect_game_object, x, y, h, w, r, g, b, a, layer, speed
+
+	ret ; // Return with the address of the memory block in HeapAlloc
+new_background_rect_game_object ENDP
 
 END 

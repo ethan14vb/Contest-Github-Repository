@@ -15,6 +15,6 @@ BackgroundRect STRUCT
 BackgroundRect ENDS
 
 init_background_rect_game_object	PROTO x: DWORD, y: DWORD, h: DWORD, w: DWORD, r: BYTE, g: BYTE, b: BYTE, a: BYTE, layer: DWORD, speed: DWORD
-init_background_rect_game_object	PROTO x: DWORD, y: DWORD, h: DWORD, w: DWORD, r: BYTE, g: BYTE, b: BYTE, a: BYTE, layer: DWORD
+new_background_rect_game_object		PROTO x: DWORD, y: DWORD, h: DWORD, w: DWORD, r: BYTE, g: BYTE, b: BYTE, a: BYTE, layer: DWORD, speed: DWORD
 
 ENDIF
