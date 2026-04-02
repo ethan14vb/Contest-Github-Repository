@@ -108,7 +108,17 @@ transition_state PROC USES eax ebx edx esi edi
 
 		mov (NeonGameManager PTR [ecx]).stateObjectCounter, eax
 	.ELSEIF eax == TUNNEL_STATE_ENUM
-
+		mov (NeonGameManager PTR [ecx]).state, TUNNEL_STATE_ENUM
+		mov (NeonGameManager PTR [ecx]).timer, 0
+		
+		; // Get a random number of objects in this scene
+		mov eax, tunnelStateObjectMax
+		sub eax, tunnelStateObjectMin
+		
+		INVOKE RandomRange
+		add eax, tunnelStateObjectMin
+			
+		mov (NeonGameManager PTR [ecx]).stateObjectCounter, eax
 	.ENDIF
 
 	ret
@@ -187,7 +197,7 @@ tunnel_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
     fst (NeonGameManager PTR [ecx]).timer
 
 	; // Determine if the timer is greater than or equal to spawnTime
-	fcomp defaultSpawnTime
+	fcomp tunnelSpawnTime
 
 	; // Get flags
 	fnstsw ax
