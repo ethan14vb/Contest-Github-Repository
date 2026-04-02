@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 21:47:42
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 21:48:08
 renderer.asm						     Page 1 - 1
 
 
@@ -700,7 +700,7 @@ renderer.asm						     Page 1 - 1
  000001D3  3D 000000FF	   *	    cmp    eax, 0FFh
  000001D8  75 05	   *	    jne    @C0001
  000001DA  8B 45 08				mov eax, fgColor
- 000001DD  EB 36				jmp blendColor_exit
+ 000001DD  EB 5D				jmp blendColor_exit
 					.ENDIF
  000001DF		   *@C0001:
 
@@ -709,7 +709,7 @@ renderer.asm						     Page 1 - 1
  000001DF  0B C0	   *	    or	eax, eax
  000001E1  75 05	   *	    jne    @C0003
  000001E3  8B 45 0C				mov eax, bgColor
- 000001E6  EB 2D				jmp blendColor_exit
+ 000001E6  EB 54				jmp blendColor_exit
 					.ENDIF
  000001E8		   *@C0003:
 
@@ -734,181 +734,196 @@ renderer.asm						     Page 1 - 1
  00000210  C1 E8 08			shr eax, 8  ; // Divide by 256 instead of 255 for speed
  00000213  0B D0			or edx, eax
 
+					; // Green
+ 00000215  8B 45 08			mov eax, fgColor
+ 00000218  C1 E8 08			shr eax, 8 ; // Move 1 byte over
+ 0000021B  25 000000FF			and eax, 0FFh
+ 00000220  0F AF C6			imul eax, esi
+
+ 00000223  8B 5D 0C			mov ebx, bgColor
+ 00000226  C1 EB 08			shr ebx, 8
+ 00000229  81 E3 000000FF		and ebx, 0FFh
+ 0000022F  0F AF DF			imul ebx, edi ; // Multiply the background color by 255 - fgAlpha
+
+ 00000232  03 C3			add eax, ebx
+ 00000234  C1 E8 08			shr eax, 8  ; // Divide by 256 instead of 255 for speed
+ 00000237  C1 E0 08			shl eax, 8
+ 0000023A  0B D0			or edx, eax
 					
- 00000215			blendColor_exit:
+ 0000023C			blendColor_exit:
 					ret
- 00000215  5F		   *	    pop    edi
- 00000216  5E		   *	    pop    esi
- 00000217  5A		   *	    pop    edx
- 00000218  59		   *	    pop    ecx
- 00000219  5B		   *	    pop    ebx
- 0000021A  C9		   *	    leave  
- 0000021B  C2 0008	   *	    ret    00008h
- 0000021E			blendColor ENDP
-renderer.asm(345) : warning A6004:procedure argument or local not referenced : finalColor
+ 0000023C  5F		   *	    pop    edi
+ 0000023D  5E		   *	    pop    esi
+ 0000023E  5A		   *	    pop    edx
+ 0000023F  59		   *	    pop    ecx
+ 00000240  5B		   *	    pop    ebx
+ 00000241  C9		   *	    leave  
+ 00000242  C2 0008	   *	    ret    00008h
+ 00000245			blendColor ENDP
+renderer.asm(360) : warning A6004:procedure argument or local not referenced : finalColor
 
 				; // ----------------------------------
 				; // drawRect
 				; // Private helper. Draws a filled rectangle to the buffer.
 				; // Position is relative to camera (unless ignoreCamera set).
 				; // ----------------------------------
- 0000021E			drawRect PROC PRIVATE USES esi edi ebx ecx edx, pTrans:DWORD, pRect:DWORD, pCamera:DWORD, pBuffer:DWORD
+ 00000245			drawRect PROC PRIVATE USES esi edi ebx ecx edx, pTrans:DWORD, pRect:DWORD, pCamera:DWORD, pBuffer:DWORD
 					local sx:DWORD, sy:DWORD, rw:DWORD, rh:DWORD, color:DWORD
 
 					; // skip if not visible
- 0000021E  55		   *	    push   ebp
- 0000021F  8B EC	   *	    mov    ebp, esp
- 00000221  83 C4 EC	   *	    add    esp, 0FFFFFFECh
- 00000224  56		   *	    push   esi
- 00000225  57		   *	    push   edi
- 00000226  53		   *	    push   ebx
- 00000227  51		   *	    push   ecx
- 00000228  52		   *	    push   edx
- 00000229  8B 7D 0C			mov edi, pRect
- 0000022C  8B 47 08			mov eax, (RenderableComponent PTR [edi]).visible
- 0000022F  85 C0			test eax, eax
- 00000231  0F 84 000000ED		jz drawRect_done
+ 00000245  55		   *	    push   ebp
+ 00000246  8B EC	   *	    mov    ebp, esp
+ 00000248  83 C4 EC	   *	    add    esp, 0FFFFFFECh
+ 0000024B  56		   *	    push   esi
+ 0000024C  57		   *	    push   edi
+ 0000024D  53		   *	    push   ebx
+ 0000024E  51		   *	    push   ecx
+ 0000024F  52		   *	    push   edx
+ 00000250  8B 7D 0C			mov edi, pRect
+ 00000253  8B 47 08			mov eax, (RenderableComponent PTR [edi]).visible
+ 00000256  85 C0			test eax, eax
+ 00000258  0F 84 000000ED		jz drawRect_done
 
 					; // check w > 0 and h > 0
- 00000237  8B 47 14			mov eax, (RectComponent PTR [edi]).w
- 0000023A  83 F8 00			cmp eax, 0
- 0000023D  0F 8E 000000E1		jle drawRect_done
- 00000243  89 45 F4			mov rw, eax
+ 0000025E  8B 47 14			mov eax, (RectComponent PTR [edi]).w
+ 00000261  83 F8 00			cmp eax, 0
+ 00000264  0F 8E 000000E1		jle drawRect_done
+ 0000026A  89 45 F4			mov rw, eax
 				
- 00000246  8B 47 10			mov eax, (RectComponent PTR [edi]).h
- 00000249  83 F8 00			cmp eax, 0
- 0000024C  0F 8E 000000D2		jle drawRect_done
- 00000252  89 45 F0			mov rh, eax
+ 0000026D  8B 47 10			mov eax, (RectComponent PTR [edi]).h
+ 00000270  83 F8 00			cmp eax, 0
+ 00000273  0F 8E 000000D2		jle drawRect_done
+ 00000279  89 45 F0			mov rh, eax
 
 					; // screen position
- 00000255  8B 5D 08			mov ebx, pTrans
- 00000258  8B 43 08			mov eax, (TransformComponent PTR [ebx]).x
- 0000025B  8B 53 0C			mov edx, (TransformComponent PTR [ebx]).y
+ 0000027C  8B 5D 08			mov ebx, pTrans
+ 0000027F  8B 43 08			mov eax, (TransformComponent PTR [ebx]).x
+ 00000282  8B 53 0C			mov edx, (TransformComponent PTR [ebx]).y
 
- 0000025E  8B 5D 08			mov ebx, pTrans
+ 00000285  8B 5D 08			mov ebx, pTrans
 					.IF [ebx].TransformComponent.ignoreCamera == 0
- 00000261  83 7B 10 00	   *	    cmp    [ebx] . TransformComponent . ignoreCamera, 000h
- 00000265  75 08	   *	    jne    @C0005
- 00000267  8B 75 10				mov esi, pCamera
- 0000026A  2B 06				sub eax, (Camera PTR [esi]).x
- 0000026C  2B 56 04				sub edx, (Camera PTR [esi]).y
+ 00000288  83 7B 10 00	   *	    cmp    [ebx] . TransformComponent . ignoreCamera, 000h
+ 0000028C  75 08	   *	    jne    @C0005
+ 0000028E  8B 75 10				mov esi, pCamera
+ 00000291  2B 06				sub eax, (Camera PTR [esi]).x
+ 00000293  2B 56 04				sub edx, (Camera PTR [esi]).y
 					.ENDIF
- 0000026F		   *@C0005:
+ 00000296		   *@C0005:
 
- 0000026F  89 45 FC			mov sx, eax
- 00000272  89 55 F8			mov sy, edx
+ 00000296  89 45 FC			mov sx, eax
+ 00000299  89 55 F8			mov sy, edx
 
 					; // clipping logic (set bounds)
 
 					; // check that left edge isn't past the left of the screen
 					; //	if it is, clamp it to 0
- 00000275  8B 45 FC			mov eax, sx
- 00000278  8B 4D FC			mov ecx, sx
- 0000027B  03 4D F4			add ecx, rw
+ 0000029C  8B 45 FC			mov eax, sx
+ 0000029F  8B 4D FC			mov ecx, sx
+ 000002A2  03 4D F4			add ecx, rw
 				
- 0000027E  83 F8 00			cmp eax, 0
- 00000281  7D 05			jge check_x_end
- 00000283  B8 00000000			mov eax, 0
+ 000002A5  83 F8 00			cmp eax, 0
+ 000002A8  7D 05			jge check_x_end
+ 000002AA  B8 00000000			mov eax, 0
 
 					; // check that right edge isn't past the right of the screen
 					; //	if it is, clamp it to SCREEN_WIDTH
- 00000288			check_x_end:
- 00000288  83 F9 50			cmp ecx, SCREEN_WIDTH
- 0000028B  7E 05			jle set_x_bounds
- 0000028D  B9 00000050			mov ecx, SCREEN_WIDTH
+ 000002AF			check_x_end:
+ 000002AF  83 F9 50			cmp ecx, SCREEN_WIDTH
+ 000002B2  7E 05			jle set_x_bounds
+ 000002B4  B9 00000050			mov ecx, SCREEN_WIDTH
 
 					; // Check if the left is offscreen
 					; //	if it is, don't draw the Rect
- 00000292			set_x_bounds:
- 00000292  3B C1			cmp eax, ecx
- 00000294  0F 8D 0000008A		jge drawRect_done
+ 000002B9			set_x_bounds:
+ 000002B9  3B C1			cmp eax, ecx
+ 000002BB  0F 8D 0000008A		jge drawRect_done
 
 					; // Clamp X bounds
- 0000029A  2B C8			sub ecx, eax
- 0000029C  89 45 FC			mov sx, eax
- 0000029F  89 4D F4			mov rw, ecx
+ 000002C1  2B C8			sub ecx, eax
+ 000002C3  89 45 FC			mov sx, eax
+ 000002C6  89 4D F4			mov rw, ecx
 
 					; // check that top edge isn't before the bottom of the screen
 					; //	if it is, clamp it to 0
- 000002A2  8B 75 F8			mov esi, sy
- 000002A5  8B 55 F8			mov edx, sy
- 000002A8  03 55 F0			add edx, rh
+ 000002C9  8B 75 F8			mov esi, sy
+ 000002CC  8B 55 F8			mov edx, sy
+ 000002CF  03 55 F0			add edx, rh
 				
- 000002AB  83 FE 00			cmp esi, 0
- 000002AE  7D 05			jge check_y_end
- 000002B0  BE 00000000			mov esi, 0
+ 000002D2  83 FE 00			cmp esi, 0
+ 000002D5  7D 05			jge check_y_end
+ 000002D7  BE 00000000			mov esi, 0
 
 					; // check that bottom edge isn't past the bottom of the screen
 					; //	if it is, clamp it to SCREEN_HEIGHT
- 000002B5			check_y_end:
- 000002B5  83 FA 32			cmp edx, SCREEN_HEIGHT
- 000002B8  7E 05			jle set_y_bounds
- 000002BA  BA 00000032			mov edx, SCREEN_HEIGHT
+ 000002DC			check_y_end:
+ 000002DC  83 FA 32			cmp edx, SCREEN_HEIGHT
+ 000002DF  7E 05			jle set_y_bounds
+ 000002E1  BA 00000032			mov edx, SCREEN_HEIGHT
 
 					; // Check if the top is offscreen
 					; //	if it is, don't draw the Rect
- 000002BF			set_y_bounds:
- 000002BF  3B F2			cmp esi, edx
- 000002C1  7D 61			jge drawRect_done
+ 000002E6			set_y_bounds:
+ 000002E6  3B F2			cmp esi, edx
+ 000002E8  7D 61			jge drawRect_done
 					
 					; // Clamp Y bounds
- 000002C3  2B D6			sub edx, esi
- 000002C5  89 75 F8			mov sy, esi
- 000002C8  89 55 F0			mov rh, edx
+ 000002EA  2B D6			sub edx, esi
+ 000002EC  89 75 F8			mov sy, esi
+ 000002EF  89 55 F0			mov rh, edx
 
 					; // build pixel dword (r g b a)
- 000002CB  0F B6 47 18			movzx eax, (RectComponent PTR [edi]).r
- 000002CF  0F B6 5F 19			movzx ebx, (RectComponent PTR [edi]).g
- 000002D3  C1 E3 08			shl ebx, 8
- 000002D6  0B C3			or eax, ebx
- 000002D8  0F B6 5F 1A			movzx ebx, (RectComponent PTR [edi]).b
- 000002DC  C1 E3 10			shl ebx, 16
- 000002DF  0B C3			or eax, ebx
- 000002E1  0F B6 5F 1B			movzx ebx, (RectComponent PTR [edi]).a
- 000002E5  C1 E3 18			shl ebx, 24
- 000002E8  0B C3			or eax, ebx
- 000002EA  89 45 EC			mov color, eax
+ 000002F2  0F B6 47 18			movzx eax, (RectComponent PTR [edi]).r
+ 000002F6  0F B6 5F 19			movzx ebx, (RectComponent PTR [edi]).g
+ 000002FA  C1 E3 08			shl ebx, 8
+ 000002FD  0B C3			or eax, ebx
+ 000002FF  0F B6 5F 1A			movzx ebx, (RectComponent PTR [edi]).b
+ 00000303  C1 E3 10			shl ebx, 16
+ 00000306  0B C3			or eax, ebx
+ 00000308  0F B6 5F 1B			movzx ebx, (RectComponent PTR [edi]).a
+ 0000030C  C1 E3 18			shl ebx, 24
+ 0000030F  0B C3			or eax, ebx
+ 00000311  89 45 EC			mov color, eax
 
 					; // draw loops
- 000002ED  8B 75 F8			mov esi, sy
- 000002F0  8B 55 F8			mov edx, sy
- 000002F3  03 55 F0			add edx, rh
- 000002F6			yloop_rect:
- 000002F6  3B F2			cmp esi, edx
- 000002F8  7D 2A			jge drawRect_done
- 000002FA  8B C6			mov eax, esi
- 000002FC  6B C0 50			imul eax, SCREEN_WIDTH
- 000002FF  03 45 FC			add eax, sx
- 00000302  C1 E0 02			shl eax, 2
- 00000305  03 45 14			add eax, pBuffer
- 00000308  8B F8			mov edi, eax
- 0000030A  8B 4D F4			mov ecx, rw
- 0000030D			xloop_rect:
- 0000030D  8B 45 EC			mov eax, color
- 00000310  8B 1F			mov ebx, [edi] ; // Grab the color underneath
+ 00000314  8B 75 F8			mov esi, sy
+ 00000317  8B 55 F8			mov edx, sy
+ 0000031A  03 55 F0			add edx, rh
+ 0000031D			yloop_rect:
+ 0000031D  3B F2			cmp esi, edx
+ 0000031F  7D 2A			jge drawRect_done
+ 00000321  8B C6			mov eax, esi
+ 00000323  6B C0 50			imul eax, SCREEN_WIDTH
+ 00000326  03 45 FC			add eax, sx
+ 00000329  C1 E0 02			shl eax, 2
+ 0000032C  03 45 14			add eax, pBuffer
+ 0000032F  8B F8			mov edi, eax
+ 00000331  8B 4D F4			mov ecx, rw
+ 00000334			xloop_rect:
+ 00000334  8B 45 EC			mov eax, color
+ 00000337  8B 1F			mov ebx, [edi] ; // Grab the color underneath
 
 					INVOKE blendColor, eax, ebx
- 00000312  53		   *	    push   ebx
- 00000313  50		   *	    push   eax
- 00000314  E8 FFFFFEA9	   *	    call   blendColor
+ 00000339  53		   *	    push   ebx
+ 0000033A  50		   *	    push   eax
+ 0000033B  E8 FFFFFE82	   *	    call   blendColor
 
- 00000319  89 07			mov [edi], eax
- 0000031B  83 C7 04			add edi, 4
- 0000031E  49				dec ecx
- 0000031F  75 EC			jnz xloop_rect
- 00000321  46				inc esi
- 00000322  EB D2			jmp yloop_rect
+ 00000340  89 07			mov [edi], eax
+ 00000342  83 C7 04			add edi, 4
+ 00000345  49				dec ecx
+ 00000346  75 EC			jnz xloop_rect
+ 00000348  46				inc esi
+ 00000349  EB D2			jmp yloop_rect
 
- 00000324			drawRect_done:
+ 0000034B			drawRect_done:
 					ret
- 00000324  5A		   *	    pop    edx
- 00000325  59		   *	    pop    ecx
- 00000326  5B		   *	    pop    ebx
- 00000327  5F		   *	    pop    edi
- 00000328  5E		   *	    pop    esi
- 00000329  C9		   *	    leave  
- 0000032A  C2 0010	   *	    ret    00010h
- 0000032D			drawRect ENDP
+ 0000034B  5A		   *	    pop    edx
+ 0000034C  59		   *	    pop    ecx
+ 0000034D  5B		   *	    pop    ebx
+ 0000034E  5F		   *	    pop    edi
+ 0000034F  5E		   *	    pop    esi
+ 00000350  C9		   *	    leave  
+ 00000351  C2 0010	   *	    ret    00010h
+ 00000354			drawRect ENDP
 
 				; // ----------------------------------
 				; // drawSprite
@@ -918,92 +933,92 @@ renderer.asm(345) : warning A6004:procedure argument or local not referenced : f
 				; // pTexture must point to a cellW*cellH Pixel buffer.
 				; // No flipping, no spritesheet stride, no clipping.
 				; // ----------------------------------
- 0000032D			drawSprite PROC PRIVATE USES esi edi ebx ecx edx, pTrans:DWORD, pSprite:DWORD, pCamera:DWORD, pBuffer:DWORD
+ 00000354			drawSprite PROC PRIVATE USES esi edi ebx ecx edx, pTrans:DWORD, pSprite:DWORD, pCamera:DWORD, pBuffer:DWORD
 					local sx:DWORD, sy:DWORD, sw:DWORD, sh:DWORD, pTex:DWORD
 
 					; // skip if not visible
- 0000032D  55		   *	    push   ebp
- 0000032E  8B EC	   *	    mov    ebp, esp
- 00000330  83 C4 EC	   *	    add    esp, 0FFFFFFECh
- 00000333  56		   *	    push   esi
- 00000334  57		   *	    push   edi
- 00000335  53		   *	    push   ebx
- 00000336  51		   *	    push   ecx
- 00000337  52		   *	    push   edx
- 00000338  8B 55 0C			mov edx, pSprite
- 0000033B  8B 42 08			mov eax, (RenderableComponent PTR [edx]).visible
- 0000033E  85 C0			test eax, eax
- 00000340  74 74			jz drawSprite_done
+ 00000354  55		   *	    push   ebp
+ 00000355  8B EC	   *	    mov    ebp, esp
+ 00000357  83 C4 EC	   *	    add    esp, 0FFFFFFECh
+ 0000035A  56		   *	    push   esi
+ 0000035B  57		   *	    push   edi
+ 0000035C  53		   *	    push   ebx
+ 0000035D  51		   *	    push   ecx
+ 0000035E  52		   *	    push   edx
+ 0000035F  8B 55 0C			mov edx, pSprite
+ 00000362  8B 42 08			mov eax, (RenderableComponent PTR [edx]).visible
+ 00000365  85 C0			test eax, eax
+ 00000367  74 74			jz drawSprite_done
 
 					; // screen position
- 00000342  8B 5D 08			mov ebx, pTrans
- 00000345  8B 43 08			mov eax, (TransformComponent PTR [ebx]).x
- 00000348  8B 53 0C			mov edx, (TransformComponent PTR [ebx]).y
+ 00000369  8B 5D 08			mov ebx, pTrans
+ 0000036C  8B 43 08			mov eax, (TransformComponent PTR [ebx]).x
+ 0000036F  8B 53 0C			mov edx, (TransformComponent PTR [ebx]).y
 
 					.IF [ebx].TransformComponent.ignoreCamera == 0
- 0000034B  83 7B 10 00	   *	    cmp    [ebx] . TransformComponent . ignoreCamera, 000h
- 0000034F  75 06	   *	    jne    @C0007
- 00000351  2B 45 10				sub eax, (Camera PTR [pCamera]).x
- 00000354  2B 55 14				sub edx, (Camera PTR [pCamera]).y
+ 00000372  83 7B 10 00	   *	    cmp    [ebx] . TransformComponent . ignoreCamera, 000h
+ 00000376  75 06	   *	    jne    @C0007
+ 00000378  2B 45 10				sub eax, (Camera PTR [pCamera]).x
+ 0000037B  2B 55 14				sub edx, (Camera PTR [pCamera]).y
 					.ENDIF
- 00000357		   *@C0007:
+ 0000037E		   *@C0007:
 					; // anchor at transform
- 00000357  2B 45 1C			sub eax, (SpriteComponent PTR [pSprite]).originX
- 0000035A  2B 55 20			sub edx, (SpriteComponent PTR [pSprite]).originY
- 0000035D  89 45 FC			mov sx, eax
- 00000360  89 55 F8			mov sy, edx
+ 0000037E  2B 45 1C			sub eax, (SpriteComponent PTR [pSprite]).originX
+ 00000381  2B 55 20			sub edx, (SpriteComponent PTR [pSprite]).originY
+ 00000384  89 45 FC			mov sx, eax
+ 00000387  89 55 F8			mov sy, edx
 
 					; // cell size
- 00000363  8B 45 30			mov eax, (SpriteComponent PTR [pSprite]).cellW
- 00000366  89 45 F4			mov sw, eax
- 00000369  8B 45 34			mov eax, (SpriteComponent PTR [pSprite]).cellH
- 0000036C  89 45 F0			mov sh, eax
+ 0000038A  8B 45 30			mov eax, (SpriteComponent PTR [pSprite]).cellW
+ 0000038D  89 45 F4			mov sw, eax
+ 00000390  8B 45 34			mov eax, (SpriteComponent PTR [pSprite]).cellH
+ 00000393  89 45 F0			mov sh, eax
 
 					; // texture pointer
- 0000036F  8B 45 24			mov eax, (SpriteComponent PTR [pSprite]).pTexture
- 00000372  89 45 EC			mov pTex, eax
+ 00000396  8B 45 24			mov eax, (SpriteComponent PTR [pSprite]).pTexture
+ 00000399  89 45 EC			mov pTex, eax
 
 					; // draw loops
- 00000375  8B 75 F8			mov esi, sy
- 00000378  8B 55 F8			mov edx, sy
- 0000037B  03 55 F0			add edx, sh
- 0000037E			yloop_sprite:
- 0000037E  3B F2			cmp esi, edx
- 00000380  7D 34			jge drawSprite_done
- 00000382  8B C6			mov eax, esi
- 00000384  6B C0 50			imul eax, SCREEN_WIDTH
- 00000387  03 45 FC			add eax, sx
- 0000038A  C1 E0 02			shl eax, 2
- 0000038D  03 45 14			add eax, pBuffer
- 00000390  8B F8			mov edi, eax
+ 0000039C  8B 75 F8			mov esi, sy
+ 0000039F  8B 55 F8			mov edx, sy
+ 000003A2  03 55 F0			add edx, sh
+ 000003A5			yloop_sprite:
+ 000003A5  3B F2			cmp esi, edx
+ 000003A7  7D 34			jge drawSprite_done
+ 000003A9  8B C6			mov eax, esi
+ 000003AB  6B C0 50			imul eax, SCREEN_WIDTH
+ 000003AE  03 45 FC			add eax, sx
+ 000003B1  C1 E0 02			shl eax, 2
+ 000003B4  03 45 14			add eax, pBuffer
+ 000003B7  8B F8			mov edi, eax
 					; // source row in texture
- 00000392  8B DE			mov ebx, esi
- 00000394  2B 5D F8			sub ebx, sy
- 00000397  8B 45 F4			mov eax, sw
- 0000039A  0F AF D8			imul ebx, eax
- 0000039D  C1 E3 02			shl ebx, 2
- 000003A0  03 5D EC			add ebx, pTex
- 000003A3  8B 4D F4			mov ecx, sw
- 000003A6			xloop_sprite:
- 000003A6  8B 03			mov eax, [ebx]
- 000003A8  89 07			mov [edi], eax
- 000003AA  83 C3 04			add ebx, 4
- 000003AD  83 C7 04			add edi, 4
- 000003B0  49				dec ecx
- 000003B1  75 F3			jnz xloop_sprite
- 000003B3  46				inc esi
- 000003B4  EB C8			jmp yloop_sprite
+ 000003B9  8B DE			mov ebx, esi
+ 000003BB  2B 5D F8			sub ebx, sy
+ 000003BE  8B 45 F4			mov eax, sw
+ 000003C1  0F AF D8			imul ebx, eax
+ 000003C4  C1 E3 02			shl ebx, 2
+ 000003C7  03 5D EC			add ebx, pTex
+ 000003CA  8B 4D F4			mov ecx, sw
+ 000003CD			xloop_sprite:
+ 000003CD  8B 03			mov eax, [ebx]
+ 000003CF  89 07			mov [edi], eax
+ 000003D1  83 C3 04			add ebx, 4
+ 000003D4  83 C7 04			add edi, 4
+ 000003D7  49				dec ecx
+ 000003D8  75 F3			jnz xloop_sprite
+ 000003DA  46				inc esi
+ 000003DB  EB C8			jmp yloop_sprite
 
- 000003B6			drawSprite_done:
+ 000003DD			drawSprite_done:
 					ret
- 000003B6  5A		   *	    pop    edx
- 000003B7  59		   *	    pop    ecx
- 000003B8  5B		   *	    pop    ebx
- 000003B9  5F		   *	    pop    edi
- 000003BA  5E		   *	    pop    esi
- 000003BB  C9		   *	    leave  
- 000003BC  C2 0010	   *	    ret    00010h
- 000003BF			drawSprite ENDP
+ 000003DD  5A		   *	    pop    edx
+ 000003DE  59		   *	    pop    ecx
+ 000003DF  5B		   *	    pop    ebx
+ 000003E0  5F		   *	    pop    edi
+ 000003E1  5E		   *	    pop    esi
+ 000003E2  C9		   *	    leave  
+ 000003E3  C2 0010	   *	    ret    00010h
+ 000003E6			drawSprite ENDP
 
 				; // ----------------------------------
 				; // renderCommands
@@ -1011,87 +1026,87 @@ renderer.asm(345) : warning A6004:procedure argument or local not referenced : f
 				; // clears the RGB buffer to black, then draws every
 				; // sprite (and rect) to create the frame.
 				; // ----------------------------------
- 000003BF			renderCommands PROC PUBLIC USES esi ecx edi ebx, pRenderCommands:DWORD, numCommands:DWORD, pCamera:DWORD
+ 000003E6			renderCommands PROC PUBLIC USES esi ecx edi ebx, pRenderCommands:DWORD, numCommands:DWORD, pCamera:DWORD
 					local pBuffer: DWORD
- 000003BF  55		   *	    push   ebp
- 000003C0  8B EC	   *	    mov    ebp, esp
- 000003C2  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 000003C5  56		   *	    push   esi
- 000003C6  51		   *	    push   ecx
- 000003C7  57		   *	    push   edi
- 000003C8  53		   *	    push   ebx
- 000003C9  C7 45 FC			mov pBuffer, OFFSET screenBuffer
+ 000003E6  55		   *	    push   ebp
+ 000003E7  8B EC	   *	    mov    ebp, esp
+ 000003E9  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 000003EC  56		   *	    push   esi
+ 000003ED  51		   *	    push   ecx
+ 000003EE  57		   *	    push   edi
+ 000003EF  53		   *	    push   ebx
+ 000003F0  C7 45 FC			mov pBuffer, OFFSET screenBuffer
 	   00000018 R
 					; // clear buffer to black (r=0,g=0,b=0,a=255)
- 000003D0  B9 00000FA0			mov ecx, SCREEN_WIDTH * SCREEN_HEIGHT
- 000003D5  8B 7D FC			mov edi, pBuffer
- 000003D8  B8 FF000000			mov eax, 0FF000000h
- 000003DD  F3/ AB			rep stosd
+ 000003F7  B9 00000FA0			mov ecx, SCREEN_WIDTH * SCREEN_HEIGHT
+ 000003FC  8B 7D FC			mov edi, pBuffer
+ 000003FF  B8 FF000000			mov eax, 0FF000000h
+ 00000404  F3/ AB			rep stosd
 
 					; // process each command
- 000003DF  8B 75 08			mov esi, pRenderCommands
- 000003E2  8B 5D 0C			mov ebx, numCommands
- 000003E5			cmd_loop:
- 000003E5  83 FB 00			cmp ebx, 0
- 000003E8  74 39			je render_done
- 000003EA  4B				dec ebx
+ 00000406  8B 75 08			mov esi, pRenderCommands
+ 00000409  8B 5D 0C			mov ebx, numCommands
+ 0000040C			cmd_loop:
+ 0000040C  83 FB 00			cmp ebx, 0
+ 0000040F  74 39			je render_done
+ 00000411  4B				dec ebx
 
- 000003EB  8B 06			mov eax, [esi]
- 000003ED  8B 50 04			mov edx, (RenderCommand PTR [eax]).pRenderable
- 000003F0  8B 12			mov edx, (Component PTR [edx]).componentType
+ 00000412  8B 06			mov eax, [esi]
+ 00000414  8B 50 04			mov edx, (RenderCommand PTR [eax]).pRenderable
+ 00000417  8B 12			mov edx, (Component PTR [edx]).componentType
 
 					.IF edx == RECT_COMPONENT_ID
- 000003F2  83 FA 01	   *	    cmp    edx, RECT_COMPONENT_ID
- 000003F5  75 12	   *	    jne    @C0009
+ 00000419  83 FA 01	   *	    cmp    edx, RECT_COMPONENT_ID
+ 0000041C  75 12	   *	    jne    @C0009
 						INVOKE drawRect, (RenderCommand PTR [eax]).pTransform, (RenderCommand PTR [eax]).pRenderable, pCamera, pBuffer
- 000003F7  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
- 000003FA  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
- 000003FD  FF 70 04	   *	    push   dword  ptr [eax]+000000004h
- 00000400  FF 30	   *	    push   dword  ptr [eax]
- 00000402  E8 FFFFFE17	   *	    call   drawRect
+ 0000041E  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
+ 00000421  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
+ 00000424  FF 70 04	   *	    push   dword  ptr [eax]+000000004h
+ 00000427  FF 30	   *	    push   dword  ptr [eax]
+ 00000429  E8 FFFFFE17	   *	    call   drawRect
 					.ELSEIF edx == SPRITE_COMPONENT_ID
- 00000407  EB 15	   *	    jmp    @C000B
- 00000409		   *@C0009:
- 00000409  83 FA 02	   *	    cmp    edx, SPRITE_COMPONENT_ID
- 0000040C  75 10	   *	    jne    @C000C
+ 0000042E  EB 15	   *	    jmp    @C000B
+ 00000430		   *@C0009:
+ 00000430  83 FA 02	   *	    cmp    edx, SPRITE_COMPONENT_ID
+ 00000433  75 10	   *	    jne    @C000C
 						INVOKE drawSprite, (RenderCommand PTR [eax]).pTransform, (RenderCommand PTR [eax]).pRenderable, pCamera, pBuffer
- 0000040E  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
- 00000411  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
- 00000414  FF 70 04	   *	    push   dword  ptr [eax]+000000004h
- 00000417  FF 30	   *	    push   dword  ptr [eax]
- 00000419  E8 FFFFFF0F	   *	    call   drawSprite
+ 00000435  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
+ 00000438  FF 75 10	   *	    push   dword  ptr ss:[ebp]+000000010h
+ 0000043B  FF 70 04	   *	    push   dword  ptr [eax]+000000004h
+ 0000043E  FF 30	   *	    push   dword  ptr [eax]
+ 00000440  E8 FFFFFF0F	   *	    call   drawSprite
 					.ENDIF
- 0000041E		   *@C000C:
- 0000041E		   *@C000B:
+ 00000445		   *@C000C:
+ 00000445		   *@C000B:
 
- 0000041E  83 C6 04			add esi, TYPE DWORD
- 00000421  EB C2			jmp cmd_loop
- 00000423			render_done:
+ 00000445  83 C6 04			add esi, TYPE DWORD
+ 00000448  EB C2			jmp cmd_loop
+ 0000044A			render_done:
 					.IF rendererInitialized == 0 
- 00000423  83 3D 00000000 R
+ 0000044A  83 3D 00000000 R
 	   00		   *	    cmp    rendererInitialized, 000h
- 0000042A  75 0F	   *	    jne    @C000E
+ 00000451  75 0F	   *	    jne    @C000E
 						INVOKE initializeRenderer
- 0000042C  E8 FFFFFD26	   *	    call   initializeRenderer
- 00000431  C7 05 00000000 R			mov rendererInitialized, 0FFFFFFFFh
+ 00000453  E8 FFFFFCFF	   *	    call   initializeRenderer
+ 00000458  C7 05 00000000 R			mov rendererInitialized, 0FFFFFFFFh
 	   FFFFFFFF
 					.ENDIF
- 0000043B		   *@C000E:
+ 00000462		   *@C000E:
 
 					INVOKE displayBuffer, pBuffer
- 0000043B  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
- 0000043E  E8 FFFFFBE6	   *	    call   displayBuffer
+ 00000462  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
+ 00000465  E8 FFFFFBBF	   *	    call   displayBuffer
 					ret
- 00000443  5B		   *	    pop    ebx
- 00000444  5F		   *	    pop    edi
- 00000445  59		   *	    pop    ecx
- 00000446  5E		   *	    pop    esi
- 00000447  C9		   *	    leave  
- 00000448  C2 000C	   *	    ret    0000Ch
- 0000044B			renderCommands ENDP
+ 0000046A  5B		   *	    pop    ebx
+ 0000046B  5F		   *	    pop    edi
+ 0000046C  59		   *	    pop    ecx
+ 0000046D  5E		   *	    pop    esi
+ 0000046E  C9		   *	    leave  
+ 0000046F  C2 000C	   *	    ret    0000Ch
+ 00000472			renderCommands ENDP
 
 				END
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 21:47:42
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/01/26 21:48:08
 renderer.asm						     Symbols 2 - 1
 
 
@@ -1174,7 +1189,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 0001C538 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000044B DWord	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000472 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -1189,19 +1204,19 @@ SetConsoleCursorPosition . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 SetConsoleMode . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 SetConsoleOutputCP . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteConsoleA  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-blendColor . . . . . . . . . . .	P Near	 000001C2 _TEXT	Length= 0000005C Private STDCALL
+blendColor . . . . . . . . . . .	P Near	 000001C2 _TEXT	Length= 00000083 Private STDCALL
   fgColor  . . . . . . . . . . .	DWord	 bp + 00000008
   bgColor  . . . . . . . . . . .	DWord	 bp + 0000000C
   finalColor . . . . . . . . . .	DWord	 bp - 00000004
   fgAlpha  . . . . . . . . . . .	DWord	 bp - 00000008
-  blendColor_exit  . . . . . . .	L Near	 00000215 _TEXT	
+  blendColor_exit  . . . . . . .	L Near	 0000023C _TEXT	
 displayBuffer  . . . . . . . . .	P Near	 00000029 _TEXT	Length= 0000012E Public STDCALL
   pBuffer  . . . . . . . . . . .	DWord	 bp + 00000008
   y_loop . . . . . . . . . . . .	L Near	 00000044 _TEXT	
   x_loop . . . . . . . . . . . .	L Near	 0000004F _TEXT	
   row_end  . . . . . . . . . . .	L Near	 0000010F _TEXT	
   done . . . . . . . . . . . . .	L Near	 0000011F _TEXT	
-drawRect . . . . . . . . . . . .	P Near	 0000021E _TEXT	Length= 0000010F Private STDCALL
+drawRect . . . . . . . . . . . .	P Near	 00000245 _TEXT	Length= 0000010F Private STDCALL
   pTrans . . . . . . . . . . . .	DWord	 bp + 00000008
   pRect  . . . . . . . . . . . .	DWord	 bp + 0000000C
   pCamera  . . . . . . . . . . .	DWord	 bp + 00000010
@@ -1211,14 +1226,14 @@ drawRect . . . . . . . . . . . .	P Near	 0000021E _TEXT	Length= 0000010F Private
   rw . . . . . . . . . . . . . .	DWord	 bp - 0000000C
   rh . . . . . . . . . . . . . .	DWord	 bp - 00000010
   color  . . . . . . . . . . . .	DWord	 bp - 00000014
-  check_x_end  . . . . . . . . .	L Near	 00000288 _TEXT	
-  set_x_bounds . . . . . . . . .	L Near	 00000292 _TEXT	
-  check_y_end  . . . . . . . . .	L Near	 000002B5 _TEXT	
-  set_y_bounds . . . . . . . . .	L Near	 000002BF _TEXT	
-  yloop_rect . . . . . . . . . .	L Near	 000002F6 _TEXT	
-  xloop_rect . . . . . . . . . .	L Near	 0000030D _TEXT	
-  drawRect_done  . . . . . . . .	L Near	 00000324 _TEXT	
-drawSprite . . . . . . . . . . .	P Near	 0000032D _TEXT	Length= 00000092 Private STDCALL
+  check_x_end  . . . . . . . . .	L Near	 000002AF _TEXT	
+  set_x_bounds . . . . . . . . .	L Near	 000002B9 _TEXT	
+  check_y_end  . . . . . . . . .	L Near	 000002DC _TEXT	
+  set_y_bounds . . . . . . . . .	L Near	 000002E6 _TEXT	
+  yloop_rect . . . . . . . . . .	L Near	 0000031D _TEXT	
+  xloop_rect . . . . . . . . . .	L Near	 00000334 _TEXT	
+  drawRect_done  . . . . . . . .	L Near	 0000034B _TEXT	
+drawSprite . . . . . . . . . . .	P Near	 00000354 _TEXT	Length= 00000092 Private STDCALL
   pTrans . . . . . . . . . . . .	DWord	 bp + 00000008
   pSprite  . . . . . . . . . . .	DWord	 bp + 0000000C
   pCamera  . . . . . . . . . . .	DWord	 bp + 00000010
@@ -1228,9 +1243,9 @@ drawSprite . . . . . . . . . . .	P Near	 0000032D _TEXT	Length= 00000092 Private
   sw . . . . . . . . . . . . . .	DWord	 bp - 0000000C
   sh . . . . . . . . . . . . . .	DWord	 bp - 00000010
   pTex . . . . . . . . . . . . .	DWord	 bp - 00000014
-  yloop_sprite . . . . . . . . .	L Near	 0000037E _TEXT	
-  xloop_sprite . . . . . . . . .	L Near	 000003A6 _TEXT	
-  drawSprite_done  . . . . . . .	L Near	 000003B6 _TEXT	
+  yloop_sprite . . . . . . . . .	L Near	 000003A5 _TEXT	
+  xloop_sprite . . . . . . . . .	L Near	 000003CD _TEXT	
+  drawSprite_done  . . . . . . .	L Near	 000003DD _TEXT	
 free_camera  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_component_virtual . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_component . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -1249,13 +1264,13 @@ new_component  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 new_rect_component . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_render_command . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_transform_component  . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-renderCommands . . . . . . . . .	P Near	 000003BF _TEXT	Length= 0000008C Public STDCALL
+renderCommands . . . . . . . . .	P Near	 000003E6 _TEXT	Length= 0000008C Public STDCALL
   pRenderCommands  . . . . . . .	DWord	 bp + 00000008
   numCommands  . . . . . . . . .	DWord	 bp + 0000000C
   pCamera  . . . . . . . . . . .	DWord	 bp + 00000010
   pBuffer  . . . . . . . . . . .	DWord	 bp - 00000004
-  cmd_loop . . . . . . . . . . .	L Near	 000003E5 _TEXT	
-  render_done  . . . . . . . . .	L Near	 00000423 _TEXT	
+  cmd_loop . . . . . . . . . . .	L Near	 0000040C _TEXT	
+  render_done  . . . . . . . . .	L Near	 0000044A _TEXT	
 writeByteInDecimal . . . . . . .	P Near	 00000000 _TEXT	Length= 00000029 Private STDCALL
   print_tens . . . . . . . . . .	L Near	 00000010 _TEXT	
   print_ones . . . . . . . . . .	L Near	 00000021 _TEXT	

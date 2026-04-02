@@ -339,6 +339,21 @@ local finalColor : DWORD, fgAlpha : DWORD
 	shr eax, 8  ; // Divide by 256 instead of 255 for speed
 	or edx, eax
 
+	; // Green
+	mov eax, fgColor
+	shr eax, 8 ; // Move 1 byte over
+	and eax, 0FFh
+	imul eax, esi
+
+	mov ebx, bgColor
+	shr ebx, 8
+	and ebx, 0FFh
+	imul ebx, edi ; // Multiply the background color by 255 - fgAlpha
+
+	add eax, ebx
+	shr eax, 8  ; // Divide by 256 instead of 255 for speed
+	shl eax, 8
+	or edx, eax
 	
 blendColor_exit:
 	ret
