@@ -12,6 +12,7 @@ INCLUDE game_object.inc
 
 NeonSquarePlayer STRUCT
 	baseGameObject GameObject<>
+	isAlive DWORD ?
 NeonSquarePlayer ENDS
 
 init_neon_square_player PROTO

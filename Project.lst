@@ -1,17 +1,12 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:03:35
-neon_game_manager.asm					     Page 1 - 1
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:06:23
+neon_square_player.asm					     Page 1 - 1
 
 
 				; // ==================================
-				; // neon_game_manager.asm
+				; // neon_square_player.asm
 				; // ----------------------------------
-				; // A GameObject with logic that controls the NeonSquare game.
-				; // It is responsible for the spawning of obstacles that the
-				; // player must avoid.
-				; //
-				; // If there is time to implement it, this can also
-				; // handle logic like counting up the player's score or 
-				; // adjusting the difficulty over time.
+				; // The NeonSquarePlayer is a subclass of GameObject that functions
+				; // as the player in the NeonSquareScene.
 				; // ==================================
 
 				INCLUDE default_header.inc
@@ -20,30 +15,6 @@ neon_game_manager.asm					     Page 1 - 1
 			      C option casemap : none
 			      C .stack 4096
 			      C OPTION PROC : PRIVATE
-			      C 
-				INCLUDE engine_types.inc
-			      C ; // ==================================
-			      C ; // engine_types.inc
-			      C ; // ----------------------------------
-			      C ; // Misc types used throughout the engine. This file is old and
-			      C ; // nonspecific and will be replaced by more specific header
-			      C ; // files in the future. 
-			      C ; // ==================================
-			      C 
-			      C IFNDEF ENGINE_TYPES_INC
- = 00000001		      C ENGINE_TYPES_INC EQU 1
-			      C 
- = 00000050		      C SCREEN_WIDTH = 80
- = 00000032		      C SCREEN_HEIGHT = 50
-			      C 
- 00000004		      C Pixel STRUCT
- 00000000  00		      C     r BYTE ?
- 00000001  00		      C     g BYTE ?
- 00000002  00		      C     b BYTE ?
- 00000003  00		      C     a BYTE ?
-			      C Pixel ENDS
-			      C 
-			      C ENDIF
 			      C 
 				INCLUDE game_object.inc
 			      C ; // ==================================
@@ -214,6 +185,30 @@ neon_game_manager.asm					     Page 1 - 1
 			      C IFNDEF GAME_OBJECT_IDS_INC
 			      C ENDIF
 			      C 
+				INCLUDE engine_types.inc
+			      C ; // ==================================
+			      C ; // engine_types.inc
+			      C ; // ----------------------------------
+			      C ; // Misc types used throughout the engine. This file is old and
+			      C ; // nonspecific and will be replaced by more specific header
+			      C ; // files in the future. 
+			      C ; // ==================================
+			      C 
+			      C IFNDEF ENGINE_TYPES_INC
+ = 00000001		      C ENGINE_TYPES_INC EQU 1
+			      C 
+ = 00000050		      C SCREEN_WIDTH = 80
+ = 00000032		      C SCREEN_HEIGHT = 50
+			      C 
+ 00000004		      C Pixel STRUCT
+ 00000000  00		      C     r BYTE ?
+ 00000001  00		      C     g BYTE ?
+ 00000002  00		      C     b BYTE ?
+ 00000003  00		      C     a BYTE ?
+			      C Pixel ENDS
+			      C 
+			      C ENDIF
+			      C 
 				INCLUDE scene.inc
 			      C ; // ==================================
 			      C ; // Scene
@@ -325,54 +320,6 @@ neon_game_manager.asm					     Page 1 - 1
 			      C 
 			      C ENDIF
 			      C 
-				INCLUDE wall_obstacle.inc
-			      C ; // ==================================
-			      C ; // wall_obstacle.inc
-			      C ; // ----------------------------------
-			      C ; // Wall obstacles push the player off the screen. The player
-			      C ; // must avoid them to avoid losing the game.
-			      C ; // ==================================
-			      C 
-			      C IFNDEF WALL_OBSTACLE_INC
- = 00000001		      C WALL_OBSTACLE_INC EQU 1
-			      C 
-			      C INCLUDE game_object.inc
-			      C ; // ==================================
-			      C ; // GameObject
-			      C ; // ----------------------------------
-			      C ; //	GameObjects are the core elements of a scene
-			      C ; // that contain gameplay logic and anything the player
-			      C ; // will see.
-			      C ; //	This STRUCT is intended to be 'subclassed' by 
-			      C ; // overriding the virtual function table.
-			      C ; //	GameObjects contain a list of components that
-			      C ; // define utility behavior such as sprites to render
-			      C ; // or animation states. These componenets are updated
-			      C ; // by the scene_update to keep their auxillary functionality
-			      C ; // separate from main game logic.
-			      C ; // ==================================
-			      C 
-			      C IFNDEF GAME_OBJECT_INC
-			      C ENDIF
-			      C 
-			      C 
- 00000020		      C WallObstacle STRUCT
- 00000000  00000000	      C 	baseGameObject GameObject<>
-	   00000000
-	   00000000
-	   00000000
-	   00000000
-	   00000000
-	   00000000
-			      C 
- 0000001C  00000000	      C 	pNeonPlayer DWORD ?
-			      C WallObstacle ENDS
-			      C 
-			      C init_wall_obstacle	PROTO startX : DWORD, startY : DWORD, height : DWORD
-			      C new_wall_obstacle	PROTO startX : DWORD, startY : DWORD, height : DWORD
-			      C 
-			      C ENDIF
-			      C 
 				INCLUDE neon_square_player.inc
 			      C ; // ==================================
 			      C ; // neon_square_player.asm
@@ -404,7 +351,7 @@ neon_game_manager.asm					     Page 1 - 1
 			      C ENDIF
 			      C 
 			      C 
- 0000001C		      C NeonSquarePlayer STRUCT
+ 00000020		      C NeonSquarePlayer STRUCT
  00000000  00000000	      C 	baseGameObject GameObject<>
 	   00000000
 	   00000000
@@ -412,81 +359,11 @@ neon_game_manager.asm					     Page 1 - 1
 	   00000000
 	   00000000
 	   00000000
+ 0000001C  00000000	      C 	isAlive DWORD ?
 			      C NeonSquarePlayer ENDS
 			      C 
 			      C init_neon_square_player PROTO
 			      C new_neon_square_player PROTO
-			      C 
-			      C ENDIF
-			      C 
-				INCLUDE neon_game_manager.inc
-			      C ; // ==================================
-			      C ; // neon_game_manager.inc
-			      C ; // ----------------------------------
-			      C ; // A GameObject with logic that controls the NeonSquare game.
-			      C ; // It is responsible for the spawning of obstacles that the
-			      C ; // player must avoid.
-			      C ; //
-			      C ; // If there is time to implement it, this can also
-			      C ; // handle logic like counting up the player's score or 
-			      C ; // adjusting the difficulty over time.
-			      C ; // ==================================
-			      C 
-			      C IFNDEF NEON_GAME_MANAGER_INC
- = 00000001		      C NEON_GAME_MANAGER_INC EQU 1
-			      C 
-			      C INCLUDE game_object.inc
-			      C ; // ==================================
-			      C ; // GameObject
-			      C ; // ----------------------------------
-			      C ; //	GameObjects are the core elements of a scene
-			      C ; // that contain gameplay logic and anything the player
-			      C ; // will see.
-			      C ; //	This STRUCT is intended to be 'subclassed' by 
-			      C ; // overriding the virtual function table.
-			      C ; //	GameObjects contain a list of components that
-			      C ; // define utility behavior such as sprites to render
-			      C ; // or animation states. These componenets are updated
-			      C ; // by the scene_update to keep their auxillary functionality
-			      C ; // separate from main game logic.
-			      C ; // ==================================
-			      C 
-			      C IFNDEF GAME_OBJECT_INC
-			      C ENDIF
-			      C 
-			      C 
-			      C ; // State enums
-			      C GAME_MANAGER_STATE_ENUM typedef DWORD
-			      C 
- = 00000001		      C DEFAULT_STATE_ENUM		= 1
- = 00000002		      C TUNNEL_STATE_ENUM		= 2
- = 00000003		      C TRANSITION_TO_STAIR_STATE_ENUM	= 3
- = 00000004		      C BARRIER_STATE_ENUM		= 4
- = 00000005		      C PAUSE_STATE_ENUM		= 5
-			      C 
-			      C 
- = 00000064		      C STAIRCASE_STATE_ENUM = 100
-			      C 
-			      C 
- 00000028		      C NeonGameManager STRUCT
- 00000000  00000000	      C 	baseGameObject GameObject<>
-	   00000000
-	   00000000
-	   00000000
-	   00000000
-	   00000000
-	   00000000
-			      C 
- 0000001C  00000000	      C 	timer REAL4 ?
-			      C 
- 00000020  00000000	      C 	state GAME_MANAGER_STATE_ENUM ?
-			      C 
- 00000024  00000000	      C 	stateObjectCounter DWORD ?
-			      C NeonGameManager ENDS
-			      C 
-			      C ; // Protos
-			      C init_neon_game_manager PROTO
-			      C new_neon_game_manager PROTO
 			      C 
 			      C ENDIF
 			      C 
@@ -526,36 +403,210 @@ neon_game_manager.asm					     Page 1 - 1
 			      C 
 			      C ENDIF
 			      C 
-
-				; // Irvine32 functions
-				RandomRange PROTO
-				Random32 PROTO
+				INCLUDE input_manager.inc
+			      C ; // ==================================
+			      C ; // input_manager.inc
+			      C ; // ----------------------------------
+			      C ; // The input manager is responsible for determining
+			      C ; // which keys are currently pressed and providing
+			      C ; // a convenient method for other files to determine
+			      C ; // the currently pressed keys. This should be
+			      C ; // updated on a by-frame basis by a scene.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF INPUT_MANAGER_INC
+ = 00000001		      C INPUT_MANAGER_INC EQU 1
+			      C 
+			      C VK_CODE typedef BYTE 
+			      C 
+			      C ; // Win32 virtual key codes taken from learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+ = 00000025		      C VK_LEFT		=	025h
+ = 00000026		      C VK_UP		=	026h
+ = 00000027		      C VK_RIGHT	=	027h
+ = 00000028		      C VK_DOWN		=	028h
+			      C 
+ = 000000CB		      C VK_GAMEPAD_DPAD_UP		= 0CBh
+ = 000000CC		      C VK_GAMEPAD_DPAD_DOWN	= 0CCh
+			      C 
+ = 000000D3		      C VK_GAMEPAD_LEFT_THUMBSTICK_UP	= 0D3h	
+ = 000000D4		      C VK_GAMEPAD_LEFT_THUMBSTICK_DOWN = 0D4h
+			      C 
+			      C updateInput PROTO
+			      C isKeyPressed PROTO vkCode: VK_CODE
+			      C isKeyJustPressed PROTO vkCode: VK_CODE
+			      C 
+			      C ENDIF
+			      C 
+				INCLUDE transform_component.inc
+			      C ; // ==================================
+			      C ; // TransformComponent
+			      C ; // ----------------------------------
+			      C ; // Defines where in space a GameObject should be
+			      C ; // represented.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF TRANSFORM_COMPONENT_INC
+ = 00000001		      C TRANSFORM_COMPONENT_INC EQU 1
+			      C 
+			      C INCLUDE component.inc
+			      C ; // ==================================
+			      C ; // component.inc
+			      C ; // ----------------------------------
+			      C ; //	Components are utility helpers to GameObjects that
+			      C ; // allow for easy adding of features and a composition
+			      C ; // structure for them (HasA vs IsA). 
+			      C ; //	Some examples of components are SpriteComponents
+			      C ; // that describe what a GameObject should look like or
+			      C ; // TransformComponents that describe where a GameObject
+			      C ; // is located spatially. 
+			      C ; //	This is the generic component STRUCT that
+			      C ; // all components inherit from.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF COMPONENT_INC
+ = 00000001		      C COMPONENT_INC EQU 1
+			      C 
+			      C INCLUDE component_ids.inc
+			      C ; // ==================================
+			      C ; // component_ids.inc
+			      C ; // ----------------------------------
+			      C ; // A set of "enum" style macros that identify component types 
+			      C ; // for the data definition and parsing of a scene's data.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF COMPONENT_IDS_INC
+			      C ENDIF
+			      C 
+			      C 
+ 00000004		      C Component_vtable STRUCT
+ 00000000  00000000	      C 	pFree DWORD ?
+			      C Component_vtable ENDS
+			      C 
+ 00000008		      C Component STRUCT
+ 00000000  00000000	      C 	componentType ENUM_COMPONENT_ID DEFAULT_COMPONENT_ID
+ 00000004  00000000	      C 	pVt DWORD ?
+			      C Component ENDS
+			      C 
+			      C ; // Constructor protos
+			      C init_component PROTO
+			      C new_component PROTO
+			      C free_component PROTO
+			      C free_component_virtual PROTO
+			      C 
+			      C ENDIF
+			      C 
+			      C 
+ 00000014		      C TransformComponent STRUCT
+ 00000000  00000000	      C 	baseComponent Component <>
+	   00000000
+			      C 
+ 00000008  00000000	      C 	x SDWORD ?
+ 0000000C  00000000	      C 	y SDWORD ?
+			      C 
+			      C 	; // Whether to ignore the camera offset when rendering.
+			      C 	; // Used for drawing UI items
+ 00000010  00000000	      C 	ignoreCamera DWORD ?
+			      C 
+			      C 	; // Out of scope for this project
+			      C 	; // rotation DWORD ?
+			      C 	; // scaleX DWORD ?
+			      C 	; // scaleY DWORD ?
+			      C TransformComponent ENDS
+			      C 
+			      C ; // Constructor methods
+			      C init_transform_component PROTO x: DWORD, y : DWORD, ignoreCamera : DWORD
+			      C new_transform_component PROTO x: DWORD, y: DWORD, ignoreCamera: DWORD
+			      C free_transform_component PROTO
+			      C 
+			      C ENDIF
+			      C 
+				INCLUDE rect_component.inc
+			      C ; // ==================================
+			      C ; // rect_component.inc
+			      C ; // ----------------------------------
+			      C ; // Defines how a GameObject should appear using a rectangle.
+			      C ; // Should be used with a transform for proper functionality.
+			      C ; // The origin is defined by a transform.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF RECT_COMMAND_INC
+ = 00000001		      C RECT_COMMAND_INC EQU 1
+			      C 
+			      C INCLUDE renderable_component.inc
+			      C ; // ==================================
+			      C ; // renderable_component.inc
+			      C ; // ----------------------------------
+			      C ; // A subclass of component that provides
+			      C ; // fields for the RenderableComponents which
+			      C ; // are RectComponents and SpriteComponents
+			      C ; // ==================================
+			      C 
+			      C IFNDEF RENDERABLE_COMPONENT_INC
+ = 00000001		      C RENDERABLE_COMPONENT_INC EQU 1
+			      C 
+			      C INCLUDE component.inc
+			      C ; // ==================================
+			      C ; // component.inc
+			      C ; // ----------------------------------
+			      C ; //	Components are utility helpers to GameObjects that
+			      C ; // allow for easy adding of features and a composition
+			      C ; // structure for them (HasA vs IsA). 
+			      C ; //	Some examples of components are SpriteComponents
+			      C ; // that describe what a GameObject should look like or
+			      C ; // TransformComponents that describe where a GameObject
+			      C ; // is located spatially. 
+			      C ; //	This is the generic component STRUCT that
+			      C ; // all components inherit from.
+			      C ; // ==================================
+			      C 
+			      C IFNDEF COMPONENT_INC
+			      C ENDIF
+			      C 
+			      C 
+ 00000010		      C RenderableComponent STRUCT
+ 00000000  00000000	      C 	baseComponent Component <>
+	   00000000
+			      C 
+ 00000008  00000000	      C 	visible DWORD ?
+ 0000000C  00000000	      C 	layer DWORD ?
+			      C RenderableComponent ENDS
+			      C 
+			      C ; // Constructor protos
+			      C init_renderable_component PROTO visible : DWORD, layer : DWORD
+			      C 
+			      C ENDIF
+			      C 
+			      C 
+ 0000001C		      C RectComponent STRUCT
+ 00000000  00000000	      C 	baseRenderableComponent RenderableComponent <>
+	   00000000
+	   00000000
+	   00000000
+			      C 
+ 00000010  00000000	      C 	h DWORD ? ; // Height
+ 00000014  00000000	      C 	w DWORD ? ; // Width
+			      C 
+			      C 	; // Color (For future development, this should be an RGBA object)
+			      C 	; // For simplicity reasons, it is 4 bytes for now. 
+ 00000018  00		      C 	r BYTE ?
+ 00000019  00		      C 	g BYTE ?
+ 0000001A  00		      C 	b BYTE ?
+ 0000001B  00		      C 	a BYTE ?
+			      C RectComponent ENDS
+			      C 
+			      C ; // Constructor methods
+			      C init_rect_component PROTO h: DWORD, w : DWORD, r : BYTE, g : BYTE, b : BYTE, a : BYTE
+			      C new_rect_component PROTO h: DWORD, w: DWORD, r: BYTE, g: BYTE, b:  BYTE, a: BYTE
+			      C free_rect_component PROTO
+			      C 
+			      C ENDIF
+			      C 
 
  00000000			.data
- 00000000 00000000 E		NEON_GAME_MANAGER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET neon_game_manager_update, OFFSET game_object_exit, OFFSET free_game_object>
-	   00000370 R
+ 00000000 00000000 E		NEON_SQUARE_PLAYER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET neon_square_player_update, OFFSET game_object_exit, OFFSET free_game_object>
+	   0000007C R
 	   00000000 E
 	   00000000 E
-
-				; // Default state values
- 00000010 3E800000		defaultSpawnTime REAL4 0.25
- = 00000008			defaultStateObjectMin = 8
- = 00000014			defaultStateObjectMax = 20
-
-				; // Tunnel state values
- 00000014 3E800000		tunnelSpawnTime REAL4 0.25
- = 00000008			tunnelStateObjectMin = 8
- = 00000014			tunnelStateObjectMax = 20
-
-				; // Pause state values
- 00000018 3E4CCCCD		pauseTime REAL4 0.2
-
-				; // Staircase state values
- 0000001C 3D4CCCCD		stairSpawnTime REAL4 0.05
- 00000020 0000000F		stairStateObjectMin DWORD 15
- 00000024 00000014		stairStateObjectMax DWORD 20
- 00000028 00000000		stairDirection DWORD 0 ; // Can be either 0 or 1
- 0000002C 00000000		stairSpawnPos DWORD 0
 
  00000000			.code
 				; // ********************************************
@@ -563,13 +614,13 @@ neon_game_manager.asm					     Page 1 - 1
 				; // ********************************************
 
 				; // ----------------------------------
-				; // init_neon_game_manager
-				; // Initializes memory with the contents of a NeonGameManager
+				; // init_neon_square_player
+				; // Initializes memory with the contents of a NeonSquarePlayer
 				; // 
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000000			init_neon_game_manager PROC PUBLIC USES esi ebx edx
+ 00000000			init_neon_square_player PROC PUBLIC USES esi ebx edx
 					local pThis
  00000000  55		   *	    push   ebp
  00000001  8B EC	   *	    mov    ebp, esp
@@ -583,672 +634,176 @@ neon_game_manager.asm					     Page 1 - 1
 					INVOKE init_game_object, 2
  0000000C  6A 02	   *	    push   +000000002h
  0000000E  E8 00000000 E   *	    call   init_game_object
- 00000013  C7 01 00000004		mov (GameObject PTR [ecx]).gameObjectType, NEON_GAME_MANAGER_GAME_OBJECT_ID
- 00000019  C7 41 10			mov (GameObject PTR [ecx]).pVt, OFFSET NEON_GAME_MANAGER_GAMEOBJECT_VTABLE
+ 00000013  C7 01 00000002		mov (GameObject PTR [ecx]).gameObjectType, NEON_SQUARE_PLAYER_GAME_OBJECT_ID
+ 00000019  C7 41 10			mov (GameObject PTR [ecx]).pVt, OFFSET NEON_SQUARE_PLAYER_GAMEOBJECT_VTABLE
 	   00000000 R
 
-					; // My constructor
- 00000020  C7 41 1C			mov (NeonGameManager PTR [ecx]).timer, 0
-	   00000000
- 00000027  C7 41 20			mov (NeonGameManager PTR [ecx]).state, DEFAULT_STATE_ENUM
-	   00000001
- 0000002E  C7 41 24			mov (NeonGameManager PTR [ecx]).stateObjectCounter, defaultStateObjectMin
-	   00000008
-						
- 00000035  8B 45 FC			mov eax, pThis
+					; // My class members
+ 00000020  C7 41 1C			mov (NeonSquarePlayer PTR [ecx]).isAlive, 0FFFFFFFFh
+	   FFFFFFFF
+
+					; // Add transform component
+					INVOKE new_transform_component, 20, 25, 0
+ 00000027  6A 00	   *	    push   +000000000h
+ 00000029  6A 19	   *	    push   +000000019h
+ 0000002B  6A 14	   *	    push   +000000014h
+ 0000002D  E8 00000000 E   *	    call   new_transform_component
+					INVOKE add_component, pThis, eax
+ 00000032  50		   *	    push   eax
+ 00000033  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
+ 00000036  E8 00000000 E   *	    call   add_component
+
+					; // Add rect component
+					INVOKE new_rect_component, 2, 2, 0, 255, 0, 255
+ 0000003B  68 000000FF	   *	    push   +0000000FFh
+ 00000040  6A 00	   *	    push   +000000000h
+ 00000042  68 000000FF	   *	    push   +0000000FFh
+ 00000047  6A 00	   *	    push   +000000000h
+ 00000049  6A 02	   *	    push   +000000002h
+ 0000004B  6A 02	   *	    push   +000000002h
+ 0000004D  E8 00000000 E   *	    call   new_rect_component
+					INVOKE add_component, pThis, eax
+ 00000052  50		   *	    push   eax
+ 00000053  FF 75 FC	   *	    push   dword  ptr ss:[ebp]+0FFFFFFFCh
+ 00000056  E8 00000000 E   *	    call   add_component
+
+ 0000005B  8B 45 FC			mov eax, pThis
 						
 					ret
- 00000038  5A		   *	    pop    edx
- 00000039  5B		   *	    pop    ebx
- 0000003A  5E		   *	    pop    esi
- 0000003B  C9		   *	    leave  
- 0000003C  C3		   *	    ret    00000h
- 0000003D			init_neon_game_manager ENDP
+ 0000005E  5A		   *	    pop    edx
+ 0000005F  5B		   *	    pop    ebx
+ 00000060  5E		   *	    pop    esi
+ 00000061  C9		   *	    leave  
+ 00000062  C3		   *	    ret    00000h
+ 00000063			init_neon_square_player ENDP
 
 				; // ----------------------------------
-				; // new_neon_game_manager
+				; // new_neon_square_player
 				; // Reserves heap space for the Object with parameters calls the initializer method
 				; // ----------------------------------
- 0000003D			new_neon_game_manager PROC PUBLIC USES ecx
- 0000003D  51		   *	    push   ecx
-					INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF NeonGameManager
- 0000003E  6A 28	   *	    push   +000000028h
- 00000040  6A 04	   *	    push   +000000004h
- 00000042  FF 35 00000000 E *	    push   hHeap
- 00000048  E8 00000000 E   *	    call   HeapAlloc
- 0000004D  8B C8			mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
-					INVOKE init_neon_game_manager
- 0000004F  E8 FFFFFFAC	   *	    call   init_neon_game_manager
+ 00000063			new_neon_square_player PROC PUBLIC USES ecx
+ 00000063  51		   *	    push   ecx
+					INVOKE HeapAlloc, hHeap, HEAP_GENERATE_EXCEPTIONS, SIZEOF NeonSquarePlayer
+ 00000064  6A 20	   *	    push   +000000020h
+ 00000066  6A 04	   *	    push   +000000004h
+ 00000068  FF 35 00000000 E *	    push   hHeap
+ 0000006E  E8 00000000 E   *	    call   HeapAlloc
+ 00000073  8B C8			mov ecx, eax ; // Move the memory address to ecx so it can function as a "this" pointer
+					INVOKE init_neon_square_player
+ 00000075  E8 FFFFFF86	   *	    call   init_neon_square_player
 
 					ret ; // Return with the address of the memory block in HeapAlloc
- 00000054  59		   *	    pop    ecx
- 00000055  C3		   *	    ret    00000h
- 00000056			new_neon_game_manager ENDP
+ 0000007A  59		   *	    pop    ecx
+ 0000007B  C3		   *	    ret    00000h
+ 0000007C			new_neon_square_player ENDP
 
 				; // ********************************************
 				; // Instance methods
 				; // ********************************************
 
 				; // ----------------------------------
-				; // transition_to_state
-				; // Transitions to the next state
+				; // neon_square_player_update
+				; // Moves the player up and down depending on keyboard input.
 				; // 
 				; // Register Parameters: 
 				; //	ecx - THIS pointer
 				; // ----------------------------------
- 00000056			transition_to_state PROC USES eax ebx edx esi edi, state : GAME_MANAGER_STATE_ENUM
- 00000056  55		   *	    push   ebp
- 00000057  8B EC	   *	    mov    ebp, esp
- 00000059  50		   *	    push   eax
- 0000005A  53		   *	    push   ebx
- 0000005B  52		   *	    push   edx
- 0000005C  56		   *	    push   esi
- 0000005D  57		   *	    push   edi
- 0000005E  8B 45 08			mov eax, state
+ 0000007C			neon_square_player_update PROC stdcall USES eax ebx edx, deltaTime: REAL4
+					local pThis : DWORD, yMov : SDWORD, pTransform : DWORD, pRect : DWORD
+ 0000007C  55		   *	    push   ebp
+ 0000007D  8B EC	   *	    mov    ebp, esp
+ 0000007F  83 C4 F0	   *	    add    esp, 0FFFFFFF0h
+ 00000082  50		   *	    push   eax
+ 00000083  53		   *	    push   ebx
+ 00000084  52		   *	    push   edx
+ 00000085  89 4D FC			mov pThis, ecx
+ 00000088  8B 45 08			mov eax, deltaTime ; // Use the deltaTime variable so MASM doesn't get angry and throw a compile time error
 
-					.IF eax == DEFAULT_STATE_ENUM
- 00000061  83 F8 01	   *	    cmp    eax, DEFAULT_STATE_ENUM
- 00000064  75 26	   *	    jne    @C0001
- 00000066  C7 41 20				mov (NeonGameManager PTR [ecx]).state, DEFAULT_STATE_ENUM
-	   00000001
- 0000006D  C7 41 1C				mov (NeonGameManager PTR [ecx]).timer, 0
+ 0000008B  C7 45 F8			mov yMov, 0
 	   00000000
-						
-						; // Get a random number of objects in this scene
- 00000074  B8 00000014				mov eax, defaultStateObjectMax
- 00000079  83 E8 08				sub eax, defaultStateObjectMin
-						
-						INVOKE RandomRange
- 0000007C  E8 00000000 E   *	    call   RandomRange
- 00000081  83 C0 08				add eax, defaultStateObjectMin
 
- 00000084  89 41 24				mov (NeonGameManager PTR [ecx]).stateObjectCounter, eax
-					.ELSEIF eax == TUNNEL_STATE_ENUM
- 00000087  E9 000000C2	   *	    jmp    @C0003
- 0000008C		   *@C0001:
- 0000008C  83 F8 02	   *	    cmp    eax, TUNNEL_STATE_ENUM
- 0000008F  75 26	   *	    jne    @C0004
- 00000091  C7 41 20				mov (NeonGameManager PTR [ecx]).state, TUNNEL_STATE_ENUM
-	   00000002
- 00000098  C7 41 1C				mov (NeonGameManager PTR [ecx]).timer, 0
-	   00000000
-						
-						; // Get a random number of objects in this scene
- 0000009F  B8 00000014				mov eax, tunnelStateObjectMax
- 000000A4  83 E8 08				sub eax, tunnelStateObjectMin
-						
-						INVOKE RandomRange
- 000000A7  E8 00000000 E   *	    call   RandomRange
- 000000AC  83 C0 08				add eax, tunnelStateObjectMin
-							
- 000000AF  89 41 24				mov (NeonGameManager PTR [ecx]).stateObjectCounter, eax
-					.ELSEIF eax == STAIRCASE_STATE_ENUM
- 000000B2  E9 00000097	   *	    jmp    @C0006
- 000000B7		   *@C0004:
- 000000B7  83 F8 64	   *	    cmp    eax, STAIRCASE_STATE_ENUM
- 000000BA  75 6A	   *	    jne    @C0007
- 000000BC  C7 41 20				mov (NeonGameManager PTR [ecx]).state, STAIRCASE_STATE_ENUM
-	   00000064
- 000000C3  C7 41 1C				mov (NeonGameManager PTR [ecx]).timer, 0
-	   00000000
-						
-						; // Get a random number of objects in this scene
- 000000CA  A1 00000024 R			mov eax, stairStateObjectMax
- 000000CF  2B 05 00000020 R			sub eax, stairStateObjectMin
-						
-						INVOKE RandomRange
- 000000D5  E8 00000000 E   *	    call   RandomRange
- 000000DA  03 05 00000020 R			add eax, stairStateObjectMin
- 000000E0  89 41 24				mov (NeonGameManager PTR [ecx]).stateObjectCounter, eax
-							
-						; // Set a direction
- 000000E3  B8 00000002				mov eax, 2
-						INVOKE RandomRange
- 000000E8  E8 00000000 E   *	    call   RandomRange
-						.IF eax == 0
- 000000ED  0B C0	   *	    or	eax, eax
- 000000EF  75 16	   *	    jne    @C0009
-							; // Direction = Down
- 000000F1  C7 05 00000028 R				mov stairDirection, 1 ; // Can be either 0 or 1
-	   00000001
- 000000FB  C7 05 0000002C R				mov stairSpawnPos, 2
-	   00000002
+					; // Check if any of the keys are pressed
+					INVOKE isKeyPressed, VK_GAMEPAD_LEFT_THUMBSTICK_UP
+ 00000092  68 000000D3	   *	    push   +0000000D3h
+ 00000097  E8 00000000 E   *	    call   isKeyPressed
+ 0000009C  8B D8			mov ebx, eax
+					INVOKE isKeyPressed, VK_GAMEPAD_DPAD_UP
+ 0000009E  68 000000CB	   *	    push   +0000000CBh
+ 000000A3  E8 00000000 E   *	    call   isKeyPressed
+ 000000A8  0B D8			or ebx, eax
+					INVOKE isKeyPressed, VK_UP
+ 000000AA  6A 26	   *	    push   +000000026h
+ 000000AC  E8 00000000 E   *	    call   isKeyPressed
+ 000000B1  0B D8			or ebx, eax
+ 000000B3  F7 DB			neg ebx
+ 000000B5  D1 E3			shl ebx, 1 ; // Multiply the movement by 2 to speed things up
+ 000000B7  01 5D F8			add yMov, ebx
+						 
+					INVOKE isKeyPressed, VK_GAMEPAD_LEFT_THUMBSTICK_DOWN
+ 000000BA  68 000000D4	   *	    push   +0000000D4h
+ 000000BF  E8 00000000 E   *	    call   isKeyPressed
+ 000000C4  8B D8			mov ebx, eax
+					INVOKE isKeyPressed, VK_DOWN
+ 000000C6  6A 28	   *	    push   +000000028h
+ 000000C8  E8 00000000 E   *	    call   isKeyPressed
+ 000000CD  0B D8			or ebx, eax
+					INVOKE isKeyPressed, VK_GAMEPAD_DPAD_DOWN
+ 000000CF  68 000000CC	   *	    push   +0000000CCh
+ 000000D4  E8 00000000 E   *	    call   isKeyPressed
+ 000000D9  0B D8			or ebx, eax
+ 000000DB  D1 E3			shl ebx, 1 ; // Multiply the movement by 2 to speed things up
+ 000000DD  01 5D F8			add yMov, ebx
 
-						.ELSEIF eax == 1
- 00000105  EB 47	   *	    jmp    @C000B
- 00000107		   *@C0009:
- 00000107  83 F8 01	   *	    cmp    eax, 001h
- 0000010A  75 42	   *	    jne    @C000C
-							; // Direction = Up
- 0000010C  C7 05 00000028 R				mov stairDirection, 0; // Can be either 0 or 1
-	   00000000
- 00000116  BB 00000032					mov ebx, SCREEN_HEIGHT
- 0000011B  83 EB 0E					sub ebx, 14
- 0000011E  89 1D 0000002C R				mov stairSpawnPos, ebx
-						.ENDIF
-					.ELSEIF eax == PAUSE_STATE_ENUM
- 00000124  EB 28	   *	    jmp    @C000E
- 00000126		   *@C0007:
- 00000126  83 F8 05	   *	    cmp    eax, PAUSE_STATE_ENUM
- 00000129  75 10	   *	    jne    @C000F
- 0000012B  C7 41 20				mov (NeonGameManager PTR [ecx]).state, PAUSE_STATE_ENUM
-	   00000005
- 00000132  C7 41 1C				mov (NeonGameManager PTR [ecx]).timer, 0
-	   00000000
-					.ELSEIF eax == TRANSITION_TO_STAIR_STATE_ENUM
- 00000139  EB 13	   *	    jmp    @C0011
- 0000013B		   *@C000F:
- 0000013B  83 F8 03	   *	    cmp    eax, TRANSITION_TO_STAIR_STATE_ENUM
- 0000013E  75 0E	   *	    jne    @C0012
- 00000140  C7 41 20				mov (NeonGameManager PTR [ecx]).state, TRANSITION_TO_STAIR_STATE_ENUM
-	   00000003
- 00000147  C7 41 1C				mov (NeonGameManager PTR [ecx]).timer, 0
-	   00000000
-					.ENDIF
- 0000014E		   *@C0012:
- 0000014E		   *@C0011:
- 0000014E		   *@C000E:
- 0000014E		   *@C0006:
- 0000014E		   *@C0003:
- 0000014E		   *@C000C:
- 0000014E		   *@C000B:
+					; // Now move the player
+ 000000E0  8B 4D FC			mov ecx, pThis
+					INVOKE get_first_component_which_is_a, TRANSFORM_COMPONENT_ID
+ 000000E3  6A 03	   *	    push   +000000003h
+ 000000E5  E8 00000000 E   *	    call   get_first_component_which_is_a
+ 000000EA  89 45 F4			mov pTransform, eax
 
-					ret
- 0000014E  5F		   *	    pop    edi
- 0000014F  5E		   *	    pop    esi
- 00000150  5A		   *	    pop    edx
- 00000151  5B		   *	    pop    ebx
- 00000152  58		   *	    pop    eax
- 00000153  C9		   *	    leave  
- 00000154  C2 0004	   *	    ret    00004h
- 00000157			transition_to_state ENDP
+ 000000ED  8B 5D F8			mov ebx, yMov
+ 000000F0  01 58 0C			add (TransformComponent PTR [eax]).y, ebx
 
-				; // ----------------------------------
-				; // transition_state
-				; // Randomly decides what the next state will be
-				; // 
-				; // Register Parameters: 
-				; //	ecx - THIS pointer
-				; // ----------------------------------
- 00000157			transition_state PROC USES eax ebx edx esi edi
- 00000157  50		   *	    push   eax
- 00000158  53		   *	    push   ebx
- 00000159  52		   *	    push   edx
- 0000015A  56		   *	    push   esi
- 0000015B  57		   *	    push   edi
- 0000015C  B8 00000003			mov eax, 3
-					INVOKE RandomRange
- 00000161  E8 00000000 E   *	    call   RandomRange
- 00000166  40				inc eax
+					; // If I'm above the top of the screen, reset me to the top
+ 000000F3  8B 58 0C			mov ebx, (TransformComponent PTR [eax]).y
+ 000000F6  83 FB 00			cmp ebx, 0
+ 000000F9  7D 07			jge neon_square_player_update_not_above_screen
+ 000000FB  C7 40 0C			mov (TransformComponent PTR [eax]).y, 0
+	   00000000
+ 00000102			neon_square_player_update_not_above_screen:
+
 					
-					INVOKE transition_to_state, eax
- 00000167  50		   *	    push   eax
- 00000168  E8 FFFFFEE9	   *	    call   transition_to_state
+					; // If I'm below the bottom of the screen, reset me to the bottom
+ 00000102  8B D0			mov edx, eax
+ 00000104  8B 4D FC			mov ecx, pThis
+					INVOKE get_first_component_which_is_a, RECT_COMPONENT_ID
+ 00000107  6A 01	   *	    push   +000000001h
+ 00000109  E8 00000000 E   *	    call   get_first_component_which_is_a
+ 0000010E  89 45 F0			mov pRect, eax
 
-					ret
- 0000016D  5F		   *	    pop    edi
- 0000016E  5E		   *	    pop    esi
- 0000016F  5A		   *	    pop    edx
- 00000170  5B		   *	    pop    ebx
- 00000171  58		   *	    pop    eax
- 00000172  C3		   *	    ret    00000h
- 00000173			transition_state ENDP
-
-				; // ----------------------------------
-				; // default_state_update
-				; // Spawns walls in random positions
-				; // 
-				; // Register Parameters: 
-				; //	ecx - THIS pointer
-				; // ----------------------------------
- 00000173			default_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
-					local pThis : DWORD
- 00000173  55		   *	    push   ebp
- 00000174  8B EC	   *	    mov    ebp, esp
- 00000176  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 00000179  50		   *	    push   eax
- 0000017A  53		   *	    push   ebx
- 0000017B  52		   *	    push   edx
- 0000017C  56		   *	    push   esi
- 0000017D  57		   *	    push   edi
- 0000017E  89 4D FC			mov pThis, ecx
-
-					; // Update timer
- 00000181  D9 41 1C			fld (NeonGameManager PTR [ecx]).timer
- 00000184  D8 45 08		    fadd deltaTime
- 00000187  D9 51 1C		    fst (NeonGameManager PTR [ecx]).timer
-
-					; // Determine if the timer is greater than or equal to spawnTime
- 0000018A  D8 1D 00000010 R		fcomp defaultSpawnTime
-
-					; // Get flags
- 00000190  DF E0			fnstsw ax
- 00000192  9E				sahf
-
- 00000193  72 42			jb default_state_update_skip_spawn
-				   
-					; // Set the timer to 0
- 00000195  C7 41 1C		    mov (NeonGameManager PTR [ecx]).timer, 0
-	   00000000
-				    
-					; // Spawn the obstacle
- 0000019C  8B 4D FC			mov ecx, pThis
- 0000019F  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
-
- 000001A2  B8 00000032			mov eax, SCREEN_HEIGHT
- 000001A7  83 E8 14			sub eax, 20
-
-					INVOKE RandomRange
- 000001AA  E8 00000000 E   *	    call   RandomRange
-
-					INVOKE new_wall_obstacle, SCREEN_WIDTH, eax, 20
- 000001AF  6A 14	   *	    push   +000000014h
- 000001B1  50		   *	    push   eax
- 000001B2  6A 50	   *	    push   +000000050h
- 000001B4  E8 00000000 E   *	    call   new_wall_obstacle
-					
- 000001B9  8B 4D FC			mov ecx, pThis
- 000001BC  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
-
-					INVOKE instantiate_game_object, eax
- 000001BF  50		   *	    push   eax
- 000001C0  E8 00000000 E   *	    call   instantiate_game_object
-
- 000001C5  8B 4D FC			mov ecx, pThis
- 000001C8  FF 49 24			dec (NeonGameManager PTR [ecx]).stateObjectCounter
-
- 000001CB  8B 59 24			mov ebx, (NeonGameManager PTR[ecx]).stateObjectCounter
-					.IF ebx == 0
- 000001CE  0B DB	   *	    or	ebx, ebx
- 000001D0  75 05	   *	    jne    @C0014
-						INVOKE transition_state
- 000001D2  E8 FFFFFF80	   *	    call   transition_state
+ 00000111  8B 5A 0C			mov ebx, (TransformComponent PTR [edx]).y
+ 00000114  B9 00000032			mov ecx, SCREEN_HEIGHT
+ 00000119  2B 48 10			sub ecx, (RectComponent PTR [eax]).h
+					.IF ebx > ecx
+ 0000011C  3B D9	   *	    cmp    ebx, ecx
+ 0000011E  76 03	   *	    jbe    @C0001
+ 00000120  89 4A 0C				mov (TransformComponent PTR [edx]).y, ecx
 					.ENDIF
- 000001D7		   *@C0014:
-				    
- 000001D7			default_state_update_skip_spawn:
+ 00000123		   *@C0001:
+
+ 00000123  8B 4D FC			mov ecx, pThis ; // Restore the THIS pointer
+ 00000126  8B 45 08			mov eax, deltaTime
 					ret
- 000001D7  5F		   *	    pop    edi
- 000001D8  5E		   *	    pop    esi
- 000001D9  5A		   *	    pop    edx
- 000001DA  5B		   *	    pop    ebx
- 000001DB  58		   *	    pop    eax
- 000001DC  C9		   *	    leave  
- 000001DD  C2 0004	   *	    ret    00004h
- 000001E0			default_state_update ENDP
-
-				; // ----------------------------------
-				; // tunnel_state_update
-				; // Spawns walls in tunnels
-				; // 
-				; // Register Parameters: 
-				; //	ecx - THIS pointer
-				; // ----------------------------------
- 000001E0			tunnel_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
-					local pThis : DWORD
- 000001E0  55		   *	    push   ebp
- 000001E1  8B EC	   *	    mov    ebp, esp
- 000001E3  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 000001E6  50		   *	    push   eax
- 000001E7  53		   *	    push   ebx
- 000001E8  52		   *	    push   edx
- 000001E9  56		   *	    push   esi
- 000001EA  57		   *	    push   edi
- 000001EB  89 4D FC			mov pThis, ecx
-
-					; // Update timer
- 000001EE  D9 41 1C			fld (NeonGameManager PTR [ecx]).timer
- 000001F1  D8 45 08		    fadd deltaTime
- 000001F4  D9 51 1C		    fst (NeonGameManager PTR [ecx]).timer
-
-					; // Determine if the timer is greater than or equal to spawnTime
- 000001F7  D8 1D 00000014 R		fcomp tunnelSpawnTime
-
-					; // Get flags
- 000001FD  DF E0			fnstsw ax
- 000001FF  9E				sahf
-
- 00000200  72 66			jb tunnel_state_update_skip_spawn
-				   
-					; // Set the timer to 0
- 00000202  C7 41 1C		    mov (NeonGameManager PTR [ecx]).timer, 0
-	   00000000
-				    
-					; // Spawn the obstacle
- 00000209  8B 4D FC			mov ecx, pThis
- 0000020C  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
-
- 0000020F  B8 00000032			mov eax, SCREEN_HEIGHT
- 00000214  83 E8 12			sub eax, 18
-
-					INVOKE RandomRange
- 00000217  E8 00000000 E   *	    call   RandomRange
- 0000021C  83 C0 01			add eax, 1
-
- 0000021F  8B D8			mov ebx, eax ; // Store the random number in ebx
-
-					; // Spawn the top wall
-					INVOKE new_wall_obstacle, SCREEN_WIDTH, 0, ebx
- 00000221  53		   *	    push   ebx
- 00000222  6A 00	   *	    push   +000000000h
- 00000224  6A 50	   *	    push   +000000050h
- 00000226  E8 00000000 E   *	    call   new_wall_obstacle
-					
- 0000022B  8B 4D FC			mov ecx, pThis
- 0000022E  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
-
-					INVOKE instantiate_game_object, eax
- 00000231  50		   *	    push   eax
- 00000232  E8 00000000 E   *	    call   instantiate_game_object
-
-					; // Now spawn the bottom wall
- 00000237  83 C3 11			add ebx, 17
- 0000023A  BA 00000050			mov edx, SCREEN_WIDTH
- 0000023F  2B D3			sub edx, ebx
-					INVOKE new_wall_obstacle, SCREEN_WIDTH, ebx, edx
- 00000241  52		   *	    push   edx
- 00000242  53		   *	    push   ebx
- 00000243  6A 50	   *	    push   +000000050h
- 00000245  E8 00000000 E   *	    call   new_wall_obstacle
-
- 0000024A  8B 4D FC			mov ecx, pThis
- 0000024D  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
-
-					INVOKE instantiate_game_object, eax
- 00000250  50		   *	    push   eax
- 00000251  E8 00000000 E   *	    call   instantiate_game_object
-
-					; // Decrement the amount of objects left to spawn in this state
- 00000256  8B 4D FC			mov ecx, pThis
- 00000259  FF 49 24			dec (NeonGameManager PTR [ecx]).stateObjectCounter
-
- 0000025C  8B 59 24			mov ebx, (NeonGameManager PTR[ecx]).stateObjectCounter
-					.IF ebx == 0
- 0000025F  0B DB	   *	    or	ebx, ebx
- 00000261  75 05	   *	    jne    @C0016
-						INVOKE transition_state
- 00000263  E8 FFFFFEEF	   *	    call   transition_state
-					.ENDIF
- 00000268		   *@C0016:
-				    
- 00000268			tunnel_state_update_skip_spawn:
-					ret
- 00000268  5F		   *	    pop    edi
- 00000269  5E		   *	    pop    esi
- 0000026A  5A		   *	    pop    edx
- 0000026B  5B		   *	    pop    ebx
- 0000026C  58		   *	    pop    eax
- 0000026D  C9		   *	    leave  
- 0000026E  C2 0004	   *	    ret    00004h
- 00000271			tunnel_state_update ENDP
-
-				; // ----------------------------------
-				; // pause_state_update
-				; // Waits for a little while. If nextState is nonzero, pause will transition to that state after finishing
-				; // Otherwise the next state will be random
-				; //
-				; // Register Parameters: 
-				; //	ecx - THIS pointer
-				; // ----------------------------------
- 00000271			pause_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4, nextState: GAME_MANAGER_STATE_ENUM
-					local pThis : DWORD
- 00000271  55		   *	    push   ebp
- 00000272  8B EC	   *	    mov    ebp, esp
- 00000274  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 00000277  50		   *	    push   eax
- 00000278  53		   *	    push   ebx
- 00000279  52		   *	    push   edx
- 0000027A  56		   *	    push   esi
- 0000027B  57		   *	    push   edi
- 0000027C  89 4D FC			mov pThis, ecx
-
-					; // Update timer
- 0000027F  D9 41 1C			fld (NeonGameManager PTR [ecx]).timer
- 00000282  D8 45 08		    fadd deltaTime
- 00000285  D9 51 1C		    fst (NeonGameManager PTR [ecx]).timer
-
-					; // Determine if the timer is greater than or equal to spawnTime
- 00000288  D8 1D 00000018 R		fcomp pauseTime
-
-					; // Get flags
- 0000028E  DF E0			fnstsw ax
- 00000290  9E				sahf
-
- 00000291  72 1D			jb pause_state_update_skip_spawn
-				   
-					; // Set the timer to 0
- 00000293  C7 41 1C		    mov (NeonGameManager PTR [ecx]).timer, 0
-	   00000000
-						
- 0000029A  8B 5D 0C			mov ebx, nextState
-					.IF ebx == 0 ; // If no next state was given, go to a random state
- 0000029D  0B DB	   *	    or	ebx, ebx
- 0000029F  75 07	   *	    jne    @C0018
-						INVOKE transition_state
- 000002A1  E8 FFFFFEB1	   *	    call   transition_state
-					.ELSE
- 000002A6  EB 08	   *	    jmp    @C001A
- 000002A8		   *@C0018:
-						INVOKE transition_to_state, nextState
- 000002A8  FF 75 0C	   *	    push   dword  ptr ss:[ebp]+00000000Ch
- 000002AB  E8 FFFFFDA6	   *	    call   transition_to_state
-					.ENDIF
- 000002B0		   *@C001A:
-					
-
- 000002B0			pause_state_update_skip_spawn:
-					ret
- 000002B0  5F		   *	    pop    edi
- 000002B1  5E		   *	    pop    esi
- 000002B2  5A		   *	    pop    edx
- 000002B3  5B		   *	    pop    ebx
- 000002B4  58		   *	    pop    eax
- 000002B5  C9		   *	    leave  
- 000002B6  C2 0008	   *	    ret    00008h
- 000002B9			pause_state_update ENDP
-
-				; // ----------------------------------
-				; // stair_state_update
-				; // Spawns stairs in a descending or ascending pattern
-				; // 
-				; // Register Parameters: 
-				; //	ecx - THIS pointer
-				; // ----------------------------------
- 000002B9			stair_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
-					local pThis : DWORD
- 000002B9  55		   *	    push   ebp
- 000002BA  8B EC	   *	    mov    ebp, esp
- 000002BC  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 000002BF  50		   *	    push   eax
- 000002C0  53		   *	    push   ebx
- 000002C1  52		   *	    push   edx
- 000002C2  56		   *	    push   esi
- 000002C3  57		   *	    push   edi
- 000002C4  89 4D FC			mov pThis, ecx
-
-					; // Update timer
- 000002C7  D9 41 1C			fld (NeonGameManager PTR [ecx]).timer
- 000002CA  D8 45 08		    fadd deltaTime
- 000002CD  D9 51 1C		    fst (NeonGameManager PTR [ecx]).timer
-
-					; // Determine if the timer is greater than or equal to spawnTime
- 000002D0  D8 1D 0000001C R		fcomp stairSpawnTime
-
-					; // Get flags
- 000002D6  DF E0			fnstsw ax
- 000002D8  9E				sahf
-
- 000002D9  0F 82 00000088		jb stair_state_update_skip_spawn
-				   
-					; // Set the timer to 0
- 000002DF  C7 41 1C		    mov (NeonGameManager PTR [ecx]).timer, 0
-	   00000000
-				    
-					; // Spawn the obstacle
- 000002E6  8B 4D FC			mov ecx, pThis
- 000002E9  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
-
- 000002EC  8B D8			mov ebx, eax ; // Store the random number in ebx
-
-					; // Spawn the top wall
- 000002EE  8B 1D 0000002C R		mov ebx, stairSpawnPos
-					INVOKE new_wall_obstacle, SCREEN_WIDTH, 0, ebx
- 000002F4  53		   *	    push   ebx
- 000002F5  6A 00	   *	    push   +000000000h
- 000002F7  6A 50	   *	    push   +000000050h
- 000002F9  E8 00000000 E   *	    call   new_wall_obstacle
-					
- 000002FE  8B 1D 00000028 R		mov ebx, stairDirection
-					.IF ebx == 0
- 00000304  0B DB	   *	    or	ebx, ebx
- 00000306  75 0E	   *	    jne    @C001B
- 00000308  FF 0D 0000002C R			dec stairSpawnPos
- 0000030E  FF 0D 0000002C R			dec stairSpawnPos
-					.ELSE
- 00000314  EB 0C	   *	    jmp    @C001D
- 00000316		   *@C001B:
- 00000316  FF 05 0000002C R			inc stairSpawnPos
- 0000031C  FF 05 0000002C R			inc stairSpawnPos
-					.ENDIF
- 00000322		   *@C001D:
-
- 00000322  8B 4D FC			mov ecx, pThis
- 00000325  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
-
-					INVOKE instantiate_game_object, eax
- 00000328  50		   *	    push   eax
- 00000329  E8 00000000 E   *	    call   instantiate_game_object
-
-					; // Now spawn the bottom wall
- 0000032E  8B 1D 0000002C R		mov ebx, stairSpawnPos
- 00000334  83 C3 11			add ebx, 17
- 00000337  BA 00000050			mov edx, SCREEN_WIDTH
- 0000033C  2B D3			sub edx, ebx
-					INVOKE new_wall_obstacle, SCREEN_WIDTH, ebx, edx
- 0000033E  52		   *	    push   edx
- 0000033F  53		   *	    push   ebx
- 00000340  6A 50	   *	    push   +000000050h
- 00000342  E8 00000000 E   *	    call   new_wall_obstacle
-
- 00000347  8B 4D FC			mov ecx, pThis
- 0000034A  8B 49 14			mov ecx, (GameObject PTR [ecx]).pParentScene
-
-					INVOKE instantiate_game_object, eax
- 0000034D  50		   *	    push   eax
- 0000034E  E8 00000000 E   *	    call   instantiate_game_object
-
-					; // Decrement the amount of objects left to spawn in this state
- 00000353  8B 4D FC			mov ecx, pThis
- 00000356  FF 49 24			dec (NeonGameManager PTR [ecx]).stateObjectCounter
-
- 00000359  8B 59 24			mov ebx, (NeonGameManager PTR[ecx]).stateObjectCounter
-					.IF ebx == 0
- 0000035C  0B DB	   *	    or	ebx, ebx
- 0000035E  75 07	   *	    jne    @C001E
-						INVOKE transition_to_state, PAUSE_STATE_ENUM
- 00000360  6A 05	   *	    push   +000000005h
- 00000362  E8 FFFFFCEF	   *	    call   transition_to_state
-					.ENDIF
- 00000367		   *@C001E:
-				    
- 00000367			stair_state_update_skip_spawn:
-					ret
- 00000367  5F		   *	    pop    edi
- 00000368  5E		   *	    pop    esi
- 00000369  5A		   *	    pop    edx
- 0000036A  5B		   *	    pop    ebx
- 0000036B  58		   *	    pop    eax
- 0000036C  C9		   *	    leave  
- 0000036D  C2 0004	   *	    ret    00004h
- 00000370			stair_state_update ENDP
-
-				; // ----------------------------------
-				; // neon_game_manager_update
-				; // Moves the wall to the left of the screen. This function uses FPU instructions
-				; // that were not learned in class. These were added to accommodate for deltaTime
-				; // being a REAL4.
-				; // 
-				; // Register Parameters: 
-				; //	ecx - THIS pointer
-				; // ----------------------------------
- 00000370			neon_game_manager_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
-					local pThis : DWORD
- 00000370  55		   *	    push   ebp
- 00000371  8B EC	   *	    mov    ebp, esp
- 00000373  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 00000376  50		   *	    push   eax
- 00000377  53		   *	    push   ebx
- 00000378  52		   *	    push   edx
- 00000379  56		   *	    push   esi
- 0000037A  57		   *	    push   edi
- 0000037B  89 4D FC			mov pThis, ecx
-
- 0000037E  8B 59 20			mov ebx, (NeonGameManager PTR[ecx]).state
-					.IF ebx == DEFAULT_STATE_ENUM
- 00000381  83 FB 01	   *	    cmp    ebx, DEFAULT_STATE_ENUM
- 00000384  75 0A	   *	    jne    @C0020
-						INVOKE default_state_update, deltaTime
- 00000386  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 00000389  E8 FFFFFDE5	   *	    call   default_state_update
-
-					.ELSEIF ebx == TUNNEL_STATE_ENUM
- 0000038E  EB 3E	   *	    jmp    @C0022
- 00000390		   *@C0020:
- 00000390  83 FB 02	   *	    cmp    ebx, TUNNEL_STATE_ENUM
- 00000393  75 0A	   *	    jne    @C0023
-						INVOKE tunnel_state_update, deltaTime
- 00000395  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 00000398  E8 FFFFFE43	   *	    call   tunnel_state_update
-
-					.ELSEIF ebx == PAUSE_STATE_ENUM
- 0000039D  EB 2F	   *	    jmp    @C0025
- 0000039F		   *@C0023:
- 0000039F  83 FB 05	   *	    cmp    ebx, PAUSE_STATE_ENUM
- 000003A2  75 0C	   *	    jne    @C0026
-						INVOKE pause_state_update, deltaTime, 0
- 000003A4  6A 00	   *	    push   +000000000h
- 000003A6  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 000003A9  E8 FFFFFEC3	   *	    call   pause_state_update
-
-					.ELSEIF ebx == TRANSITION_TO_STAIR_STATE_ENUM
- 000003AE  EB 1E	   *	    jmp    @C0028
- 000003B0		   *@C0026:
- 000003B0  83 FB 03	   *	    cmp    ebx, TRANSITION_TO_STAIR_STATE_ENUM
- 000003B3  75 0C	   *	    jne    @C0029
-						INVOKE pause_state_update, deltaTime, STAIRCASE_STATE_ENUM
- 000003B5  6A 64	   *	    push   +000000064h
- 000003B7  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 000003BA  E8 FFFFFEB2	   *	    call   pause_state_update
-
-					.ELSEIF ebx == STAIRCASE_STATE_ENUM
- 000003BF  EB 0D	   *	    jmp    @C002B
- 000003C1		   *@C0029:
- 000003C1  83 FB 64	   *	    cmp    ebx, STAIRCASE_STATE_ENUM
- 000003C4  75 08	   *	    jne    @C002C
-						INVOKE stair_state_update, deltaTime
- 000003C6  FF 75 08	   *	    push   dword  ptr ss:[ebp]+000000008h
- 000003C9  E8 FFFFFEEB	   *	    call   stair_state_update
-
-					.ENDIF
- 000003CE		   *@C002C:
- 000003CE		   *@C002B:
- 000003CE		   *@C0028:
- 000003CE		   *@C0025:
- 000003CE		   *@C0022:
-					
-					ret
- 000003CE  5F		   *	    pop    edi
- 000003CF  5E		   *	    pop    esi
- 000003D0  5A		   *	    pop    edx
- 000003D1  5B		   *	    pop    ebx
- 000003D2  58		   *	    pop    eax
- 000003D3  C9		   *	    leave  
- 000003D4  C2 0004	   *	    ret    00004h
- 000003D7			neon_game_manager_update ENDP
+ 00000129  5A		   *	    pop    edx
+ 0000012A  5B		   *	    pop    ebx
+ 0000012B  58		   *	    pop    eax
+ 0000012C  C9		   *	    leave  
+ 0000012D  C2 0004	   *	    ret    00004h
+ 00000130			neon_square_player_update ENDP
 
 				END 
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:03:35
-neon_game_manager.asm					     Symbols 2 - 1
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    04/02/26 01:06:23
+neon_square_player.asm					     Symbols 2 - 1
 
 
 
@@ -1270,6 +825,11 @@ Camera . . . . . . . . . . . . .	 00000010
   y  . . . . . . . . . . . . . .	 00000004	 DWord
   h  . . . . . . . . . . . . . .	 00000008	 DWord
   w  . . . . . . . . . . . . . .	 0000000C	 DWord
+Component_vtable . . . . . . . .	 00000004
+  pFree  . . . . . . . . . . . .	 00000000	 DWord
+Component  . . . . . . . . . . .	 00000008
+  componentType  . . . . . . . .	 00000000	 DWord
+  pVt  . . . . . . . . . . . . .	 00000004	 DWord
 GameObject_vtable  . . . . . . .	 00000010
   pStart . . . . . . . . . . . .	 00000000	 DWord
   pUpdate  . . . . . . . . . . .	 00000004	 DWord
@@ -1281,31 +841,41 @@ GameObject . . . . . . . . . . .	 0000001C
   pVt  . . . . . . . . . . . . .	 00000010	 DWord
   pParentScene . . . . . . . . .	 00000014	 DWord
   awaitingFree . . . . . . . . .	 00000018	 DWord
-NeonGameManager  . . . . . . . .	 00000028
+NeonSquarePlayer . . . . . . . .	 00000020
   baseGameObject . . . . . . . .	 00000000	 
-  timer  . . . . . . . . . . . .	 0000001C	 DWord
-  state  . . . . . . . . . . . .	 00000020	 DWord
-  stateObjectCounter . . . . . .	 00000024	 DWord
-NeonSquarePlayer . . . . . . . .	 0000001C
-  baseGameObject . . . . . . . .	 00000000	 
+  isAlive  . . . . . . . . . . .	 0000001C	 DWord
 Pixel  . . . . . . . . . . . . .	 00000004
   r  . . . . . . . . . . . . . .	 00000000	 Byte
   g  . . . . . . . . . . . . . .	 00000001	 Byte
   b  . . . . . . . . . . . . . .	 00000002	 Byte
   a  . . . . . . . . . . . . . .	 00000003	 Byte
+RectComponent  . . . . . . . . .	 0000001C
+  baseRenderableComponent  . . .	 00000000	 XmmWord
+  h  . . . . . . . . . . . . . .	 00000010	 DWord
+  w  . . . . . . . . . . . . . .	 00000014	 DWord
+  r  . . . . . . . . . . . . . .	 00000018	 Byte
+  g  . . . . . . . . . . . . . .	 00000019	 Byte
+  b  . . . . . . . . . . . . . .	 0000001A	 Byte
+  a  . . . . . . . . . . . . . .	 0000001B	 Byte
+RenderableComponent  . . . . . .	 00000010
+  baseComponent  . . . . . . . .	 00000000	 QWord
+  visible  . . . . . . . . . . .	 00000008	 DWord
+  layer  . . . . . . . . . . . .	 0000000C	 DWord
 Scene  . . . . . . . . . . . . .	 00000040
   camera . . . . . . . . . . . .	 00000000	 XmmWord
   gameObjects  . . . . . . . . .	 00000010	 
   startQueue . . . . . . . . . .	 0000001C	 
   freeQueue  . . . . . . . . . .	 00000028	 
   renderCommands . . . . . . . .	 00000034	 
+TransformComponent . . . . . . .	 00000014
+  baseComponent  . . . . . . . .	 00000000	 QWord
+  x  . . . . . . . . . . . . . .	 00000008	 DWord
+  y  . . . . . . . . . . . . . .	 0000000C	 DWord
+  ignoreCamera . . . . . . . . .	 00000010	 DWord
 UnorderedVector  . . . . . . . .	 0000000C
   pData  . . . . . . . . . . . .	 00000000	 DWord
   count  . . . . . . . . . . . .	 00000004	 DWord
   capacity . . . . . . . . . . .	 00000008	 DWord
-WallObstacle . . . . . . . . . .	 00000020
-  baseGameObject . . . . . . . .	 00000000	 
-  pNeonPlayer  . . . . . . . . .	 0000001C	 DWord
 
 
 Types:
@@ -1314,8 +884,8 @@ Types:
 
 ENUM_COMPONENT_ID  . . . . . . .	 00000004     DWord
 ENUM_GAME_OBJECT_ID  . . . . . .	 00000004     DWord
-GAME_MANAGER_STATE_ENUM  . . . .	 00000004     DWord
 HANDLE . . . . . . . . . . . . .	 00000004     DWord
+VK_CODE  . . . . . . . . . . . .	 00000001     Byte
 
 
 Segments and Groups:
@@ -1324,8 +894,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000030 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000003D7 DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000010 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000130 DWord	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -1336,17 +906,15 @@ GetProcessHeap . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 HeapAlloc  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 HeapReAlloc  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-Random32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-RandomRange  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 add_component  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 check_rect_collision . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-default_state_update . . . . . .	P Near	 00000173 _TEXT	Length= 0000006D Private STDCALL
-  deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
-  pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
-  default_state_update_skip_spawn 	L Near	 000001D7 _TEXT	
 free_camera  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+free_component_virtual . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+free_component . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_game_object . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+free_rect_component  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_scene . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+free_transform_component . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 free_unordered_vector  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 game_object_exit . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 game_object_free_virtual . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -1357,45 +925,39 @@ game_object_update . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 get_first_component_which_is_a .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 get_first_game_object_which_is_a .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_camera  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+init_component . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_game_object . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-init_neon_game_manager . . . . .	P Near	 00000000 _TEXT	Length= 0000003D Public STDCALL
+init_neon_square_player  . . . .	P Near	 00000000 _TEXT	Length= 00000063 Public STDCALL
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
-init_neon_square_player  . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+init_rect_component  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+init_renderable_component  . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_scene . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+init_transform_component . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 init_unordered_vector  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-init_wall_obstacle . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 initialize_heap  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 instantiate_game_object  . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-neon_game_manager_update . . . .	P Near	 00000370 _TEXT	Length= 00000067 Private STDCALL
+isKeyJustPressed . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+isKeyPressed . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+neon_square_player_update  . . .	P Near	 0000007C _TEXT	Length= 000000B4 Private STDCALL
   deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
   pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
+  yMov . . . . . . . . . . . . .	DWord	 bp - 00000008
+  pTransform . . . . . . . . . .	DWord	 bp - 0000000C
+  pRect  . . . . . . . . . . . .	DWord	 bp - 00000010
+  neon_square_player_update_not_above_screen . L Near   00000102 _TEXT	
 new_camera . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+new_component  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_game_object  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-new_neon_game_manager  . . . . .	P Near	 0000003D _TEXT	Length= 00000019 Public STDCALL
-new_neon_square_player . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+new_neon_square_player . . . . .	P Near	 00000063 _TEXT	Length= 00000019 Public STDCALL
+new_rect_component . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_scene  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+new_transform_component  . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 new_unordered_vector . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-new_wall_obstacle  . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-pause_state_update . . . . . . .	P Near	 00000271 _TEXT	Length= 00000048 Private STDCALL
-  deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
-  nextState  . . . . . . . . . .	DWord	 bp + 0000000C
-  pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
-  pause_state_update_skip_spawn 	L Near	 000002B0 _TEXT	
 push_back  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 queue_free_game_object . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 remove_element . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 scene_update . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-stair_state_update . . . . . . .	P Near	 000002B9 _TEXT	Length= 000000B7 Private STDCALL
-  deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
-  pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
-  stair_state_update_skip_spawn 	L Near	 00000367 _TEXT	
-transition_state . . . . . . . .	P Near	 00000157 _TEXT	Length= 0000001C Private STDCALL
-transition_to_state  . . . . . .	P Near	 00000056 _TEXT	Length= 00000101 Private STDCALL
-  state  . . . . . . . . . . . .	DWord	 bp + 00000008
-tunnel_state_update  . . . . . .	P Near	 000001E0 _TEXT	Length= 00000091 Private STDCALL
-  deltaTime  . . . . . . . . . .	DWord	 bp + 00000008
-  pThis  . . . . . . . . . . . .	DWord	 bp - 00000004
-  tunnel_state_update_skip_spawn .	L Near	 00000268 _TEXT	
+updateInput  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 
 
 Symbols:
@@ -1411,13 +973,12 @@ Symbols:
 @fardata?  . . . . . . . . . . .	Text   	 FLAT
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
-BARRIER_STATE_ENUM . . . . . . .	Number	 00000004h   
 CAMERA_INC . . . . . . . . . . .	Number	 00000001h   
 CAMERA_MOVER_GAME_OBJECT_ID  . .	Number	 00000001h   
 COMPONENT_IDS_INC  . . . . . . .	Number	 00000001h   
+COMPONENT_INC  . . . . . . . . .	Number	 00000001h   
 DEFAULT_COMPONENT_ID . . . . . .	Number	 00000000h   
 DEFAULT_GAME_OBJECT_ID . . . . .	Number	 00000000h   
-DEFAULT_STATE_ENUM . . . . . . .	Number	 00000001h   
 ENGINE_TYPES_INC . . . . . . . .	Number	 00000001h   
 GAME_OBJECT_IDS_INC  . . . . . .	Number	 00000001h   
 GAME_OBJECT_INC  . . . . . . . .	Number	 00000001h   
@@ -1425,40 +986,34 @@ HEAP_FUNCTIONS_INC . . . . . . .	Number	 00000001h
 HEAP_GENERATE_EXCEPTIONS . . . .	Number	 00000004h   
 HEAP_NO_SERIALIZE  . . . . . . .	Number	 00000001h   
 HEAP_ZERO_MEMORY . . . . . . . .	Number	 00000008h   
-NEON_GAME_MANAGER_GAMEOBJECT_VTABLE 	GameObject_vtable  00000000 _DATA	
+INPUT_MANAGER_INC  . . . . . . .	Number	 00000001h   
 NEON_GAME_MANAGER_GAME_OBJECT_ID .	Number	 00000004h   
-NEON_GAME_MANAGER_INC  . . . . .	Number	 00000001h   
+NEON_SQUARE_PLAYER_GAMEOBJECT_VTABLE .	GameObject_vtable  00000000 _DATA	
 NEON_SQUARE_PLAYER_GAME_OBJECT_ID 	Number	 00000002h   
 NEON_SQUARE_PLAYER_INC . . . . .	Number	 00000001h   
 NULL . . . . . . . . . . . . . .	Number	 00000000h   
-PAUSE_STATE_ENUM . . . . . . . .	Number	 00000005h   
+RECT_COMMAND_INC . . . . . . . .	Number	 00000001h   
 RECT_COMPONENT_ID  . . . . . . .	Number	 00000001h   
 RENDERABLE_COMPONENT_ID  . . . .	Number	 00000004h   
+RENDERABLE_COMPONENT_INC . . . .	Number	 00000001h   
 SCENE_INC  . . . . . . . . . . .	Number	 00000001h   
 SCREEN_HEIGHT  . . . . . . . . .	Number	 00000032h   
 SCREEN_WIDTH . . . . . . . . . .	Number	 00000050h   
 SPRITE_COMPONENT_ID  . . . . . .	Number	 00000002h   
-STAIRCASE_STATE_ENUM . . . . . .	Number	 00000064h   
 TRANSFORM_COMPONENT_ID . . . . .	Number	 00000003h   
-TRANSITION_TO_STAIR_STATE_ENUM .	Number	 00000003h   
-TUNNEL_STATE_ENUM  . . . . . . .	Number	 00000002h   
+TRANSFORM_COMPONENT_INC  . . . .	Number	 00000001h   
 UNORDERED_VECTOR_INC . . . . . .	Number	 00000001h   
+VK_DOWN  . . . . . . . . . . . .	Number	 00000028h   
+VK_GAMEPAD_DPAD_DOWN . . . . . .	Number	 000000CCh   
+VK_GAMEPAD_DPAD_UP . . . . . . .	Number	 000000CBh   
+VK_GAMEPAD_LEFT_THUMBSTICK_DOWN 	Number	 000000D4h   
+VK_GAMEPAD_LEFT_THUMBSTICK_UP  .	Number	 000000D3h   
+VK_LEFT  . . . . . . . . . . . .	Number	 00000025h   
+VK_RIGHT . . . . . . . . . . . .	Number	 00000027h   
+VK_UP  . . . . . . . . . . . . .	Number	 00000026h   
 WALL_OBSTACLE_GAME_OBJECT_ID . .	Number	 00000003h   
-WALL_OBSTACLE_INC  . . . . . . .	Number	 00000001h   
-defaultSpawnTime . . . . . . . .	DWord	 00000010 _DATA	
-defaultStateObjectMax  . . . . .	Number	 00000014h   
-defaultStateObjectMin  . . . . .	Number	 00000008h   
 enumId . . . . . . . . . . . . .	Number	 00000005h   
 hHeap  . . . . . . . . . . . . .	DWord	 00000000 FLAT	External STDCALL
-pauseTime  . . . . . . . . . . .	DWord	 00000018 _DATA	
-stairDirection . . . . . . . . .	DWord	 00000028 _DATA	
-stairSpawnPos  . . . . . . . . .	DWord	 0000002C _DATA	
-stairSpawnTime . . . . . . . . .	DWord	 0000001C _DATA	
-stairStateObjectMax  . . . . . .	DWord	 00000024 _DATA	
-stairStateObjectMin  . . . . . .	DWord	 00000020 _DATA	
-tunnelSpawnTime  . . . . . . . .	DWord	 00000014 _DATA	
-tunnelStateObjectMax . . . . . .	Number	 00000014h   
-tunnelStateObjectMin . . . . . .	Number	 00000008h   
 
 	   0 Warnings
 	   0 Errors
