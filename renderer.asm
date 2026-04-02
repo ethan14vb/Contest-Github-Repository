@@ -601,21 +601,137 @@ drawSprite ENDP
 ; // ----------------------------------
 ; // renderCommands
 ; // Takes the render commands list and camera position,
-; // clears the RGB buffer to black, then draws every
-; // sprite (and rect) to create the frame.
+; // sorts the command pointers by layer (lowest first) using insertion sort,
+; // clears the RGB buffer to black, then draws every renderable in
+; // sorted order so that lower-layer objects appear behind higher-layer ones.
+; //
+; // Parameters:
+; //	pRenderCommands DWORD - pointer to an array of DWORD pointers,
+; //	                        each pointing to a RenderCommand struct.
+; //	numCommands     DWORD - number of entries in the array.
+; //	pCamera         DWORD - pointer to the active Camera struct.
 ; // ----------------------------------
 renderCommands PROC PUBLIC USES esi ecx edi ebx, pRenderCommands:DWORD, numCommands:DWORD, pCamera:DWORD
-	local pBuffer: DWORD
+	local pBuffer:DWORD     ; // pointer to the screen pixel buffer
+	local key_ptr:DWORD     ; // the RenderCommand pointer being placed during sort
+	local key_layer:DWORD   ; // the layer value of key_ptr
+	local sort_i:DWORD      ; // outer loop index  (insertion sort)
+	local sort_j:DWORD      ; // inner loop index  (insertion sort)
+
+	; // ----------------------------------------------------------------
+	; // INSERTION SORT
+	; // Sort pRenderCommands[0..numCommands-1] in ascending layer order.
+	; // Algorithm: for each element i starting at 1, shift all elements
+	; // to its left that have a larger layer value one slot to the right,
+	; // then insert element i into the gap.
+	; // ----------------------------------------------------------------
+
+	; // Nothing to sort when there are fewer than 2 commands
+	mov eax, numCommands
+	cmp eax, 2
+	jl sort_done
+
+	mov sort_i, 1           ; // outer index starts at element 1
+
+sort_outer_loop:
+	; // Loop condition: while sort_i < numCommands
+	mov eax, sort_i
+	cmp eax, numCommands
+	jge sort_done
+
+	; // key_ptr = pRenderCommands[sort_i]
+	; //   esi = address of pRenderCommands[sort_i]
+	; //   eax = the RenderCommand pointer stored there
+	mov esi, pRenderCommands
+	mov eax, sort_i
+	shl eax, 2              ; // byte offset = sort_i * sizeof(DWORD)
+	add esi, eax            ; // esi = &pRenderCommands[sort_i]
+	mov eax, [esi]          ; // eax = RenderCommand pointer at index sort_i
+	mov key_ptr, eax
+
+	; // key_layer = key_ptr->pRenderable->layer
+	mov ecx, (RenderCommand PTR [eax]).pRenderable
+	mov eax, (RenderableComponent PTR [ecx]).layer
+	mov key_layer, eax
+
+	; // sort_j = sort_i - 1  (start scanning leftward from the element before key)
+	mov eax, sort_i
+	dec eax
+	mov sort_j, eax
+
+sort_inner_loop:
+	; // Loop condition: while sort_j >= 0
+	; // Note: sort_j is a DWORD local. When it wraps below 0 it becomes
+	; //       0FFFFFFFFh, which is negative when interpreted as a signed
+	; //       value, so the signed "jl" correctly detects the underflow.
+	mov eax, sort_j
+	cmp eax, 0
+	jl sort_insert          ; // j < 0: we've reached the front of the array
+
+	; // Load pRenderCommands[sort_j] and read its layer
+	; //   esi = address of pRenderCommands[sort_j]
+	; //   ecx = the RenderCommand pointer stored there
+	; //   edx = layer value of that command
+	mov esi, pRenderCommands
+	mov eax, sort_j
+	shl eax, 2
+	add esi, eax            ; // esi = &pRenderCommands[sort_j]
+	mov ecx, [esi]          ; // ecx = RenderCommand pointer at [sort_j]
+	mov edx, (RenderCommand PTR [ecx]).pRenderable
+	mov edx, (RenderableComponent PTR [edx]).layer
+
+	; // If [sort_j].layer <= key_layer: the key belongs here, stop shifting
+	cmp edx, key_layer
+	jle sort_insert
+
+	; // [sort_j].layer > key_layer: shift [sort_j] one slot to the right
+	; //   pRenderCommands[sort_j + 1] = pRenderCommands[sort_j]
+	; //   esi is still &pRenderCommands[sort_j], so esi+4 is [sort_j+1]
+	mov eax, [esi]          ; // value at [sort_j]
+	mov edi, esi
+	add edi, 4              ; // edi = &pRenderCommands[sort_j + 1]
+	mov [edi], eax          ; // write shifted value one slot right
+
+	dec sort_j
+	jmp sort_inner_loop
+
+sort_insert:
+	; // Write key_ptr into pRenderCommands[sort_j + 1]
+	; // When sort_j wrapped below 0 (i.e., 0FFFFFFFFh), inc brings it to 0,
+	; // which correctly targets index 0 (the very front of the array).
+	mov esi, pRenderCommands
+	mov eax, sort_j
+	inc eax                 ; // sort_j + 1
+	shl eax, 2              ; // byte offset
+	add esi, eax            ; // esi = &pRenderCommands[sort_j + 1]
+	mov eax, key_ptr
+	mov [esi], eax          ; // insert key at its sorted position
+
+	inc sort_i
+	jmp sort_outer_loop
+
+sort_done:
+	; // ----------------------------------------------------------------
+	; // CLEAR BUFFER
+	; // Fill the screen pixel buffer with solid black (r=0,g=0,b=0,a=255).
+	; // ----------------------------------------------------------------
 	mov pBuffer, OFFSET screenBuffer
-	; // clear buffer to black (r=0,g=0,b=0,a=255)
 	mov ecx, SCREEN_WIDTH * SCREEN_HEIGHT
 	mov edi, pBuffer
 	mov eax, 0FF000000h
 	rep stosd
 
-	; // process each command
+	; // ----------------------------------------------------------------
+	; // RENDER LOOP
+	; // Walk the now-sorted pointer array and dispatch each command to
+	; // the correct drawing helper (drawRect or drawSprite).
+	; // Lower-layer objects were sorted to the front of the array and are
+	; // therefore drawn first (background). Higher-layer objects are drawn
+	; // last (foreground), painting over earlier layers as expected.
+	; // ----------------------------------------------------------------
 	mov esi, pRenderCommands
 	mov ebx, numCommands
+
 cmd_loop:
 	cmp ebx, 0
 	je render_done
@@ -633,6 +749,7 @@ cmd_loop:
 
 	add esi, TYPE DWORD
 	jmp cmd_loop
+
 render_done:
 	.IF rendererInitialized == 0 
 		INVOKE initializeRenderer
