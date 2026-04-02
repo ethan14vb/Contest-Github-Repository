@@ -25,8 +25,9 @@ BARRIER_STATE_ENUM		= 3
 
 NeonGameManager STRUCT
 	baseGameObject GameObject<>
+
 	timer REAL4 ?
-    spawnTime REAL4 ?
+
 	state GAME_MANAGER_STATE_ENUM ?
 NeonGameManager ENDS
 

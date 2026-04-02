@@ -26,7 +26,7 @@ Random32 PROTO
 
 .data
 NEON_GAME_MANAGER_GAMEOBJECT_VTABLE GameObject_vtable <OFFSET game_object_start, OFFSET neon_game_manager_update, OFFSET game_object_exit, OFFSET free_game_object>
-spawnTime REAL4 0.25
+defaultSpawnTime REAL4 0.25
 
 .code
 ; // ********************************************
@@ -52,10 +52,7 @@ init_neon_game_manager PROC PUBLIC USES esi ebx edx
 	; // My constructor
 	mov (NeonGameManager PTR [ecx]).timer, 0
 	mov (NeonGameManager PTR [ecx]).state, DEFAULT_STATE_ENUM
-
-	mov esi, spawnTime
-	mov (NeonGameManager PTR [ecx]).spawnTime, esi
-
+		
 	mov eax, pThis
 		
 	ret
@@ -77,16 +74,7 @@ new_neon_game_manager ENDP
 ; // Instance methods
 ; // ********************************************
 
-; // ----------------------------------
-; // neon_game_manager_update
-; // Moves the wall to the left of the screen. This function uses FPU instructions
-; // that were not learned in class. These were added to accommodate for deltaTime
-; // being a REAL4.
-; // 
-; // Register Parameters: 
-; //	ecx - THIS pointer
-; // ----------------------------------
-neon_game_manager_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
+default_state_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 	local pThis : DWORD
 	mov pThis, ecx
 
@@ -96,7 +84,7 @@ neon_game_manager_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
     fst (NeonGameManager PTR [ecx]).timer
 
 	; // Determine if the timer is greater than or equal to spawnTime
-	fcomp (NeonGameManager PTR [ecx]).spawnTime
+	fcomp defaultSpawnTime
 
 	; // Get flags
 	fnstsw ax
@@ -124,6 +112,27 @@ neon_game_manager_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
 	INVOKE instantiate_game_object, eax
     
 update_neon_game_manager_skip_spawn:
+	ret
+default_state_update ENDP
+
+; // ----------------------------------
+; // neon_game_manager_update
+; // Moves the wall to the left of the screen. This function uses FPU instructions
+; // that were not learned in class. These were added to accommodate for deltaTime
+; // being a REAL4.
+; // 
+; // Register Parameters: 
+; //	ecx - THIS pointer
+; // ----------------------------------
+neon_game_manager_update PROC stdcall USES eax ebx edx esi edi, deltaTime: REAL4
+	local pThis : DWORD
+	mov pThis, ecx
+
+	mov ebx, (NeonGameManager PTR[ecx]).state
+	.IF ebx == DEFAULT_STATE_ENUM
+		INVOKE default_state_update, deltaTime
+	.ENDIF
+
 	ret
 neon_game_manager_update ENDP
 
